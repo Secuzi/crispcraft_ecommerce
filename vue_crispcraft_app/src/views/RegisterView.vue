@@ -10,7 +10,7 @@ import productHighlight from "@/assets/images/PRODUCT PLACEMENT RESOURCES/1.png"
     <div class="bg-primary h-[46px]"></div>
     <div class="bg-secondary flex-grow relative">
       <div
-        class="container mx-auto p-[16px] flex justify-center h-full flex-col flex-grow xl:flex-row xl:items-center"
+        class="container mx-auto p-[16px] flex justify-center h-full flex-col flex-grow xl:flex-row xl:items-center lg:gap-5"
       >
         <!-- Login form -->
         <!-- <Login /> -->
