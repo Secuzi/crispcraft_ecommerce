@@ -9,6 +9,8 @@ const user = reactive({
   phoneNum: "",
   fName: "",
   lName: "",
+  city: "",
+  state: "",
 });
 
 const isPasswordHidden = ref(true);

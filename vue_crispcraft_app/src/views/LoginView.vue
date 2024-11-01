@@ -1,7 +1,6 @@
 <script setup>
 import logo from "@/assets/images/BAG of CHIPS/logo.png";
 import Login from "@/components/Login.vue";
-import Register from "@/components/Register.vue";
 import productHighlight from "@/assets/images/PRODUCT PLACEMENT RESOURCES/1.png";
 </script>
 
