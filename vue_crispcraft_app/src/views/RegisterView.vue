@@ -6,8 +6,8 @@ import productHighlight from "@/assets/images/PRODUCT PLACEMENT RESOURCES/1.png"
 
 <template>
   <main class="h-dvh flex flex-col overflow-hidden">
-    <div class="bg-primary h-[46px]"></div>
-    <div class="bg-secondary flex-grow relative">
+    <div class="bg-myPrimaryColor h-[46px]"></div>
+    <div class="bg-mySecondaryColor flex-grow relative">
       <div
         class="container mx-auto p-[16px] flex justify-center h-full flex-col flex-grow xl:flex-row xl:items-center lg:gap-5"
       >
@@ -30,6 +30,6 @@ import productHighlight from "@/assets/images/PRODUCT PLACEMENT RESOURCES/1.png"
       </div>
     </div>
 
-    <div class="bg-primary h-[46px]"></div>
+    <div class="bg-myPrimaryColor h-[46px]"></div>
   </main>
 </template>

@@ -1,7 +1,5 @@
 <script setup>
-import ScrollPanel from "primevue/scrollpanel";
 import { reactive, ref } from "vue";
-import Select from "primevue/select";
 const user = reactive({
   email: "",
   password: "",
@@ -224,26 +222,8 @@ const toggleConfirmPassword = () => {
         <!-- Login button -->
       </form>
 
-      <div class="flex justify-center items-center space-x-3 mb-[20px]">
-        <div class="bg-opacity-50 w-[30%] h-[1px] flex-grow-0 bg-black"></div>
-        <span class="text-[14px] text-black text-opacity-50">Or</span>
-        <div class="bg-opacity-50 w-[30%] h-[1px] flex-grow-0 bg-black"></div>
-      </div>
-
-      <div class="text-center mb-[19px]">
-        <a href="#">
-          <i class="pi pi-facebook"></i>
-        </a>
-        <a href="#">
-          <i class="pi pi-google"></i>
-        </a>
-        <a href="#">
-          <i class="pi pi-apple"></i>
-        </a>
-      </div>
-
       <div
-        class="flex justify-between items-center flex-col-reverse xl:flex-row"
+        class="flex justify-between items-center flex-col-reverse xl:flex-row mt-5"
       >
         <div class="text-center text-sm">
           <p class="text-opacity-50 text-black inline mr-[3px]">

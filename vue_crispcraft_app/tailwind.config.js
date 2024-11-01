@@ -7,10 +7,12 @@ export default {
         sans: ["Inter", "sans-serif"],
       },
       colors: {
-        primary: "var(--primary-color)",
-        secondary: "var(--secondary-color)",
+        myPrimaryColor: "var(--primary-color)",
+        mySecondaryColor: "var(--secondary-color)",
       },
     },
   },
-  plugins: [],
+  plugins: [require("tailwindcss-primeui")],
+  darkMode: ["selector", '[class*="app-dark"]'],
+  // darkMode: ["class", '[class*="app-dark"]'],
 };

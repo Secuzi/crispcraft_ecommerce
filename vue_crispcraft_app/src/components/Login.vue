@@ -70,24 +70,7 @@ const togglePassword = () => {
         </button>
       </form>
 
-      <div class="flex justify-between items-center space-x-3 mb-[20px]">
-        <div class="bg-opacity-50 w-[60%] h-[1px] flex-grow-0 bg-black"></div>
-        <span class="text-[14px] text-black text-opacity-50">Or</span>
-        <div class="bg-opacity-50 w-[60%] h-[1px] flex-grow-0 bg-black"></div>
-      </div>
-
-      <div class="text-center mb-[19px]">
-        <a href="#">
-          <i class="pi pi-facebook"></i>
-        </a>
-        <a href="#">
-          <i class="pi pi-google"></i>
-        </a>
-        <a href="#">
-          <i class="pi pi-apple"></i>
-        </a>
-      </div>
-      <div class="text-center text-sm">
+      <div class="text-center text-sm mt-5">
         <p class="text-opacity-50 text-black inline mr-[3px]">
           New to Malunggay?
         </p>
