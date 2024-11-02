@@ -15,17 +15,6 @@ const sqlConfig = {
     trustServerCertificate: true, // change to true for local dev / self-signed certs
   },
 };
-// let pool;
-// const connectionString = async () => {
-//   try {
-//     if (!pool) {
-//       pool = await sql.connect(sqlConfig);
-//       console.log(`Connected to the database!`);
-//     }
-//   } catch (err) {
-//     console.log(err);
-//   }
-// };
 
 const poolPromise = new sql.ConnectionPool(sqlConfig)
   .connect()

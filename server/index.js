@@ -3,7 +3,6 @@ const express = require("express");
 const dotenv = require("dotenv").config();
 const customerRoutes = require("./routes/CustomerRoutes");
 const app = express();
-const dbConnection = require("./connections/dbConnection");
 const PORT = process.env.PORT || 3000;
 // dbConnection();
 app.use(express.json());
