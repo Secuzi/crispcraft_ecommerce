@@ -1,64 +1,44 @@
-const customers = [
-  {
-    customer_id: 1,
-    fName: "Harold",
-    lName: "Filomeno",
-    address: "2263 yawa city",
-    city: "Cebu city",
-    state: "NA",
-    phoneNum: "09765164743",
-    email: "act.hvfilomeno@gmail.com",
-  },
-  {
-    customer_id: 2,
-    fName: "Howard",
-    lName: "Devilleres",
-    address: "2263 yawaan i city",
-    city: "Talisay city",
-    state: "stateless",
-    phoneNum: "09765164666",
-    email: "act.vhdevilleres@gmail.com",
-  },
-];
+const customerService = require("../services/CustomerService");
 
 //@path GET /customers
-const getAllCustomers = (req, res) => {
+const getAllCustomers = async (req, res) => {
+  const customers = await customerService.getAll();
   res.send({ customers });
 };
 
 //@path GET /customers/:id
-const getCustomer = (req, res) => {
+const getCustomer = async (req, res) => {
   const id = Number(req.params.id);
-  const user = customers.find((customer) => customer.customer_id === id);
-  if (!user) {
-    return res.send("Cannot find User");
+  const customer = await customerService.read(id, "customerID");
+
+  if (!customer) {
+    return res.status(400).send("Cannot find User");
   }
-  return res.send({ user });
+  return res.status(200).json({ customer });
 };
 
 //@path POST /customers
 
-const createCustomer = (req, res) => {
-  const customer = { ...req.body };
-  //JOI validation
-  if (!customer) {
-    res.send({ message: "Could not create customer" });
+const createCustomer = async (req, res) => {
+  try {
+    const newCustomer = await customerService.create(req.body);
+    //JOI validation
+    if (!newCustomer) {
+      res.status(400).send({ message: "Could not create customer" });
+    }
+    res.status(201).send({ newCustomer });
+  } catch (e) {
+    console.log(e);
   }
-  customers.push(customer);
-  res.send({ customer });
 };
 
 //@path DELETE /customers/:id
 
-const deleteCustomer = (req, res) => {
+const deleteCustomer = async (req, res) => {
   const customer_id = Number(req.params.id);
 
-  console.log(`Customer ID: ${customer_id}`);
-  const deletedCustomersList = customers.filter(
-    (customer) => Number(customer.customer_id) !== Number(customer_id)
-  );
-
-  res.send({ deletedCustomersList });
+  const output = await customerService.delete(customer_id, "customerID");
+  res.send({ output });
 };
 
 module.exports = {
