@@ -51,13 +51,17 @@ class ModelService {
   }
 
   async update(id, data, primaryKey = "id") {
-    const pool = await poolPromise;
-    const updates = Object.keys(data)
-      .map((key) => `${key} = '${data[key]}'`)
-      .join(", ");
-    const query = `UPDATE ${this.tableName} SET ${updates} WHERE ${primaryKey} = @id`;
-    await pool.request().input("id", id).query(query);
-    return { message: "Update successful" };
+    try {
+      const pool = await poolPromise;
+      const updates = Object.keys(data)
+        .map((key) => `${key} = '${data[key]}'`)
+        .join(", ");
+      const query = `UPDATE ${this.tableName} SET ${updates} WHERE ${primaryKey} = @id`;
+      await pool.request().input("id", id).query(query);
+      return { message: "Update successful" };
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async delete(id, primaryKey = "id") {

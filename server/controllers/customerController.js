@@ -41,9 +41,18 @@ const deleteCustomer = async (req, res) => {
   res.send({ output });
 };
 
+const updateCustomer = async (req, res) => {
+  const customer_id = Number(req.params.id);
+  const data = { ...req.body };
+  const output = await customerService.update(customer_id, data, "customerID");
+
+  res.send({ output });
+};
+
 module.exports = {
   getAllCustomers,
   getCustomer,
   createCustomer,
   deleteCustomer,
+  updateCustomer,
 };
