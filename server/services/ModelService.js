@@ -37,10 +37,26 @@ class ModelService {
     }
   }
 
+  async getAllWithProperty(propertyName) {
+    try {
+      const pool = await poolPromise;
+
+      const query = `SELECT * FROM ${this.tableName} WHERE ${propertyName} = @value`;
+      const result = await pool
+        .request()
+        .input("value", propertyName)
+        .query(query);
+      return result.recordset;
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   async read(id, primaryKey = "id") {
     try {
       console.log(`Table name: ${this.tableName}`);
       const pool = await poolPromise;
+
       const query = `SELECT * FROM ${this.tableName} WHERE ${primaryKey} = @id`;
       const result = await pool.request().input("id", id).query(query);
       console.log(`Record set: ${result.recordset}`);
