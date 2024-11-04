@@ -1,10 +1,64 @@
 <script setup>
 import { reactive, ref } from "vue";
-
-const user = reactive({
+import axios from "axios";
+import useVuelidate from "@vuelidate/core";
+import { email, required } from "@vuelidate/validators";
+const form = reactive({
   email: "",
   password: "",
 });
+
+const rules = {
+  email: { required, email },
+  password: { required },
+};
+
+const v$ = useVuelidate(rules, form);
+
+async function submitForm() {
+  v$.value.$touch();
+
+  if (v$.value.$errors.length > 0) {
+    return;
+  }
+  try {
+    const response = await axios.get("http://localhost:3000/customers");
+    const { customers } = response.data;
+    //Check first if email exists
+    //If email exists then check for password
+    console.log(customers);
+
+    let doesEmailExist = false;
+
+    customers.forEach((customer) => {
+      if (customer.email === form.email) {
+        doesEmailExist = true;
+      }
+    });
+
+    if (!doesEmailExist) {
+      alert("Email does not exist!");
+      return;
+    }
+
+    const customer = customers.find(
+      (customer) =>
+        customer.email === form.email && customer.password === form.password
+    );
+
+    if (customer) {
+      alert("Customer logged in!");
+    } else {
+      alert("Password is incorrect!");
+    }
+  } catch (e) {
+    console.log(e);
+  }
+
+  //Send a request using axios to get all customers oh my god
+  //Create a service function to get a specific property
+}
+
 const isPasswordHidden = ref(true);
 
 const togglePassword = () => {
@@ -19,7 +73,7 @@ const togglePassword = () => {
     >
       <h1 class="font-semibold text-[20px] mb-[19px]">Log in</h1>
       <!-- Put function here -->
-      <form @submit.prevent="">
+      <form @submit.prevent="submitForm">
         <!-- Email -->
         <div class="mb-3">
           <label
@@ -33,7 +87,7 @@ const togglePassword = () => {
               class="w-full focus:outline-none text-[14px]"
               type="email"
               name="email"
-              v-model="user.email"
+              v-model="form.email"
               id="email"
               placeholder="Email"
             />
@@ -51,7 +105,7 @@ const togglePassword = () => {
               class="w-[85%] lg:w-[90%] focus:outline-none text-[14px]"
               name="password"
               id="password"
-              v-model="user.password"
+              v-model="form.password"
               v-bind:type="isPasswordHidden ? 'password' : 'text'"
               placeholder="Password"
             />

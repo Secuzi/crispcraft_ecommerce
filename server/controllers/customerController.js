@@ -21,7 +21,21 @@ const getCustomer = async (req, res) => {
 
 const createCustomer = async (req, res) => {
   try {
-    const newCustomer = await customerService.create(req.body);
+    //Naay bug diri katong confirm password, use joi or something fuck
+
+    const { email, password, address, phoneNum, fName, lName, city, state } =
+      req.body;
+
+    const newCustomer = await customerService.create({
+      email,
+      password,
+      address,
+      phoneNum,
+      fName,
+      lName,
+      city,
+      state,
+    });
     //JOI validation
     if (!newCustomer) {
       res.status(400).send({ message: "Could not create customer" });
@@ -41,6 +55,7 @@ const deleteCustomer = async (req, res) => {
   res.send({ output });
 };
 
+//@path PUT /customers/:id
 const updateCustomer = async (req, res) => {
   const customer_id = Number(req.params.id);
   const data = { ...req.body };

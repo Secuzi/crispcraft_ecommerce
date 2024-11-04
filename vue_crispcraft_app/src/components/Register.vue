@@ -1,6 +1,18 @@
 <script setup>
-import { reactive, ref } from "vue";
-const user = reactive({
+import { reactive, ref, computed } from "vue";
+import axios from "axios";
+import { useRouter } from "vue-router";
+import useVuelidate from "@vuelidate/core";
+import {
+  required,
+  email,
+  sameAs,
+  numeric,
+  maxLength,
+  minLength,
+} from "@vuelidate/validators";
+
+const form = reactive({
   email: "",
   password: "",
   address: "",
@@ -9,8 +21,8 @@ const user = reactive({
   lName: "",
   city: "",
   state: "",
+  confirmPassword: "",
 });
-
 const isPasswordHidden = ref(true);
 const isConfirmPasswordHidden = ref(true);
 
@@ -20,6 +32,48 @@ const togglePassword = () => {
 const toggleConfirmPassword = () => {
   isConfirmPasswordHidden.value = !isConfirmPasswordHidden.value;
 };
+
+const router = useRouter();
+
+const rules = computed(() => {
+  return {
+    email: { required, email },
+    password: { required },
+    address: { required },
+    phoneNum: {
+      required,
+      numeric,
+      maxLength: maxLength(11),
+      minLength: minLength(11),
+    },
+    fName: { required },
+    lName: { required },
+    city: { required },
+    state: { required },
+    confirmPassword: { required, sameAs: sameAs(form.password) },
+  };
+});
+
+const v$ = useVuelidate(rules, form);
+
+async function submitForm() {
+  //TODO: Check if naay same email sa database
+
+  v$.value.$touch();
+  if (v$.value.$errors.length > 0) {
+    //Throw error
+    console.log(v$.value.$errors);
+    return;
+  }
+  try {
+    const response = await axios.post("http://localhost:3000/customers", form);
+    console.log(response.data);
+  } catch (e) {
+    console.log(e);
+  }
+
+  router.push("/");
+}
 </script>
 
 <template>
@@ -29,7 +83,7 @@ const toggleConfirmPassword = () => {
     >
       <h1 class="font-semibold text-[20px] mb-[19px]">Sign Up</h1>
       <!-- Put function here -->
-      <form @submit.prevent="" class="flex">
+      <form @submit.prevent="submitForm">
         <div
           class="h-[200px] overflow-y-auto w-full xl:h-auto xl:grid xl:grid-cols-3 xl:gap-5"
         >
@@ -47,11 +101,14 @@ const toggleConfirmPassword = () => {
                   class="w-full focus:outline-none text-[14px]"
                   type="email"
                   name="email"
-                  v-model="user.email"
+                  v-model="form.email"
                   id="email"
                   placeholder="Email"
                 />
               </div>
+              <span v-if="v$.email.$error" class="text-red-500 text-xs">
+                {{ v$.email.$errors[0].$message }}
+              </span>
             </div>
             <!-- Password -->
             <div class="mb-3 relative">
@@ -67,7 +124,7 @@ const toggleConfirmPassword = () => {
                   class="w-[85%] lg:w-[90%] focus:outline-none text-[14px]"
                   name="password"
                   id="password"
-                  v-model="user.password"
+                  v-model="form.password"
                   v-bind:type="isPasswordHidden ? 'password' : 'text'"
                   placeholder="Password"
                 />
@@ -77,6 +134,9 @@ const toggleConfirmPassword = () => {
                   @click="togglePassword"
                 ></i>
               </div>
+              <span v-if="v$.password.$error" class="text-red-500 text-xs">
+                {{ v$.password.$errors[0].$message }}
+              </span>
             </div>
             <!-- Confirm Password -->
             <div class="mb-3 relative">
@@ -92,6 +152,7 @@ const toggleConfirmPassword = () => {
                   class="w-[85%] lg:w-[90%] focus:outline-none text-[14px]"
                   name="password"
                   id="confirmPassword"
+                  v-model="form.confirmPassword"
                   v-bind:type="isConfirmPasswordHidden ? 'password' : 'text'"
                   placeholder="Password"
                 />
@@ -101,6 +162,12 @@ const toggleConfirmPassword = () => {
                   @click="toggleConfirmPassword"
                 ></i>
               </div>
+              <span
+                v-if="v$.confirmPassword.$error"
+                class="text-red-500 text-xs"
+              >
+                {{ v$.confirmPassword.$errors[0].$message }}
+              </span>
             </div>
           </div>
 
@@ -117,11 +184,14 @@ const toggleConfirmPassword = () => {
                   class="w-full focus:outline-none text-[14px]"
                   type="text"
                   name="firstName"
-                  v-model="user.fName"
+                  v-model="form.fName"
                   id="firstName"
                   placeholder="First Name"
                 />
               </div>
+              <span v-if="v$.fName.$error" class="text-red-500 text-xs">
+                {{ v$.fName.$errors[0].$message }}
+              </span>
             </div>
             <!-- Last Name -->
             <div class="mb-3">
@@ -135,11 +205,14 @@ const toggleConfirmPassword = () => {
                   class="w-full focus:outline-none text-[14px]"
                   type="text"
                   name="lastName"
-                  v-model="user.lName"
+                  v-model="form.lName"
                   id="lastName"
                   placeholder="Last Name"
                 />
               </div>
+              <span v-if="v$.lName.$error" class="text-red-500 text-xs">
+                {{ v$.lName.$errors[0].$message }}
+              </span>
             </div>
             <!-- Phone Number -->
             <div class="mb-3">
@@ -153,11 +226,14 @@ const toggleConfirmPassword = () => {
                   class="w-full focus:outline-none text-[14px]"
                   type="tel"
                   name="phoneNumber"
-                  v-model="user.phoneNumber"
+                  v-model="form.phoneNum"
                   id="phoneNumber"
                   placeholder="Phone Number"
                 />
               </div>
+              <span v-if="v$.phoneNum.$error" class="text-red-500 text-xs">
+                {{ v$.phoneNum.$errors[0].$message }}
+              </span>
             </div>
           </div>
 
@@ -174,11 +250,14 @@ const toggleConfirmPassword = () => {
                   class="w-full focus:outline-none text-[14px]"
                   type="address"
                   name="address"
-                  v-model="user.address"
+                  v-model="form.address"
                   id="address"
-                  placeholder="Street/District/City/Country"
+                  placeholder="Enter address"
                 />
               </div>
+              <span v-if="v$.address.$error" class="text-red-500 text-xs">
+                {{ v$.address.$errors[0].$message }}
+              </span>
             </div>
             <!-- City -->
             <div class="mb-3">
@@ -192,11 +271,14 @@ const toggleConfirmPassword = () => {
                   class="w-full focus:outline-none text-[14px]"
                   type="text"
                   name="city"
-                  v-model="user.city"
+                  v-model="form.city"
                   id="city"
                   placeholder="City"
                 />
               </div>
+              <span v-if="v$.city.$error" class="text-red-500 text-xs">
+                {{ v$.city.$errors[0].$message }}
+              </span>
             </div>
             <!-- State -->
             <div class="mb-3">
@@ -210,35 +292,37 @@ const toggleConfirmPassword = () => {
                   class="w-full focus:outline-none text-[14px]"
                   type="text"
                   name="state"
-                  v-model="user.state"
+                  v-model="form.state"
                   id="state"
                   placeholder="State"
                 />
               </div>
+              <span v-if="v$.state.$error" class="text-red-500 text-xs">
+                {{ v$.state.$errors[0].$message }}
+              </span>
             </div>
           </div>
         </div>
 
         <!-- Login button -->
-      </form>
-
-      <div
-        class="flex justify-between items-center flex-col-reverse xl:flex-row mt-5"
-      >
-        <div class="text-center text-sm">
-          <p class="text-opacity-50 text-black inline mr-[3px]">
-            Already have an account?
-          </p>
-          <RouterLink to="/" class="text-[#0000FF] text-opacity-100"
-            >Log in</RouterLink
-          >
-        </div>
-        <button
-          class="mb-3 bg-[#15B392] w-full font-bold rounded-[3px] bg-opacity-50 p-2 xl:mb-0 xl:max-w-[20%]"
+        <div
+          class="flex justify-between items-center flex-col-reverse xl:flex-row mt-5"
         >
-          Register
-        </button>
-      </div>
+          <div class="text-center text-sm">
+            <p class="text-opacity-50 text-black inline mr-[3px]">
+              Already have an account?
+            </p>
+            <RouterLink to="/" class="text-[#0000FF] text-opacity-100"
+              >Log in</RouterLink
+            >
+          </div>
+          <button
+            class="mb-3 bg-[#15B392] w-full font-bold rounded-[3px] bg-opacity-50 p-2 xl:mb-0 xl:max-w-[20%]"
+          >
+            Register
+          </button>
+        </div>
+      </form>
     </section>
   </section>
 </template>
