@@ -1,17 +1,15 @@
 <script setup>
 import Navbar from "@/components/Navbar.vue";
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import ProductSweetCheese from "@/assets/images/BAG of CHIPS/cheese.png";
 import ProductCheesyHot from "@/assets/images/BAG of CHIPS/cheesyhot.png";
 import ProductChiliHot from "@/assets/images/BAG of CHIPS/chilihot.png";
 import ProductSaltedOnion from "@/assets/images/BAG of CHIPS/onion.png";
-import { Swiper, SwiperSlide } from "swiper/vue";
+
 import { register } from "swiper/element/bundle";
 import BestSellerLogo from "@/assets/images/BAG of CHIPS/bestseller.png";
 import HeaderText from "@/components/HeaderText.vue";
 import Carousel from "@/components/Carousel.vue";
-import LeftArrow from "@/assets/images/icons/left_arrow.png";
-import RightArrow from "@/assets/images/icons/right_arrow.png";
 
 import "swiper/css";
 import "swiper/css/navigation";
@@ -26,53 +24,6 @@ const bestSeller = ref({
   colorTheme: "#AE76B8",
 });
 
-// const swiper = ref(null);
-
-// const items = ref([
-//   {
-//     id: 1,
-//     image: ProductCheesyHot,
-//     colorTheme: "#EF9426",
-//   },
-//   {
-//     id: 2,
-//     image: ProductSaltedOnion,
-//     colorTheme: "#AE76B8",
-//   },
-//   {
-//     id: 3,
-//     image: ProductChiliHot,
-//     colorTheme: "#863E24",
-//   },
-//   {
-//     id: 4,
-//     image: ProductSweetCheese,
-//     colorTheme: "#EBCB5F",
-//   },
-// ]);
-
-// const currentTheme = ref("");
-
-// const onNextChange = () => {
-//   swiper.value.slideNext();
-// };
-
-// const onPrevChange = () => {
-//   swiper.value.slidePrev();
-// };
-
-// const onSwiper = (instance) => {
-//   swiper.value = instance;
-// };
-
-// const onSlideChange = (event) => {
-//   const currentIndex = event.realIndex;
-//   const currentItem = items.value[currentIndex];
-
-//   console.log("Current Slide Index:", currentIndex);
-//   console.log("Current Item:", currentItem);
-//   currentTheme.value = currentItem.colorTheme;
-// };
 const items = ref([
   {
     id: 1,

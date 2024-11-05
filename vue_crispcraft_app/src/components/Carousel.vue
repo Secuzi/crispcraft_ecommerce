@@ -1,16 +1,6 @@
 <script setup>
-import Navbar from "@/components/Navbar.vue";
-import { ref, onMounted } from "vue";
-import { watch } from "vue";
-import ProductSweetCheese from "@/assets/images/BAG of CHIPS/cheese.png";
-import ProductCheesyHot from "@/assets/images/BAG of CHIPS/cheesyhot.png";
-import ProductChiliHot from "@/assets/images/BAG of CHIPS/chilihot.png";
-import ProductSaltedOnion from "@/assets/images/BAG of CHIPS/onion.png";
+import { ref } from "vue";
 
-import { register } from "swiper/element/bundle";
-import BestSellerLogo from "@/assets/images/BAG of CHIPS/bestseller.png";
-import HeaderText from "@/components/HeaderText.vue";
-import Carousel from "@/components/Carousel.vue";
 import LeftArrow from "@/assets/images/icons/left_arrow.png";
 import RightArrow from "@/assets/images/icons/right_arrow.png";
 
@@ -52,41 +42,6 @@ const onSlideChange = (event) => {
   console.log("Current Item:", currentItem);
   currentTheme.value = currentItem.colorTheme;
 };
-
-// const items = ref([
-//   {
-//     id: 1,
-//     image: ProductCheesyHot,
-//     colorTheme: "#EF9426",
-//   },
-//   {
-//     id: 2,
-//     image: ProductSaltedOnion,
-//     colorTheme: "#AE76B8",
-//   },
-//   {
-//     id: 3,
-//     image: ProductChiliHot,
-//     colorTheme: "#863E24",
-//   },
-//   {
-//     id: 4,
-//     image: ProductSweetCheese,
-//     colorTheme: "#EBCB5F",
-//   },
-// ]);
-
-// onMounted(() => {
-//   if (props.items.length > 0) {
-//     currentTheme.value = props.items[0].colorTheme;
-//   }
-// });
-watch(
-  () => props.items,
-  (newItems) => {
-    console.log("Received items:", newItems);
-  }
-);
 </script>
 
 <template>
