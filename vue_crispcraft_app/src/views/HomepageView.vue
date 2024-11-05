@@ -1,6 +1,6 @@
 <script setup>
 import Navbar from "@/components/Navbar.vue";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import ProductSweetCheese from "@/assets/images/BAG of CHIPS/cheese.png";
 import ProductCheesyHot from "@/assets/images/BAG of CHIPS/cheesyhot.png";
 import ProductChiliHot from "@/assets/images/BAG of CHIPS/chilihot.png";
@@ -9,6 +9,10 @@ import { Swiper, SwiperSlide } from "swiper/vue";
 import { register } from "swiper/element/bundle";
 import BestSellerLogo from "@/assets/images/BAG of CHIPS/bestseller.png";
 import HeaderText from "@/components/HeaderText.vue";
+import Carousel from "@/components/Carousel.vue";
+import LeftArrow from "@/assets/images/icons/left_arrow.png";
+import RightArrow from "@/assets/images/icons/right_arrow.png";
+
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -22,6 +26,53 @@ const bestSeller = ref({
   colorTheme: "#AE76B8",
 });
 
+// const swiper = ref(null);
+
+// const items = ref([
+//   {
+//     id: 1,
+//     image: ProductCheesyHot,
+//     colorTheme: "#EF9426",
+//   },
+//   {
+//     id: 2,
+//     image: ProductSaltedOnion,
+//     colorTheme: "#AE76B8",
+//   },
+//   {
+//     id: 3,
+//     image: ProductChiliHot,
+//     colorTheme: "#863E24",
+//   },
+//   {
+//     id: 4,
+//     image: ProductSweetCheese,
+//     colorTheme: "#EBCB5F",
+//   },
+// ]);
+
+// const currentTheme = ref("");
+
+// const onNextChange = () => {
+//   swiper.value.slideNext();
+// };
+
+// const onPrevChange = () => {
+//   swiper.value.slidePrev();
+// };
+
+// const onSwiper = (instance) => {
+//   swiper.value = instance;
+// };
+
+// const onSlideChange = (event) => {
+//   const currentIndex = event.realIndex;
+//   const currentItem = items.value[currentIndex];
+
+//   console.log("Current Slide Index:", currentIndex);
+//   console.log("Current Item:", currentItem);
+//   currentTheme.value = currentItem.colorTheme;
+// };
 const items = ref([
   {
     id: 1,
@@ -45,16 +96,7 @@ const items = ref([
   },
 ]);
 
-const currentTheme = ref("");
-
-const onSlideChange = (event) => {
-  const currentIndex = event.realIndex;
-  const currentItem = items.value[currentIndex];
-
-  console.log("Current Slide Index:", currentIndex);
-  console.log("Current Item:", currentItem);
-  currentTheme.value = currentItem.colorTheme;
-};
+console.log(items.value);
 </script>
 
 <template>
@@ -66,26 +108,7 @@ const onSlideChange = (event) => {
       class="md:flex md:justify-between hidden bg-mySecondaryColor flex-grow md:items-center"
     >
       <!-- Carousel -->
-      <div
-        :style="{ backgroundColor: currentTheme }"
-        class="h-full flex items-center px-[24px] py-[41px] transition ease-in-out duration-500 flex-shrink"
-      >
-        <Swiper
-          :slides-per-view="1"
-          :loop="true"
-          :space-between="150"
-          :navigation="true"
-          class="product-container w-full"
-          :pagination="true"
-          :grabCursor="false"
-          @slideChange="onSlideChange"
-        >
-          <swiper-slide v-for="(item, index) in items" :key="item.id">
-            <img :src="item.image" alt="" class="cursor-pointer" />
-          </swiper-slide>
-        </Swiper>
-      </div>
-
+      <Carousel :items="items" />
       <!-- Featured Products -->
       <div class="w-[.8] h-full flex justify-center">
         <div class="flex flex-col justify-center">
@@ -180,18 +203,18 @@ const onSlideChange = (event) => {
 </template>
 
 <style scoped>
+.swiper-button-next,
 .swiper-button-prev {
-  left: 10px; /* Adjust positioning */
+  color: green;
+  top: auto;
+  bottom: 0;
 }
 
-.swiper-button-next {
-  right: 10px; /* Adjust positioning */
+.swiper-button-next::after,
+.swiper-button-prev::after {
+  content: "";
 }
 
-.swiper-button-prev,
-.swiper-button-next {
-  color: red !important;
-}
 .product-container {
   max-width: 400px;
 }
