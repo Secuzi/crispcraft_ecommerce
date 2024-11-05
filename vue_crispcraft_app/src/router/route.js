@@ -1,3 +1,4 @@
+import HomepageView from "@/views/HomepageView.vue";
 import LoginView from "@/views/LoginView.vue";
 import RegisterView from "@/views/RegisterView.vue";
 
@@ -13,6 +14,11 @@ const routes = [
     path: "/register",
     name: "register",
     component: RegisterView,
+  },
+  {
+    path: "/homepage",
+    name: "homepage",
+    component: HomepageView,
   },
 ];
 
