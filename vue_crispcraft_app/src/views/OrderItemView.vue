@@ -14,12 +14,14 @@ import MobileContainer from "@/components/MobileContainer.vue";
 
 const formQuantity = ref(null);
 
-const items = ref([
+const products = ref([
   {
     id: 1,
     image: ProductCheesyHot,
+    productName: "MC Cheesy Hot",
     colorTheme: "#EF9426",
     price: 100,
+    qty: 2,
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin at risus vel nisi volutpat facilisis. Enjoy the perfect blend of flavor and texture!",
   },
@@ -27,7 +29,9 @@ const items = ref([
     id: 2,
     image: ProductSaltedOnion,
     colorTheme: "#AE76B8",
+    productName: "MC Salted Onion",
     price: 200,
+    qty: 2,
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin at risus vel nisi volutpat facilisis. Enjoy the perfect blend of flavor and texture!",
   },
@@ -35,7 +39,9 @@ const items = ref([
     id: 3,
     image: ProductChiliHot,
     colorTheme: "#863E24",
+    productName: "MC Chili Hot",
     price: 300,
+    qty: 2,
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin at risus vel nisi volutpat facilisis. Enjoy the perfect blend of flavor and texture!",
   },
@@ -43,7 +49,9 @@ const items = ref([
     id: 4,
     image: ProductSweetCheese,
     colorTheme: "#EBCB5F",
+    productName: "MC Sweet Cheese",
     price: 200,
+    qty: 2,
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin at risus vel nisi volutpat facilisis. Enjoy the perfect blend of flavor and texture!",
   },
@@ -55,7 +63,7 @@ const items = ref([
     <Navbar />
 
     <MobileContainer>
-      <section>
+      <section class="myContainer">
         <HeaderText textsize="55px" />
         <p class="italic font-medium text-[12px] text-opacity-[.5]">
           Choose other flavors:
@@ -63,10 +71,10 @@ const items = ref([
       </section>
 
       <section>
-        <Carousel items="items" />
+        <Carousel items="products" />
       </section>
 
-      <section>
+      <section class="myContainer">
         <h2>
           MALUNGGAY CHIPS:
           <span>Sweet Cheese</span>
@@ -90,8 +98,22 @@ const items = ref([
         </div>
 
         <!-- Do this shit: -->
-        <Subtotal :products="products" />
+
+        <Subtotal
+          :products="products"
+          tableHeaderTextSize="10px"
+          subTotalTextSize="12px"
+          dataTextSize="7px"
+          sumNumberTextSize="10px"
+        />
       </section>
     </MobileContainer>
   </MainContainer>
 </template>
+
+<style scoped>
+.myContainer {
+  width: 90%;
+  margin: 0 auto;
+}
+</style>
