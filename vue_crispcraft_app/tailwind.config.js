@@ -6,6 +6,7 @@ export default {
       fontFamily: {
         sans: ["Inter", "Bebas Neue", "sans-serif"],
         bebas: ["Bebas Neue", "sans-serif"],
+        rubik: ["Rubik", "sans-serif"],
       },
       colors: {
         myPrimaryColor: "var(--primary-color)",

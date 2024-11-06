@@ -1,19 +1,18 @@
 <script setup>
 import Navbar from "@/components/Navbar.vue";
 import { ref } from "vue";
-import ProductSweetCheese from "@/assets/images/BAG of CHIPS/cheese.png";
-import ProductCheesyHot from "@/assets/images/BAG of CHIPS/cheesyhot.png";
-import ProductChiliHot from "@/assets/images/BAG of CHIPS/chilihot.png";
-import ProductSaltedOnion from "@/assets/images/BAG of CHIPS/onion.png";
 
 import { register } from "swiper/element/bundle";
 import BestSellerLogo from "@/assets/images/BAG of CHIPS/bestseller.png";
 import HeaderText from "@/components/HeaderText.vue";
 import Carousel from "@/components/Carousel.vue";
+import MainContainer from "@/components/MainContainer.vue";
 
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import MobileContainer from "@/components/MobileContainer.vue";
+import DesktopContainer from "@/components/DesktopContainer.vue";
 register();
 
 // Featured products
@@ -51,65 +50,65 @@ console.log(items.value);
 </script>
 
 <template>
-  <div class="h-dvh flex flex-col md:flex-none">
+  <MainContainer>
     <Navbar />
 
-    <!-- Desktop View -->
-    <main
-      class="md:flex md:justify-between hidden bg-mySecondaryColor flex-grow md:items-center"
-    >
-      <!-- Carousel -->
-      <Carousel :items="items" />
-      <!-- Featured Products -->
-      <div class="w-[.8] h-full flex justify-center">
-        <div class="flex flex-col justify-center">
-          <HeaderText textSize="55px" />
-          <div class="flex items-center h-fit">
-            <div
-              class="featured-products-wrapper flex justify-center mb-[-60px] self-end md:mb-0 w-full"
-            >
-              <div class="featured-products max-w-[600px] flex-shrink">
-                <div
-                  v-for="(item, index) in items"
-                  :key="item.id"
-                  class="product-image w-full"
-                  :style="{ marginLeft: index === 0 ? '0' : '-80px' }"
-                >
-                  <img :src="item.image" alt="product name" />
+    <DesktopContainer>
+      <!-- Desktop View -->
+      <main
+        class="md:flex md:justify-between hidden bg-mySecondaryColor flex-grow md:items-center h-full"
+      >
+        <!-- Carousel -->
+        <Carousel :items="items" />
+        <!-- Featured Products -->
+        <div class="w-[.8] h-full flex justify-center">
+          <div class="flex flex-col justify-center">
+            <HeaderText textSize="55px" />
+            <div class="flex items-center h-fit">
+              <div
+                class="featured-products-wrapper flex justify-center mb-[-60px] self-end md:mb-0 w-full"
+              >
+                <div class="featured-products max-w-[600px] flex-shrink">
+                  <div
+                    v-for="(item, index) in items"
+                    :key="item.id"
+                    class="product-image w-full"
+                    :style="{ marginLeft: index === 0 ? '0' : '-80px' }"
+                  >
+                    <img :src="item.image" alt="product name" />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      <!-- Best Seller -->
-      <div class="h-full min-h-[300px] overflow-hidden relative">
-        <img :src="BestSellerLogo" alt="Best seller logo" />
-        <div
-          class="flex flex-col items-center -rotate-12 right-0 bottom-[-20px] absolute"
-        >
+        <!-- Best Seller -->
+        <div class="h-full min-h-[300px] overflow-hidden relative">
+          <img :src="BestSellerLogo" alt="Best seller logo" />
           <div
-            class="transition hover:scale-125 ease-in-out z-10 cursor-pointer"
+            class="flex flex-col items-center -rotate-12 right-0 bottom-[-20px] absolute"
           >
-            <HeaderText
-              textSize="32px"
-              featuredText="NEW"
-              productsText="PRODUCT LAUNCH"
-            />
-            <img :src="bestSeller.image" alt="name" class="w-[229px]" />
+            <div
+              class="transition hover:scale-125 ease-in-out z-10 cursor-pointer"
+            >
+              <HeaderText
+                textSize="32px"
+                featuredText="NEW"
+                productsText="PRODUCT LAUNCH"
+              />
+              <img :src="bestSeller.image" alt="name" class="w-[229px]" />
+            </div>
+            <!-- Circle Section -->
+            <div
+              class="w-[283px] best-seller-bg absolute h-[232px] bottom-0"
+              :style="{ backgroundColor: bestSeller.colorTheme }"
+            ></div>
           </div>
-          <!-- Circle Section -->
-          <div
-            class="w-[283px] best-seller-bg absolute h-[232px] bottom-0"
-            :style="{ backgroundColor: bestSeller.colorTheme }"
-          ></div>
         </div>
-      </div>
-    </main>
+      </main>
+    </DesktopContainer>
 
-    <!-- Mobile View -->
-    <main class="bg-mySecondaryColor grow flex flex-col md:hidden">
-      <!-- Some content -->
+    <MobileContainer>
       <div
         class="flex-grow flex justify-evenly flex-col md:flex-row md:flex-grow-0"
       >
@@ -148,9 +147,8 @@ console.log(items.value);
           </div>
         </div>
       </div>
-    </main>
-    <div class="bg-myPrimaryColor h-[49px] w-full md:hidden"></div>
-  </div>
+    </MobileContainer>
+  </MainContainer>
 </template>
 
 <style scoped>

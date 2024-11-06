@@ -12,10 +12,7 @@ import { Swiper, SwiperSlide } from "swiper/vue";
 const swiper = ref(null);
 const currentTheme = ref("");
 const props = defineProps({
-  items: {
-    type: Array,
-    required: true,
-  },
+  items: ref({}),
 });
 
 const onNextChange = () => {
