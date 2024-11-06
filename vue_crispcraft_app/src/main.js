@@ -5,11 +5,14 @@ import App from "./App.vue";
 import router from "./router/route";
 import PrimeVue from "primevue/config";
 
-import Lara from "@/presets/lara";
+import Aura from "@/presets/aura";
 const app = createApp(App);
 app.use(router);
+// app.use(PrimeVue, {
+//   unstyled: true,
+//   pt: Aura,
+// });
 app.use(PrimeVue, {
-  unstyled: true,
-  pt: Lara,
+  theme: "none",
 });
 app.mount("#app");
