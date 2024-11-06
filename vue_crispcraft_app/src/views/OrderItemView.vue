@@ -90,7 +90,7 @@ const items = ref([
         </div>
 
         <!-- Do this shit: -->
-        <Subtotal />
+        <Subtotal :products="products" />
       </section>
     </MobileContainer>
   </MainContainer>
