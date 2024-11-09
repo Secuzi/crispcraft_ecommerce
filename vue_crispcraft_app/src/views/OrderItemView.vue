@@ -11,8 +11,10 @@ import ProductChiliHot from "@/assets/images/BAG of CHIPS/chilihot.png";
 import ProductSaltedOnion from "@/assets/images/BAG of CHIPS/onion.png";
 import MobileContainer from "@/components/MobileContainer.vue";
 import MultiCarousel from "@/components/MultiCarousel.vue";
-
+import { useOrderItemStore } from "@/stores/multicarousel";
+import { Transition } from "vue";
 import Button from "@/components/Button.vue";
+import DesktopContainer from "@/components/DesktopContainer.vue";
 
 const formQuantity = ref(null);
 
@@ -26,8 +28,9 @@ const products = ref([
     price: 100,
     stock: 99,
     qty: 2,
+    isFontBlack: true,
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin at risus vel nisi volutpat facilisis. Enjoy the perfect blend of flavor and texture!",
+      "Experience the delightful crunch of our Cheesy Hot Malunggay Chips—nutritious, flavorful, and perfect for satisfying your snack cravings!",
   },
   {
     id: 2,
@@ -35,11 +38,12 @@ const products = ref([
     colorTheme: "#AE76B8",
     productName: "MC Salted Onion",
     flavor: "Salted Onion",
+    isFontBlack: false,
     price: 200,
     stock: 39,
     qty: 2,
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin at risus vel nisi volutpat facilisis. Enjoy the perfect blend of flavor and texture!",
+      "Enjoy our Malunggay Chips with Salted Onion flavor—crispy, nutritious, and bursting with savory goodness. A delightful snack for every occasion!",
   },
   {
     id: 3,
@@ -47,11 +51,12 @@ const products = ref([
     colorTheme: "#863E24",
     productName: "MC Chili Hot",
     flavor: "Chili Hot",
+    isFontBlack: false,
     price: 300,
     stock: 25,
     qty: 2,
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin at risus vel nisi volutpat facilisis. Enjoy the perfect blend of flavor and texture!",
+      "Spice up your snack time with our Malunggay Chips in Chili Hot flavor—crispy, zesty, and packed with a fiery kick! Perfectly addictive!",
   },
   {
     id: 4,
@@ -59,11 +64,12 @@ const products = ref([
     colorTheme: "#EBCB5F",
     productName: "MC Sweet Cheese",
     flavor: "Sweet Cheese",
+    isFontBlack: true,
     price: 200,
     stock: 69,
     qty: 2,
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin at risus vel nisi volutpat facilisis. Enjoy the perfect blend of flavor and texture!",
+      "Indulge in our Sweet Cheese Malunggay Chips—crispy and perfectly sweetened with cheesy goodness. A unique treat for every snack lover!",
   },
   {
     id: 5,
@@ -71,6 +77,33 @@ const products = ref([
     colorTheme: "#EBCB5F",
     productName: "MC Sweet Cheese",
     flavor: "Sweet Cheese",
+    isFontBlack: true,
+    price: 345,
+    stock: 69,
+    qty: 2,
+    description:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin at risus vel nisi volutpat facilisis. Enjoy the perfect blend of flavor and texture!",
+  },
+  {
+    id: 6,
+    image: ProductSweetCheese,
+    colorTheme: "#EBCB5F",
+    productName: "MC Sweet Cheese",
+    flavor: "Sweet Cheese",
+    isFontBlack: true,
+    price: 345,
+    stock: 69,
+    qty: 2,
+    description:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin at risus vel nisi volutpat facilisis. Enjoy the perfect blend of flavor and texture!",
+  },
+  {
+    id: 7,
+    image: ProductSweetCheese,
+    colorTheme: "#EBCB5F",
+    productName: "MC Sweet Cheese",
+    flavor: "Sweet Cheese",
+    isFontBlack: true,
     price: 345,
     stock: 69,
     qty: 2,
@@ -79,23 +112,162 @@ const products = ref([
   },
 ]);
 
-const selectedProduct = ref({});
+const orderItemStore = useOrderItemStore();
 
-const selectedIndex = ref(null);
+orderItemStore.selectedProduct = products.value[0];
 </script>
 
 <template>
   <MainContainer>
     <Navbar />
 
-    <!-- Todo: 
-     3. Implement changing shit based on selecting product
-     3.1 When user clicks on a product we get its index and scale it
-     3.2 We have a selectedProduct object
-     
+    <DesktopContainer
+      alignItems="md:start"
+      :backgroundColor="orderItemStore.selectedProduct.colorTheme"
+    >
+      <section class="basis-[415px] self-center">
+        <!-- Selected Product -->
+        <div class="flex justify-center">
+          <Transition name="slide-fade">
+            <img
+              v-show="orderItemStore.selectedProduct"
+              :key="orderItemStore.selectedProduct.id"
+              :src="orderItemStore.selectedProduct.image"
+              :alt="orderItemStore.selectedProduct.flavor"
+              class="w-[70%]"
+            />
+          </Transition>
+        </div>
+      </section>
 
+      <section class="basis-[630px]">
+        <h1>
+          <HeaderText
+            featured-text="ORDER"
+            products-text="ITEM"
+            textSize="55px"
+          />
+        </h1>
+        <h2
+          :class="[
+            'text-[30px]',
+            'text-stroke',
+            'text-white',
+            'font-bebas',
+            'myTextShadow mt-2',
+          ]"
+        >
+          MALUNGGAY CHIPS:
+          <span
+            class="font-rubik tracking-tighter font-bold text-[#EBCB5F] block mt-[-11px] mb-2"
+            style="-webkit-text-stroke: 2px; -webkit-text-stroke-color: black"
+            >{{ orderItemStore.selectedProduct.flavor }}</span
+          >
+        </h2>
 
-     -->
+        <div class="h-[84px] overflow-y-auto">
+          <p
+            :class="[
+              'italic',
+              'max-w-[360px]',
+              'text-[14px]',
+              'mb-[10px]',
+              orderItemStore.selectedProduct.isFontBlack
+                ? 'text-black'
+                : 'text-white',
+            ]"
+          >
+            <span class="font-bold">Description:</span>
+            {{ orderItemStore.selectedProduct.description }}
+          </p>
+        </div>
+
+        <div class="flex gap-3 items-center">
+          <!-- Quantity container -->
+          <div class="flex flex-col basis-[100px]">
+            <span class="font-bold italic text-[20px] text-opacity-50"
+              >Quantity:</span
+            >
+
+            <InputNumber
+              v-model="formQuantity"
+              inputId="integeronly"
+              class="h-[24px]"
+              :pt="{
+                inputtext: {
+                  root: '!rounded-[5px]',
+                },
+                root: '!rounded-[5px]',
+              }"
+              style="width: 212px; height: 48px"
+            />
+            <!-- Button Container -->
+            <div class="mt-3">
+              <Button text="-" padding_x="1.5rem" padding_y="0px" />
+              <Button
+                text="+"
+                padding_x="1.5rem"
+                padding_y="0px"
+                class="ml-3"
+              />
+            </div>
+          </div>
+
+          <!-- Product info -->
+          <div class="grow fluid">
+            <h3 class="font-extrabold text-opacity-50 text-[16px]">
+              Available Stock: {{ orderItemStore.selectedProduct.stock }}
+            </h3>
+            <h3 class="font-extrabold text-[18px]">
+              Price: {{ orderItemStore.selectedProduct.price }}
+            </h3>
+          </div>
+        </div>
+
+        <h3
+          class="font-medium"
+          :class="[
+            orderItemStore.selectedProduct.isFontBlack
+              ? 'text-black'
+              : 'text-white',
+          ]"
+        >
+          Choose Other Flavors:
+        </h3>
+
+        <div class="flex justify-around mt-[22px]">
+          <MultiCarousel
+            :style="'width: 400px'"
+            :items="products"
+            slidesPerView="3"
+            spaceBetween="20"
+          />
+        </div>
+      </section>
+
+      <section class="self-center p-4">
+        <div>
+          <Subtotal
+            :products="products"
+            tableHeaderTextSize="12px"
+            subTotalTextSize="14px"
+            dataTextSize="14px"
+            sumNumberTextSize="14px"
+            class="mt-[15px]"
+            height="100%"
+          />
+          <div class="flex justify-end">
+            <button
+              class="bg-mySecondaryColor myTextShadow mt-3 myBoxShadow text-white font-bold text-[24px] px-5 py-2 rounded-[25px] text-center"
+            >
+              Checkout
+            </button>
+          </div>
+        </div>
+      </section>
+    </DesktopContainer>
+
+    <!-- MOBILEEE -->
     <MobileContainer>
       <section class="myContainer">
         <HeaderText
@@ -104,7 +276,14 @@ const selectedIndex = ref(null);
           products-text="ITEM"
           featured-text="ORDER"
         />
-        <p class="italic font-medium text-[14px] text-black text-opacity-[.5]">
+        <p
+          class="italic font-medium text-[14px]"
+          :class="[
+            orderItemStore.selectedProduct.isFontBlack
+              ? 'text-black'
+              : 'text-white',
+          ]"
+        >
           Choose other flavors:
         </p>
       </section>
@@ -115,34 +294,61 @@ const selectedIndex = ref(null);
             :items="products"
             slidesPerView="4"
             class="relative z-10"
+            height="h-[100px]"
           />
           <div
-            class="bg-white h-[80px] absolute z-0 bottom-0 left-0 right-0"
+            class="bg-red h-[80px] absolute z-0 bottom-0 left-0 right-0"
           ></div>
         </div>
       </section>
 
-      <section class="myContainer">
+      <section v-if="orderItemStore.selectedProduct" class="myContainer">
         <h2
-          class="text-[32px] text-stroke text-white font-bebas myTextShadow mt-2"
+          :class="[
+            'text-[32px]',
+            'text-stroke',
+            'text-white',
+            'font-bebas',
+            'myTextShadow mt-2',
+          ]"
         >
           MALUNGGAY CHIPS:
           <span
             class="font-rubik tracking-tighter font-bold text-[#EBCB5F] block mt-[-11px] mb-2"
             style="-webkit-text-stroke: 2px; -webkit-text-stroke-color: black"
-            >Sweet Cheese</span
+            >{{ orderItemStore.selectedProduct.flavor }}</span
           >
         </h2>
-        <p class="italic text-black text-opacity-50 text-[14px] mb-[10px]">
-          <span class="font-bold">Description</span> Lorem ipsum dolor sit amet,
-          consectetur adipiscing elit. Proin at risus vel nisi volutpat
-          facilisis. Enjoy the perfect blend of flavor and texture!
-        </p>
-        <div class="flex items-center gap-2">
+        <div class="h-[84px] overflow-y-auto">
+          <p
+            :class="[
+              'italic',
+
+              'text-[14px]',
+              'mb-[10px]',
+              orderItemStore.selectedProduct.isFontBlack
+                ? 'text-black'
+                : 'text-white',
+            ]"
+          >
+            <span class="font-bold">Description:</span>
+            {{ orderItemStore.selectedProduct.description }}
+          </p>
+        </div>
+
+        <div
+          :class="[
+            'flex',
+            'items-center',
+            'gap-2',
+            orderItemStore.selectedProduct.isFontBlack
+              ? 'text-black'
+              : 'text-white',
+          ]"
+        >
           <div class="flex justify-between items-end flex-shrink">
             <div class="flex flex-col basis-[100px]">
-              <span
-                class="font-bold italic text-[14px] text-black text-opacity-50"
+              <span class="font-bold italic text-[14px] text-opacity-50"
                 >Quantity:</span
               >
 
@@ -158,21 +364,21 @@ const selectedIndex = ref(null);
                 }"
                 style="width: 150px"
               />
-              <div class="flex gap-3 mt-2">
+              <div class="flex gap-3 mt-2 text-black">
                 <Button text="-" padding_x="0.5rem" padding_y="0px" />
                 <Button text="+" padding_x="0.5rem" padding_y="0px" />
               </div>
             </div>
           </div>
           <div class="grow fluid">
-            <h3 class="font-extrabold text-black text-opacity-50 text-[14px]">
-              Available Stock: 100
+            <h3 class="font-extrabold text-opacity-50 text-[14px]">
+              Available Stock: {{ orderItemStore.selectedProduct.stock }}
             </h3>
-            <h3 class="font-extrabold text-black text-[14px]">Price: 100</h3>
+            <h3 class="font-extrabold text-[14px]">
+              Price: {{ orderItemStore.selectedProduct.price }}
+            </h3>
           </div>
         </div>
-
-        <!-- Do this shit: -->
 
         <Subtotal
           :products="products"
@@ -181,11 +387,12 @@ const selectedIndex = ref(null);
           dataTextSize="14px"
           sumNumberTextSize="14px"
           class="mt-[15px]"
+          height="h-[100px]"
         />
       </section>
       <section class="myContainer flex justify-center">
         <button
-          class="bg-myPrimaryColor myTextShadow mt-[22px] myBoxShadow text-white font-bold text-[13px] px-5 py-2 rounded-[25px] text-center"
+          class="bg-myPrimaryColor myTextShadow mt-1 myBoxShadow text-white font-bold text-[13px] px-5 py-2 rounded-[25px] text-center"
         >
           Checkout
         </button>
@@ -195,6 +402,31 @@ const selectedIndex = ref(null);
 </template>
 
 <style scoped>
+.slide-fade-enter-active {
+  transition: all 0.6s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 1s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: scale(0);
+  opacity: 0;
+}
+
+/* .v-enter-active,
+.v-leave-active {
+  transition: opacity 1s ease;
+  justify-content: center;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+} */
+
 .text-stroke {
   -webkit-text-stroke: 2px #2cb100; /* Reduce the stroke width */
 }

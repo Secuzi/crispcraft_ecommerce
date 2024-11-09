@@ -5,8 +5,11 @@ import App from "./App.vue";
 import router from "./router/route";
 import PrimeVue from "primevue/config";
 import { definePreset } from "@primevue/themes";
-
+import { createPinia } from "pinia";
 import Aura from "@primevue/themes/aura";
+
+const pinia = createPinia();
+
 const app = createApp(App);
 app.use(router);
 const MyPreset = definePreset(Aura, {
@@ -69,4 +72,5 @@ app.use(PrimeVue, {
     },
   },
 });
+app.use(pinia);
 app.mount("#app");

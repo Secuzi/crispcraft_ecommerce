@@ -7,6 +7,7 @@ const props = defineProps({
   subTotalTextSize: "",
   dataTextSize: "",
   sumNumberTextSize: "",
+  height: "",
 });
 
 const calculateSubtotal = computed(() => {
@@ -19,7 +20,7 @@ const calculateSubtotal = computed(() => {
 </script>
 
 <template>
-  <div class="table-container">
+  <div class="table-container" :style="{ maxHeight: height }">
     <table
       class="bg-white shadow-lg w-full font-inter font-semibold rounded-xl"
     >
