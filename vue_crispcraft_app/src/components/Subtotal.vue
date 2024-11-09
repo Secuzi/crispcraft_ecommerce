@@ -1,70 +1,72 @@
 <script setup>
-import { reactive } from "vue";
+import { computed, ref } from "vue";
 
 const props = defineProps({
-  products: [],
+  products: ref([]),
   tableHeaderTextSize: "",
   subTotalTextSize: "",
   dataTextSize: "",
   sumNumberTextSize: "",
 });
 
-const calculateSubtotal = () => {
+const calculateSubtotal = computed(() => {
   let sum = 0;
   for (let product of props.products) {
     sum += product.price * product.qty;
   }
   return sum;
-};
+});
 </script>
 
 <template>
-  <table
-    class="bg-white shadow-lg w-full font-inter font-semibold rounded-xl overflow-y-auto"
-  >
-    <thead
-      :class="['font-semibold', 'text-start']"
-      :style="{ fontSize: tableHeaderTextSize }"
+  <div class="table-container">
+    <table
+      class="bg-white shadow-lg w-full font-inter font-semibold rounded-xl"
     >
-      <tr class="text-left text-shadow text-opacity-50 text-black">
-        <th class="px-5 pt-2">Flavor</th>
-        <th class="px-5 pt-2">Qty</th>
-        <th class="px-5 pt-2">Price</th>
-      </tr>
-    </thead>
-    <tbody
-      v-if="props.products"
-      class="font-medium text-shadow"
-      :style="{ fontSize: dataTextSize }"
-    >
-      <tr
-        v-for="(product, index) in props.products"
-        :key="product.productID"
-        class="text-opacity-50 text-black"
+      <thead
+        :class="['font-semibold', 'text-start']"
+        :style="{ fontSize: tableHeaderTextSize }"
       >
-        <td class="px-5">{{ product.productName }}</td>
-        <td class="px-5">x{{ product.qty }}</td>
-        <td class="px-5">x{{ product.price }}</td>
-      </tr>
-    </tbody>
-    <tfoot>
-      <tr class="text-shadow tfoot-border">
-        <th
-          class="py-1 text-opacity-50 text-black"
-          :style="{ fontSize: subTotalTextSize }"
+        <tr class="text-left text-shadow text-opacity-50 text-black">
+          <th class="px-5 pt-2 rounded-tl-xl">Flavor</th>
+          <th class="px-5 pt-2">Qty</th>
+          <th class="px-5 pt-2 rounded-tr-xl">Price</th>
+        </tr>
+      </thead>
+      <tbody
+        v-if="props.products"
+        class="font-medium text-shadow"
+        :style="{ fontSize: dataTextSize }"
+      >
+        <tr
+          v-for="(product, index) in props.products"
+          :key="product.productID"
+          class="text-opacity-50 text-black"
         >
-          Sub Total:
-        </th>
-        <td></td>
-        <td
-          class="py-1 text-opacity-50 text-black"
-          :style="{ fontSize: sumNumberTextSize }"
-        >
-          {{ calculateSubtotal() }}
-        </td>
-      </tr>
-    </tfoot>
-  </table>
+          <td class="px-5">{{ product.productName }}</td>
+          <td class="px-5">x{{ product.qty }}</td>
+          <td class="px-5">x{{ product.price }}</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr class="text-shadow tfoot-border">
+          <th
+            class="py-1 text-opacity-50 text-black rounded-bl-xl"
+            :style="{ fontSize: subTotalTextSize }"
+          >
+            Sub Total:
+          </th>
+          <td
+            colspan="2"
+            class="py-1 text-opacity-50 text-black rounded-br-xl"
+            :style="{ fontSize: sumNumberTextSize }"
+          >
+            Php {{ calculateSubtotal }}
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
 </template>
 
 <style scoped>
@@ -81,6 +83,27 @@ const calculateSubtotal = () => {
   border-spacing: 0;
   border-radius: 0.5rem; /* Adjust based on the desired radius */
   overflow: hidden;
+}
+
+.table-container {
+  max-height: 191px; /* Set your desired height */
+  overflow-y: auto; /* Enable vertical scrolling */
+}
+
+.table-container table {
+  width: 100%; /* Ensure the table takes full width */
+}
+
+thead th {
+  position: sticky; /* Make header sticky */
+  top: 0; /* Stick to the top */
+  background-color: white; /* Background color to cover content beneath */
+}
+
+tfoot tr {
+  position: sticky;
+  bottom: 0;
+  background-color: white;
 }
 
 .table-box-shadow {

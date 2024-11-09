@@ -18,7 +18,7 @@ const props = defineProps({
 <template>
   <h1
     :style="{ fontSize: props.textSize }"
-    class="font-bebas text-black myTextShadow text-center"
+    class="font-bebas text-black myTextShadow"
   >
     <span class="text-[#FF0000]">{{ props.featuredText }}</span
     >&nbsp;

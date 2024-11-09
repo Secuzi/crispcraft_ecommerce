@@ -15,7 +15,12 @@ import InputText from "primevue/inputtext";
           <InputText
             v-model="value1"
             placeholder="Search"
-            class="rounded-[20px] max-w-[126px] sm:max-w-[256px] lg:max-w-[382px]"
+            :pt="{
+              root: {
+                style: { borderRadius: '25px' },
+              },
+            }"
+            class="rounded-[25px] max-w-[126px] sm:max-w-[256px] lg:max-w-[382px] test"
           />
         </IconField>
       </div>
@@ -41,3 +46,9 @@ import InputText from "primevue/inputtext";
     </div>
   </nav>
 </template>
+
+<style scoped>
+:deep(.p-inputtext:focus) {
+  border-color: #2cb100 !important;
+}
+</style>
