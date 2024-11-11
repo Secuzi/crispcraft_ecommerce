@@ -3,6 +3,7 @@ import { Swiper, SwiperSlide } from "swiper/vue";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import { useOrderItemStore } from "@/stores/multicarousel";
 import { ref, watch } from "vue";
 const props = defineProps({
   items: ref({}),
@@ -10,9 +11,14 @@ const props = defineProps({
     type: String,
     default: "1",
   },
+  spaceBetween: {
+    type: String,
+    default: "20",
+  },
+  height: ref(""),
 });
 
-const swiper = ref(null);
+const orderItemStore = useOrderItemStore();
 
 const products = ref([...props.items]);
 
@@ -23,40 +29,33 @@ watch(
   }
 );
 
-const foundProductId = ref(0);
+const foundProductId = ref(orderItemStore.selectedProduct.id);
 
 const selectedProduct = (product) => {
-  console.log(typeof product.id);
+  orderItemStore.selectedProduct = product;
+
   foundProductId.value = product.id;
 };
 </script>
 
 <template>
-  <div class="w-full h-[100px]">
-    <Swiper :slides-per-view="props.slidesPerView" :space-between="20">
+  <div :class="['w-full', 'sm:h-[200px]', props.height]">
+    <Swiper
+      :slides-per-view="props.slidesPerView"
+      :space-between="props.spaceBetween"
+      dynamicBullets="true"
+    >
       <SwiperSlide
         v-for="product in products"
         :key="product.id"
         @click="selectedProduct(product)"
-        class="product-item"
+        class="product-item cursor-pointer"
         :class="{ active: foundProductId === product.id }"
       >
         <img :src="product.image" :alt="product.name" class="z-10" />
       </SwiperSlide>
     </Swiper>
   </div>
-
-  <!-- <div class="product-list">
-    <div
-      v-for="(product, index) in products"
-      :key="product.id"
-      class="product-item"
-      :class="{ active: foundProductId === product.id }"
-      @click="selectedProduct(product)"
-    >
-      <img :src="product.image" :alt="product.name" />
-    </div>
-  </div> -->
 </template>
 
 <style scoped>

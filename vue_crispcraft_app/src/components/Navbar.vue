@@ -1,5 +1,6 @@
 <script setup>
 import logo from "@/assets/images/BAG of CHIPS/logo.png";
+import { RouterLink } from "vue-router";
 import IconField from "primevue/iconfield";
 import InputIcon from "primevue/inputicon";
 import InputText from "primevue/inputtext";
@@ -9,7 +10,9 @@ import InputText from "primevue/inputtext";
   <nav class="bg-myPrimaryColor">
     <div class="flex justify-between items-center">
       <div class="flex items-center">
-        <img :src="logo" class="w-[64px] sm:w-[117px] inline-block" />
+        <RouterLink to="/">
+          <img :src="logo" class="w-[64px] sm:w-[117px] inline-block" />
+        </RouterLink>
         <IconField class="text-[8px] inline-block sm:text-[20px]">
           <InputIcon class="pi pi-search text-sm md:text-base" />
           <InputText

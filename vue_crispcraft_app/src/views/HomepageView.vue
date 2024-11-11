@@ -1,11 +1,15 @@
 <script setup>
 import Navbar from "@/components/Navbar.vue";
 import { ref } from "vue";
-
+import { RouterLink } from "vue-router";
 import { register } from "swiper/element/bundle";
 import BestSellerLogo from "@/assets/images/BAG of CHIPS/bestseller.png";
 import HeaderText from "@/components/HeaderText.vue";
 import Carousel from "@/components/Carousel.vue";
+import ProductSweetCheese from "@/assets/images/BAG of CHIPS/cheese.png";
+import ProductCheesyHot from "@/assets/images/BAG of CHIPS/cheesyhot.png";
+import ProductChiliHot from "@/assets/images/BAG of CHIPS/chilihot.png";
+import ProductSaltedOnion from "@/assets/images/BAG of CHIPS/onion.png";
 import MainContainer from "@/components/MainContainer.vue";
 
 import "swiper/css";
@@ -113,11 +117,12 @@ console.log(items.value);
         class="flex-grow flex justify-evenly flex-col md:flex-row md:flex-grow-0"
       >
         <div class="flex justify-center pt-[100px] md:hidden">
-          <button
+          <RouterLink
+            to="/order"
             class="text-[15px] font-bold px-[29px] py-[9px] bg-white rounded-[20px] text-center myBoxShadow"
           >
             Order Now
-          </button>
+          </RouterLink>
         </div>
 
         <div class="mt-auto md:mt-0">
