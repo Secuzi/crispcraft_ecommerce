@@ -12,6 +12,10 @@ const props = defineProps({
     type: String,
     default: "PRODUCTS", // Default text for the second span
   },
+  featuredTextColor: {
+    type: String,
+    default: "#FF0000",
+  },
 });
 </script>
 
@@ -20,7 +24,9 @@ const props = defineProps({
     :style="{ fontSize: props.textSize }"
     class="font-bebas text-black myTextShadow"
   >
-    <span class="text-[#FF0000]">{{ props.featuredText }}</span
+    <span :style="{ color: props.featuredTextColor }">{{
+      props.featuredText
+    }}</span
     >&nbsp;
     <span>{{ props.productsText }}</span>
   </h1>

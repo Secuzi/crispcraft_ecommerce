@@ -11,8 +11,9 @@ import ProductChiliHot from "@/assets/images/BAG of CHIPS/chilihot.png";
 import ProductSaltedOnion from "@/assets/images/BAG of CHIPS/onion.png";
 import MobileContainer from "@/components/MobileContainer.vue";
 import MultiCarousel from "@/components/MultiCarousel.vue";
+import { RouterLink } from "vue-router";
 import { useOrderItemStore } from "@/stores/multicarousel";
-import { Transition } from "vue";
+import { onUnmounted } from "vue";
 import Button from "@/components/Button.vue";
 import DesktopContainer from "@/components/DesktopContainer.vue";
 
@@ -111,6 +112,10 @@ const products = ref([
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin at risus vel nisi volutpat facilisis. Enjoy the perfect blend of flavor and texture!",
   },
 ]);
+
+onUnmounted(() => {
+  orderItemStore.selectedProduct = {};
+});
 
 const orderItemStore = useOrderItemStore();
 
@@ -257,11 +262,13 @@ orderItemStore.selectedProduct = products.value[0];
             height="100%"
           />
           <div class="flex justify-end">
-            <button
-              class="bg-mySecondaryColor myTextShadow mt-3 myBoxShadow text-white font-bold text-[24px] px-5 py-2 rounded-[25px] text-center"
-            >
-              Checkout
-            </button>
+            <RouterLink to="/checkout">
+              <button
+                class="bg-mySecondaryColor myTextShadow mt-3 myBoxShadow text-white font-bold text-[24px] px-5 py-2 rounded-[25px] text-center"
+              >
+                Checkout
+              </button>
+            </RouterLink>
           </div>
         </div>
       </section>
@@ -391,11 +398,13 @@ orderItemStore.selectedProduct = products.value[0];
         />
       </section>
       <section class="myContainer flex justify-center">
-        <button
-          class="bg-myPrimaryColor myTextShadow mt-1 myBoxShadow text-white font-bold text-[13px] px-5 py-2 rounded-[25px] text-center"
-        >
-          Checkout
-        </button>
+        <RouterLink to="/checkout">
+          <button
+            class="bg-myPrimaryColor myTextShadow mt-1 myBoxShadow text-white font-bold text-[13px] px-5 py-2 rounded-[25px] text-center"
+          >
+            Checkout
+          </button>
+        </RouterLink>
       </section>
     </MobileContainer>
   </MainContainer>
@@ -416,17 +425,6 @@ orderItemStore.selectedProduct = products.value[0];
   opacity: 0;
 }
 
-/* .v-enter-active,
-.v-leave-active {
-  transition: opacity 1s ease;
-  justify-content: center;
-}
-
-.v-enter-from,
-.v-leave-to {
-  opacity: 0;
-} */
-
 .text-stroke {
   -webkit-text-stroke: 2px #2cb100; /* Reduce the stroke width */
 }
@@ -436,9 +434,5 @@ orderItemStore.selectedProduct = products.value[0];
 }
 :deep(.p-inputnumber .p-inputtext:focus) {
   border-color: #2cb100;
-}
-.myContainer {
-  width: 90%;
-  margin-inline: auto;
 }
 </style>
