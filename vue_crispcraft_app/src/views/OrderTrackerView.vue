@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import Timeline from "primevue/timeline";
 import MobileContainer from "@/components/MobileContainer.vue";
 import DesktopContainer from "@/components/DesktopContainer.vue";
@@ -19,60 +19,130 @@ const orderTracker = ref([
     image: PackageIcon,
     color: "#9C27B0",
     subtext: "Packaging the customer's order",
+    active: true,
   },
   {
-    status: "Processing",
+    status: "Delivering",
     description:
-      "The order is being packaged now and will be forwarded to the delivering facility shortly.",
+      "Your package is now at CEBU CITY. ETA to your location 10/30/24.",
     image: DeliveryIcon,
     color: "#9C27B0",
     subtext: "Delivering the ordered products",
+    active: true,
   },
   {
-    status: "Processing",
+    status: "Received",
     description:
       "The order is being packaged now and will be forwarded to the delivering facility shortly.",
     image: PackageReceivedIcon,
     color: "#9C27B0",
     subtext: "Delivery successful ",
-  },
-]);
-
-const orderTrackerState = ref({
-  packaging: true,
-  delivering: false,
-  received: false,
-});
-
-const orderTrackerStates = ref([
-  {
-    key: "package",
-    label: "Package",
-    description: "Your package is on its way!",
     active: true,
   },
-  {
-    key: "delivery",
-    label: "Delivery",
-    description: "Out for delivery!",
-    active: false,
-  },
-  {
-    key: "received",
-    label: "Received",
-    description: "Package received!",
-    active: false,
-  },
 ]);
+
+const isDelivered = computed(() => {
+  return orderTracker.value[1].active;
+});
 </script>
 
 <template>
   <MainContainer>
     <Navbar />
 
+    <DesktopContainer background-color="bg-[#D6F3FF]">
+      <div class="w-[90%] mx-auto h-[70%]">
+        <section class="flex justify-between items-center">
+          <HeaderText
+            featuredText="ORDER"
+            productsText="TRACKER"
+            textSize="55px"
+            featuredTextColor="#004DFF"
+          />
+          <div class="flex items-center">
+            <button
+              @click="console.log('test')"
+              :disabled="isDelivered"
+              class="myTextShadow bg-[#F63639] px-7 py-1 text-white z-10 rounded-lg text-[22px] font-bold"
+              :class="[!isDelivered ? 'opacity-100' : 'opacity-50']"
+              :style="{ backgroundColor: !isDelivered ? '#F63639' : '#004DFF' }"
+            >
+              {{ !isDelivered ? "Cancel" : "Delivered" }}
+            </button>
+          </div>
+        </section>
+
+        <section
+          class="bg-white px-4 py-4 mr-auto rounded-3xl flex-grow relative h-full flex items-center"
+        >
+          <div class="w-[884px] mx-auto">
+            <Timeline
+              :value="orderTracker"
+              layout="horizontal"
+              align="bottom"
+              class="w-[100%]"
+            >
+              <template #content="{ item, index }">
+                <div class="">
+                  <div
+                    :class="[item.active ? 'opacity-100' : 'opacity-50']"
+                    class="w-[157px]"
+                  >
+                    <img
+                      :src="item.image"
+                      alt=""
+                      :class="[item.status == 'Received' ? 'h-[33px]' : '']"
+                    />
+                  </div>
+
+                  <p
+                    :class="[
+                      item.active
+                        ? 'text-opacity-100 text-black'
+                        : 'text-opacity-50 text-black',
+                    ]"
+                    class="text-xs myTextShadow mt-2"
+                  >
+                    {{ item.subtext }}
+                  </p>
+                </div>
+              </template>
+
+              <template #opposite="{ item, index }">
+                <div class="h-[64px]">
+                  <p v-show="item.active" class="text-xs">
+                    {{ item.description }}
+                  </p>
+                </div>
+              </template>
+
+              <template #marker="{ item, index }">
+                <span class="p-timeline-event-marker">
+                  <i
+                    class="pi pi-circle-fill"
+                    :style="{ color: item.active ? '#B0FF9E' : '#D6F3FF' }"
+                  ></i>
+                </span>
+              </template>
+            </Timeline>
+          </div>
+          <div class="absolute bottom-7 left-7">
+            <div class="flex gap-2 items-center">
+              <img
+                :src="CustomerSupportIcon"
+                alt="Customer Support"
+                class="w-[32px]"
+              />
+              <span class="myTextShadow font-bold">Customer Support</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </DesktopContainer>
+
     <!-- Mobilee -->
     <MobileContainer backgroundColor="bg-[#D6F3FF]">
-      <section class="flex justify-around">
+      <section class="flex justify-around items-center">
         <HeaderText
           featuredText="ORDER"
           productsText="TRACKER"
@@ -81,93 +151,67 @@ const orderTrackerStates = ref([
         />
         <div class="flex items-center">
           <button
+            @click="console.log('test')"
+            :disabled="isDelivered"
             class="myTextShadow bg-[#F63639] px-7 py-1 text-white z-10 rounded-lg text-[15px] font-bold"
+            :class="[!isDelivered ? 'opacity-100' : 'opacity-50']"
+            :style="{ backgroundColor: !isDelivered ? '#F63639' : '#004DFF' }"
           >
-            Cancel
+            {{ !isDelivered ? "Cancel" : "Delivered" }}
           </button>
         </div>
       </section>
 
       <section
-        class="bg-white px-4 py-4 w-[95%] mr-auto rounded-tr-3xl myBoxShadow flex-grow"
+        class="bg-white px-4 py-4 w-[95%] mr-auto rounded-tr-3xl flex-grow relative"
       >
         <div class="">
-          <!-- <div
-            class="p-timeline p-component p-timeline-left p-timeline-vertical"
-            data-pc-name="timeline"
-            pc40
-            data-pc-section="root"
-          >
-            <div class="p-timeline-event" data-pc-section="event">
-              <div
-                class="p.timeline-event-opposite"
-                data-pc-section="eventopposite"
-              >
-                <small>15/20/2023</small>
-              </div>
-
-              <div
-                class="p-timeline-event-separator"
-                data-pc-section="eventseparator"
-              >
-                <div
-                  class="p-timeline-event-marker"
-                  data-pc-section="eventmarker"
-                ></div>
-                <div
-                  class="p-timeline-event-connector"
-                  data-pc-section="eventconnector"
-                ></div>
-              </div>
-
-              <div
-                class="p-timeline-event-content"
-                data-pc-section="eventcontent"
-              >
-                Ordered
-              </div>
-            </div>
-          </div> -->
           <Timeline :value="orderTracker">
             <template #opposite="{ item, index }">
               <div class="">
-                <div class="w-[34px] mx-auto">
+                <div
+                  :class="[item.active ? 'opacity-100' : 'opacity-50']"
+                  class="w-[34px] mx-auto"
+                >
                   <img :src="item.image" alt="" class="object-fill" />
                 </div>
 
-                <p class="text-xs text-center mt-2 myTextShadow">
+                <p
+                  :class="[
+                    item.active
+                      ? 'text-opacity-100 text-black'
+                      : 'text-opacity-50 text-black',
+                  ]"
+                  class="text-xs text-center mt-2 myTextShadow"
+                >
                   {{ item.subtext }}
                 </p>
               </div>
             </template>
 
             <template #content="{ item, index }">
-              <p class="text-xs">{{ item.description }}</p>
+              <p v-if="item.active" class="text-xs">{{ item.description }}</p>
             </template>
 
             <template #marker="{ item, index }">
-              <span :style="{ backgroundColor: 'red' }" class="custom-marker">
-                <i :class="item.icon">oten</i>
+              <span class="p-timeline-event-marker">
+                <i
+                  class="pi pi-circle-fill"
+                  :style="{ color: item.active ? '#B0FF9E' : '#D6F3FF' }"
+                ></i>
               </span>
             </template>
           </Timeline>
-
-          <!-- <Timeline :value="orderTracker" >
-            <template #opposite="slotProps">
-              <div class="">
-                <div class="w-[34px] mx-auto">
-                  <img :src="slotProps.item.image" alt="" class="object-fill" />
-                </div>
-
-                <p class="text-xs text-center mt-2 myTextShadow">
-                  {{ slotProps.item.subtext }}
-                </p>
-              </div>
-            </template>
-            <template #content="slotProps">
-              <p class="text-xs">{{ slotProps.item.description }}</p>
-            </template>
-          </Timeline> -->
+        </div>
+        <div class="absolute bottom-2">
+          <div class="flex gap-2 items-center">
+            <img
+              :src="CustomerSupportIcon"
+              alt="Customer Support"
+              class="w-[32px]"
+            />
+            <span class="myTextShadow font-bold">Customer Support</span>
+          </div>
         </div>
       </section>
     </MobileContainer>
@@ -185,17 +229,10 @@ const orderTrackerStates = ref([
 
 :deep(.p-timeline-event-marker) {
   background: #d6f3ff;
-  border: 2px solid black;
+  border: 1px solid black;
 }
 
-:deep(.p-timeline .p-timeline-event:nth-child(1) img) {
-  opacity: 50%;
-}
-
-:deep(.p-timeline .p-timeline-event:nth-child(1) .p-timeline-event-marker) {
-  background: green;
-}
-:deep(.p-timeline-event-marker::before) {
-  background: none;
+:deep(.p-timeline-horizontal .p-timeline-event:last-child) {
+  flex-grow: 1;
 }
 </style>
