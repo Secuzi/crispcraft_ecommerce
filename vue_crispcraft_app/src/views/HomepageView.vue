@@ -49,8 +49,6 @@ const items = ref([
     colorTheme: "#EBCB5F",
   },
 ]);
-
-console.log(items.value);
 </script>
 
 <template>

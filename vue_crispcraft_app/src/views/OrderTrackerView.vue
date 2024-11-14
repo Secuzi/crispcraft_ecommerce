@@ -11,6 +11,23 @@ import HeaderText from "@/components/HeaderText.vue";
 import Navbar from "@/components/Navbar.vue";
 import MainContainer from "@/components/MainContainer.vue";
 
+const delivery = ref({
+  deliveryID: 9594,
+  deliveryDate: "2023-01-01",
+  cashCollected: null,
+  deliveryStatus: "processing",
+  orderID: 23,
+});
+
+/*
+store design:
+1. Customer has an array of delivery each delivery has order id
+
+2. if (delivery.deliveryStatus === orderTracker.status){
+    isDelivered.value = true
+  }
+*/
+
 const orderTracker = ref([
   {
     status: "Processing",

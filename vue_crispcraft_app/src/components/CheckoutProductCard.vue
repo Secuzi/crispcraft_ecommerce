@@ -23,11 +23,11 @@ const cartStore = useCartStore();
 </script>
 
 <template>
-  <div class="px-3 py-3 bg-[#D9D9D9] flex rounded-xl gap-5 relative">
+  <div class="px-5 py-3 bg-[#D9D9D9] flex rounded-xl gap-5 relative">
     <img
       :src="CloseIcon"
       alt="Close Icon"
-      class="absolute right-[-5px] w-5 top-[-5px] cursor-pointer"
+      class="absolute right-[5px] top-[5px] w-5 cursor-pointer"
       @click="cartStore.removeProduct(prop.id)"
     />
 

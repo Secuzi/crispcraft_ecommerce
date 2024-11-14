@@ -1,3 +1,4 @@
+import AdminView from "@/views/AdminView.vue";
 import CheckOutView from "@/views/CheckOutView.vue";
 import HomepageView from "@/views/HomepageView.vue";
 import LoginView from "@/views/LoginView.vue";
@@ -37,6 +38,11 @@ const routes = [
     path: "/trackorder",
     name: "order tracker",
     component: OrderTrackerView,
+  },
+  {
+    path: "/admin",
+    name: "admin dashboard",
+    component: AdminView,
   },
 ];
 
