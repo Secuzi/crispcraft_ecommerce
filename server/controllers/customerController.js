@@ -1,5 +1,5 @@
 const customerService = require("../services/CustomerService");
-
+const bycrypt = require("bcrypt");
 //@path GET /customers
 const getAllCustomers = async (req, res) => {
   const customers = await customerService.getAll();
@@ -23,10 +23,7 @@ const createCustomer = async (req, res) => {
   try {
     //Naay bug diri katong confirm password, use joi or something fuck
 
-    const { email, password, address, phoneNum, fName, lName, city, state } =
-      req.body;
-
-    const newCustomer = await customerService.create({
+    const {
       email,
       password,
       address,
@@ -35,10 +32,23 @@ const createCustomer = async (req, res) => {
       lName,
       city,
       state,
+      role = "customer",
+    } = req.body;
+    const hashed = await bycrypt.hash(password, 10);
+    const newCustomer = await customerService.create({
+      email,
+      password: hashed,
+      address,
+      phoneNum,
+      fName,
+      lName,
+      city,
+      state,
+      role,
     });
     //JOI validation
     if (!newCustomer) {
-      res.status(400).send({ message: "Could not create customer" });
+      return res.status(400).send({ message: "Could not create customer" });
     }
     res.status(201).send({ newCustomer });
   } catch (e) {
