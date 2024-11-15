@@ -1,24 +1,64 @@
 const express = require("express");
-const bycrypt = require("bcrypt");
+const bcrypt = require("bcrypt");
 const CustomerService = require("../services/CustomerService");
 const router = express.Router();
 
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const user = await CustomerService.getByField("email", email);
-  //If user doesn't exist then
-  if (!user) {
-    return res.json({ message: "Invalid email or password" });
+    // Validate input
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: "Email and password are required" });
+    }
+
+    const user = await CustomerService.getByField("email", email);
+    if (!user) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    // Store in session
+    req.session.user = { user_id: user.customerID, role: user.role };
+
+    // Send only necessary data
+    res.json({
+      message: "Login successful",
+      user: { user_id: user.customerID, role: user.role },
+    });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "Something went wrong. Please try again later." });
   }
-  const validPassword = await bycrypt.compare(password, user.password);
+});
 
-  if (!validPassword) {
-    return res.json({ message: "Invalid email or password" });
+router.get("/check-session", (req, res) => {
+  if (req.session.user) {
+    res.json({
+      authenticated: true,
+      user: req.session.user,
+    });
+  } else {
+    res.json({ authenticated: false });
   }
+});
 
-  req.session.costumer = { user_id: user.costumerID, role: user.role };
-  res.send(req.session.costumer);
+router.post("/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      res.status(500).json({ message: "Error logging out" });
+    } else {
+      res.json({ message: "Logged out!" });
+    }
+  });
 });
 
 module.exports = router;

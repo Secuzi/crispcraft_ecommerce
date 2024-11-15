@@ -1,13 +1,14 @@
 <script setup>
 import { reactive, ref } from "vue";
 import axios from "axios";
+import { useRouter } from "vue-router";
 import useVuelidate from "@vuelidate/core";
-import { email, required } from "@vuelidate/validators";
+import { email, required, minLength } from "@vuelidate/validators";
 const form = reactive({
   email: "",
   password: "",
 });
-
+const router = useRouter();
 const rules = {
   email: { required, email },
   password: { required },
@@ -19,44 +20,22 @@ async function submitForm() {
   v$.value.$touch();
 
   if (v$.value.$errors.length > 0) {
+    console.log(v$.value.$errors);
     return;
   }
   try {
-    const response = await axios.get("http://localhost:3000/customers");
-    const { customers } = response.data;
-    //Check first if email exists
-    //If email exists then check for password
-    console.log(customers);
+    console.log(form.email);
+    const response = await axios.post("http://localhost:3000/auth/login", form);
+    console.log(response.data);
 
-    let doesEmailExist = false;
-
-    customers.forEach((customer) => {
-      if (customer.email === form.email) {
-        doesEmailExist = true;
-      }
-    });
-
-    if (!doesEmailExist) {
-      alert("Email does not exist!");
-      return;
-    }
-
-    const customer = customers.find(
-      (customer) =>
-        customer.email === form.email && customer.password === form.password
-    );
-
-    if (customer) {
-      alert("Customer logged in!");
+    if (response.data.user.role === "admin") {
+      router.push("/admin");
     } else {
-      alert("Password is incorrect!");
+      router.push("/homepage");
     }
   } catch (e) {
     console.log(e);
   }
-
-  //Send a request using axios to get all customers oh my god
-  //Create a service function to get a specific property
 }
 
 const isPasswordHidden = ref(true);
@@ -92,6 +71,9 @@ const togglePassword = () => {
               placeholder="Email"
             />
           </div>
+          <span v-if="v$.email.$error" class="text-red-500 text-xs">
+            {{ v$.email.$errors[0].$message }}
+          </span>
         </div>
         <!-- Password -->
         <div class="mb-[27px] relative">
@@ -115,6 +97,9 @@ const togglePassword = () => {
               @click="togglePassword"
             ></i>
           </div>
+          <span v-if="v$.password.$error" class="text-red-500 text-xs">
+            {{ v$.password.$errors[0].$message }}
+          </span>
         </div>
         <!-- Login button -->
         <button

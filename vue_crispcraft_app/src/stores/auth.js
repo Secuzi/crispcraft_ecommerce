@@ -21,16 +21,18 @@ export const useAuthStore = defineStore("auth", () => {
 
   async function checkSession() {
     try {
-      const response = await axios.get("/auth/check-session");
+      const response = await axios.get(
+        "http://localhost:3000/auth/check-session"
+      );
       if (response.data.authenticated) {
         user.value = response.data.user;
         role.value = response.data.user.role;
         authenticated.value = true;
       } else {
-        this.logout();
+        logout();
       }
     } catch {
-      this.logout();
+      logout();
     }
   }
 
@@ -38,7 +40,7 @@ export const useAuthStore = defineStore("auth", () => {
     user.value = null;
     role.value = null;
     authenticated.value = false;
-    axios.post("/auth/logout");
+    axios.post("http://localhost:3000/auth/logout");
   }
 
   return { user, role, authenticated, login, checkSession, logout };

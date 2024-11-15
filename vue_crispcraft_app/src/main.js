@@ -12,7 +12,7 @@ import ToastService from "primevue/toastservice";
 const pinia = createPinia();
 
 const app = createApp(App);
-axios.defaults.baseURL = 3000;
+axios.defaults.baseURL = "http://localhost:3000";
 axios.defaults.withCredentials = true;
 app.use();
 
