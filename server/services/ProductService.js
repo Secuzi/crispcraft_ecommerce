@@ -3,7 +3,7 @@ const ModelService = require("./ModelService");
 
 class ProductService extends ModelService {
   constructor() {
-    super("Customer"); // Set the table name to 'Customer'
+    super("Product"); // Set the table name to 'Customer'
   }
 
   // Additional Customer-specific methods
@@ -19,4 +19,4 @@ class ProductService extends ModelService {
   }
 }
 
-module.exports = new CustomerService();
+module.exports = new ProductService();
