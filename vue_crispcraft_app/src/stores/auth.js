@@ -17,6 +17,7 @@ export const useAuthStore = defineStore("auth", () => {
       const { user } = response.data;
       user_id.value = user.user_id;
       role.value = user.role;
+      console.log(`Auth Store: ${role.value}`);
 
       authenticated.value = true;
     } catch (error) {

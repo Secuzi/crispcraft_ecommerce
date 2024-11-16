@@ -29,7 +29,8 @@ async function submitForm() {
   try {
     // const response = await axios.post("http://localhost:3000/auth/login", form);
 
-    authStore.login(form.email, form.password);
+    await authStore.login(form.email, form.password);
+
     if (authStore.role === "admin") {
       router.push("/admin");
     } else {
