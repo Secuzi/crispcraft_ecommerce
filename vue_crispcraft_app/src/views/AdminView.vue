@@ -12,7 +12,32 @@ import ChecklistIcon from "@/assets/images/icons/checklists.svg";
 import TransactionIcon from "@/assets/images/icons/transaction.svg";
 import ClerkIcon from "@/assets/images/icons/clerk.svg";
 import Button from "@/components/Button.vue";
+import { reactive } from "vue";
 const cartStore = useCartStore();
+
+const form = reactive({
+  productName: "",
+  description: "",
+  price: null,
+  expirationDate: "",
+  flavorID: null,
+  image: "",
+});
+const formInventory = reactive({
+  stockQty: null,
+  changeDate: "",
+  productID: null,
+});
+
+const formFlavor = reactive({
+  flavorName: "",
+});
+
+async function submitForm() {
+  try {
+    //use axios to create a post request to inventory, product, and flavor routes
+  } catch (e) {}
+}
 </script>
 
 <template>
@@ -94,7 +119,11 @@ const cartStore = useCartStore();
             </div>
           </section>
           <section class="flex-grow flex flex-col justify-center">
-            <form v-on:submit.prevent="" class="bg-white rounded-xl px-10 py-5">
+            <form
+              v-on:submit.prevent=""
+              class="bg-white rounded-xl px-10 py-5"
+              enctype="multipart/form-data"
+            >
               <div class="form-item">
                 <label for="productName" class="myTextShadow"
                   >Product Name:</label
@@ -103,6 +132,7 @@ const cartStore = useCartStore();
                   type="text"
                   name="productName"
                   id="productName"
+                  v-model="form.productName"
                   placeholder="Enter product name"
                   class="border-black p-3 border-2 rounded-[5px] myBoxShadow block w-full"
                 />
@@ -114,6 +144,7 @@ const cartStore = useCartStore();
                 <input
                   type="text"
                   name="flavorName"
+                  v-model="formFlavor.flavorName"
                   id="flavorName"
                   placeholder="Enter flavor name"
                   class="border-black p-3 border-2 rounded-[5px] myBoxShadow block w-full"
@@ -126,6 +157,7 @@ const cartStore = useCartStore();
                 >
                 <textarea
                   id="description"
+                  v-model="form.description"
                   placeholder="Enter product description"
                   class="border-black w-full p-3 border-2 rounded-[5px] myBoxShadow block"
                 ></textarea>
@@ -150,6 +182,7 @@ const cartStore = useCartStore();
                   <input
                     type="text"
                     name="product stock"
+                    v-model="formInventory.stockQty"
                     id="stock"
                     class="border-black border-2 px-2 rounded-[5px] myBoxShadow"
                   />
@@ -159,6 +192,7 @@ const cartStore = useCartStore();
                 <label for="price" class="myTextShadow">Price:</label>
                 <input
                   type="text"
+                  v-model="form.price"
                   name="price"
                   id="price"
                   class="border-black w-full border-2 p-3 rounded-[5px] myBoxShadow block"

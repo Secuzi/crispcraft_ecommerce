@@ -1,10 +1,10 @@
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
-
+const path = require("path");
 const express = require("express");
 const cors = require("cors");
-
+const flavorRoutes = require("./routes/FlavorRoutes");
 const customerRoutes = require("./routes/CustomerRoutes");
 const productRoutes = require("./routes/ProductRoutes");
 const session = require("express-session");
@@ -20,16 +20,17 @@ app.use(
 
 app.use(
   session({
-    secret: "puttodotenv",
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
   })
 );
-
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/auth", authRoutes);
 app.use("/customers", customerRoutes);
 app.use("/products", productRoutes);
+app.use("/flavors", flavorRoutes);
 
 app.listen(PORT, () => console.log(`Listening on port: ${PORT}`));
