@@ -1,15 +1,15 @@
-const customerService = require("../services/CustomerService");
+const CustomerService = require("../services/CustomerService");
 const bycrypt = require("bcrypt");
 //@path GET /customers
 const getAllCustomers = async (req, res) => {
-  const customers = await customerService.getAll();
+  const customers = await CustomerService.getAll();
   res.send({ customers });
 };
 
 //@path GET /customers/:id
 const getCustomer = async (req, res) => {
   const id = Number(req.params.id);
-  const customer = await customerService.read(id, "customerID");
+  const customer = await CustomerService.read(id, "customerID");
 
   if (!customer) {
     return res.status(400).send("Cannot find User");
@@ -34,7 +34,7 @@ const createCustomer = async (req, res) => {
       role = "customer",
     } = req.body;
     const hashed = await bycrypt.hash(password, 10);
-    const newCustomer = await customerService.create({
+    const newCustomer = await CustomerService.create({
       email,
       password: hashed,
       address,
@@ -61,11 +61,11 @@ const deleteCustomer = async (req, res) => {
   const customer_id = Number(req.params.id);
   console.log(req.session.user);
   //Find if user exists
-  const customer = await customerService.read(customer_id, "customerID");
+  const customer = await CustomerService.read(customer_id, "customerID");
   if (!customer) {
     return res.status(404).json({ message: "Account not found!" });
   }
-  const output = await customerService.delete(customer_id, "customerID");
+  const output = await CustomerService.delete(customer_id, "customerID");
   res.send({ output });
 };
 
@@ -73,7 +73,7 @@ const deleteCustomer = async (req, res) => {
 const updateCustomer = async (req, res) => {
   const customer_id = Number(req.params.id);
   const data = { ...req.body };
-  const output = await customerService.update(customer_id, data, "customerID");
+  const output = await CustomerService.update(customer_id, data, "customerID");
 
   res.send({ output });
 };

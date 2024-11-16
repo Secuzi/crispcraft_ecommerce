@@ -8,7 +8,6 @@ class ModelService {
 
   async getAll() {
     try {
-      console.log(`Table name: ${this.tableName}`);
       const pool = await poolPromise;
       const query = `SELECT * FROM ${this.tableName}`;
       const result = await pool.request().query(query);
@@ -80,7 +79,6 @@ class ModelService {
   //Second parameter is the name of the primary key
   async read(id, primaryKey = "id") {
     try {
-      console.log(`Table name: ${this.tableName}`);
       const pool = await poolPromise;
 
       const query = `SELECT * FROM ${this.tableName} WHERE ${primaryKey} = @id`;

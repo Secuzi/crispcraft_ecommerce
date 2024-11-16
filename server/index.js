@@ -1,7 +1,12 @@
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
+}
+
 const express = require("express");
 const cors = require("cors");
-const dotenv = require("dotenv").config();
+
 const customerRoutes = require("./routes/CustomerRoutes");
+const productRoutes = require("./routes/ProductRoutes");
 const session = require("express-session");
 const authRoutes = require("./routes/authRoutes");
 const app = express();
@@ -25,5 +30,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/auth", authRoutes);
 app.use("/customers", customerRoutes);
+app.use("/products", productRoutes);
 
 app.listen(PORT, () => console.log(`Listening on port: ${PORT}`));
