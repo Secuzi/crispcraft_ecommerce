@@ -54,7 +54,6 @@ class ModelService {
       });
 
       const result = await request.query(query);
-      console.log(`111111111111111111In service: ${result}`);
       return result.recordset[0];
     } catch (e) {
       console.log(e);
