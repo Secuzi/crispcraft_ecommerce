@@ -102,6 +102,8 @@ onUnmounted(() => {
         </div>
       </section>
 
+      <img src="" alt="" />
+
       <section class="flex-grow self-center">
         <div class="myContainer">
           <div>

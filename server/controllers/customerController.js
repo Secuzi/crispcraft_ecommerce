@@ -22,7 +22,6 @@ const getCustomer = async (req, res) => {
 
 const createCustomer = async (req, res) => {
   try {
-    //Naay bug diri katong confirm password, use joi or something fuck
     const {
       email,
       password,
