@@ -3,15 +3,21 @@ import { ref, computed } from "vue";
 import axios from "axios";
 
 export const useAuthStore = defineStore("auth", () => {
-  const user = ref(null);
+  const user_id = ref(null);
   const role = ref(null);
   const authenticated = ref(false); // Track authentication status
 
-  async function login(username, password) {
+  async function login(email, password) {
     try {
-      const response = await axios.post("/auth/login", { username, password });
-      user.value = response.data.user;
-      role.value = response.data.role;
+      const response = await axios.post("http://localhost:3000/auth/login", {
+        email,
+        password,
+      });
+
+      const { user } = response.data;
+      user_id.value = user.user_id;
+      role.value = user.role;
+
       authenticated.value = true;
     } catch (error) {
       this.logout();
@@ -25,7 +31,7 @@ export const useAuthStore = defineStore("auth", () => {
         "http://localhost:3000/auth/check-session"
       );
       if (response.data.authenticated) {
-        user.value = response.data.user;
+        user_id.value = response.data.user.user_id;
         role.value = response.data.user.role;
         authenticated.value = true;
       } else {
@@ -37,11 +43,11 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   function logout() {
-    user.value = null;
+    user_id.value = null;
     role.value = null;
     authenticated.value = false;
     axios.post("http://localhost:3000/auth/logout");
   }
 
-  return { user, role, authenticated, login, checkSession, logout };
+  return { user_id, role, authenticated, login, checkSession, logout };
 });

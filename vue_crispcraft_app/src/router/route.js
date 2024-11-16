@@ -62,7 +62,6 @@ router.beforeEach(async (to, from, next) => {
   if (!authStore.authenticated) {
     await authStore.checkSession();
   }
-
   // Guard routes based on auth and role
   if (to.meta.requiresAuth) {
     if (authStore.authenticated) {

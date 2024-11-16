@@ -6,7 +6,6 @@ const router = express.Router();
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-
     // Validate input
     if (!email || !password) {
       return res
@@ -26,7 +25,6 @@ router.post("/login", async (req, res) => {
 
     // Store in session
     req.session.user = { user_id: user.customerID, role: user.role };
-
     // Send only necessary data
     res.json({
       message: "Login successful",
@@ -52,6 +50,7 @@ router.get("/check-session", (req, res) => {
 });
 
 router.post("/logout", (req, res) => {
+  req.session.user = null;
   req.session.destroy((err) => {
     if (err) {
       res.status(500).json({ message: "Error logging out" });

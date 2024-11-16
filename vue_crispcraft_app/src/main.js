@@ -14,7 +14,6 @@ const pinia = createPinia();
 const app = createApp(App);
 axios.defaults.baseURL = "http://localhost:3000";
 axios.defaults.withCredentials = true;
-app.use();
 
 app.use(router);
 app.use(ToastService);

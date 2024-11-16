@@ -4,37 +4,46 @@ import axios from "axios";
 import { useRouter } from "vue-router";
 import useVuelidate from "@vuelidate/core";
 import { email, required, minLength } from "@vuelidate/validators";
+import { useToast } from "primevue/usetoast";
+import { Toast } from "primevue";
+import { useAuthStore } from "@/stores/auth";
 const form = reactive({
   email: "",
   password: "",
 });
+const toast = useToast();
 const router = useRouter();
 const rules = {
   email: { required, email },
   password: { required },
 };
-
+const authStore = useAuthStore();
 const v$ = useVuelidate(rules, form);
 
 async function submitForm() {
   v$.value.$touch();
 
   if (v$.value.$errors.length > 0) {
-    console.log(v$.value.$errors);
     return;
   }
   try {
-    console.log(form.email);
-    const response = await axios.post("http://localhost:3000/auth/login", form);
-    console.log(response.data);
+    // const response = await axios.post("http://localhost:3000/auth/login", form);
 
-    if (response.data.user.role === "admin") {
+    authStore.login(form.email, form.password);
+    if (authStore.role === "admin") {
       router.push("/admin");
     } else {
-      router.push("/homepage");
+      router.push("/");
     }
   } catch (e) {
     console.log(e);
+
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: e.response.data.message,
+      life: 3000,
+    });
   }
 }
 
@@ -50,6 +59,7 @@ const togglePassword = () => {
     <section
       class="container mx-auto bg-[#F2EDED] p-6 rounded-[10px] max-w-[360px]"
     >
+      <Toast />
       <h1 class="font-semibold text-[20px] mb-[19px]">Log in</h1>
       <!-- Put function here -->
       <form @submit.prevent="submitForm">

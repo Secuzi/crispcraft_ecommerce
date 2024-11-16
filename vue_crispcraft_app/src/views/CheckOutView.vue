@@ -149,17 +149,24 @@ onUnmounted(() => {
     <MobileContainer backgroundColor="bg-[#D6F3FF] relative">
       <div v-if="isWindowMobile" lass="card flex justify-center md:hidden">
         <Toast class="!right-[5px] !w-[200px]" position="top-right" />
-        <button
-          @click="showSuccessToast()"
-          class="absolute bottom-[-39px] myTextShadow left-[10%] bg-blue-700 px-7 py-1 text-white z-10 rounded-lg text-[15px] font-bold"
-        >
-          Order
-        </button>
-      </div>
 
-      <span class="absolute bottom-[-30px] right-[25%] font-bold text-[10px]"
-        >Total Price: {{ cartStore.subtotal }}
-      </span>
+        <div
+          class="bg-white myContainer h-[50px] bg-opacity-95 absolute z-10 bottom-0"
+        >
+          <div class="relative h-full w-full">
+            <button
+              @click="showSuccessToast()"
+              class="absolute myTextShadow left-[5%] top-[50%] translate-y-[-50%] bg-blue-700 px-7 py-1 text-white z-10 rounded-lg text-[15px] font-bold"
+            >
+              Order
+            </button>
+            <span
+              class="absolute top-[50%] right-[15%] translate-y-[-50%] z-10 font-bold text-[14px]"
+              >Total Price: {{ cartStore.subtotal }}
+            </span>
+          </div>
+        </div>
+      </div>
 
       <section class="myContainer">
         <HeaderText

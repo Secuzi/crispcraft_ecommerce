@@ -76,6 +76,8 @@ class ModelService {
     }
   }
 
+  // First parameter is the value of the id
+  //Second parameter is the name of the primary key
   async read(id, primaryKey = "id") {
     try {
       console.log(`Table name: ${this.tableName}`);

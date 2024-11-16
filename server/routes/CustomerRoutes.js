@@ -1,6 +1,7 @@
 const express = require("express");
-const bycrypt = require("bcrypt");
+
 const router = express.Router();
+const { isAdmin, isLoggedIn } = require("../middleware");
 const {
   getAllCustomers,
   getCustomer,
@@ -13,10 +14,10 @@ router.get("/", getAllCustomers);
 
 router.get("/:id", getCustomer);
 
-router.post("/", createCustomer);
+router.post("/", isLoggedIn, isAdmin, createCustomer);
 
-router.delete("/:id", deleteCustomer);
+router.delete("/:id", isLoggedIn, isAdmin, deleteCustomer);
 
-router.put("/:id", updateCustomer);
+router.put("/:id", isLoggedIn, isAdmin, updateCustomer);
 
 module.exports = router;

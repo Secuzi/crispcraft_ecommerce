@@ -22,7 +22,6 @@ const getCustomer = async (req, res) => {
 const createCustomer = async (req, res) => {
   try {
     //Naay bug diri katong confirm password, use joi or something fuck
-
     const {
       email,
       password,
@@ -60,7 +59,12 @@ const createCustomer = async (req, res) => {
 
 const deleteCustomer = async (req, res) => {
   const customer_id = Number(req.params.id);
-
+  console.log(req.session.user);
+  //Find if user exists
+  const customer = await customerService.read(customer_id, "customerID");
+  if (!customer) {
+    return res.status(404).json({ message: "Account not found!" });
+  }
   const output = await customerService.delete(customer_id, "customerID");
   res.send({ output });
 };
