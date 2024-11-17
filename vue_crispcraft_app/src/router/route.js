@@ -6,6 +6,7 @@ import OrderItemView from "@/views/OrderItemView.vue";
 import OrderTrackerView from "@/views/OrderTrackerView.vue";
 import RegisterView from "@/views/RegisterView.vue";
 import { useAuthStore } from "@/stores/auth";
+
 import { createRouter, createWebHistory } from "vue-router";
 
 const routes = [
@@ -46,7 +47,7 @@ const routes = [
     path: "/admin",
     name: "admin dashboard",
     component: AdminView,
-    meta: { requiresAuth: true, role: "admin" },
+    meta: { requiresAuth: false, role: "admin" },
   },
 ];
 

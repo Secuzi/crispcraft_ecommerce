@@ -1,5 +1,6 @@
 const inventorySchema = require("../schemas/InventorySchema.js");
 const InventoryService = require("../services/InventoryService");
+const dayjs = require("dayjs");
 //@path GET /inventory
 const getAllInventory = async (req, res) => {
   try {
@@ -13,8 +14,10 @@ const getAllInventory = async (req, res) => {
 const createInventory = async (req, res) => {
   try {
     let { stockQty, changeDate, productID } = req.body;
-    changeDate = new Date();
+    console.log("Before validation:");
 
+    changeDate = dayjs().format("YYYY-MM-DD HH:mm:ss");
+    console.log(changeDate);
     const { error, value: validatedInventory } = inventorySchema.validate(
       {
         stockQty,
@@ -23,18 +26,19 @@ const createInventory = async (req, res) => {
       },
       { abortEarly: false }
     );
-
-    console.log(changeDate);
+    console.log("After validation:");
+    console.log(validatedInventory.changeDate);
     if (error) {
       const errorMessages = error.details.map((detail) => detail.message);
       return res.status(400).json({ message: errorMessages });
     }
 
-    console.log(validatedInventory);
-
     const newInventory = await InventoryService.create(validatedInventory);
 
-    res.status(200).json({ message: req.body });
+    res.status(200).json({
+      message: "Inventory successfully created",
+      inventoryID: newInventory.inventoryID,
+    });
   } catch (e) {
     console.log(e);
   }

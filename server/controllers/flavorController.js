@@ -16,8 +16,11 @@ const createFlavor = async (req, res) => {
     }
 
     const newFlavor = await FlavorService.create({ flavorName });
-    res.status(200).json({ message: "Created flavor" });
-  } catch (e) {}
+
+    res.status(200).json({ message: "Created flavor", flavorID: newFlavor.id });
+  } catch (e) {
+    console.log(e);
+  }
 };
 
 module.exports = {

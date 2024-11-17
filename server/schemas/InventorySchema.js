@@ -2,7 +2,7 @@ const Joi = require("joi").extend(require("@joi/date"));
 
 const inventorySchema = Joi.object({
   stockQty: Joi.number().required(),
-  changeDate: Joi.date().format("YYYY-MM-DD HH:mm:ss").required(),
+  changeDate: Joi.string().required(),
   productID: Joi.number().required(),
 });
 

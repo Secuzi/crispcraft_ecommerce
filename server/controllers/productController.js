@@ -13,6 +13,10 @@ const getAllProducts = async (req, res) => {
 
 const createProduct = async (req, res) => {
   try {
+    console.log("file:");
+    console.log(req.file);
+    console.log("body:");
+    console.log(req.body);
     if (!req.file) {
       return res.status(400).json({ message: "Invalid image" });
     }
@@ -24,6 +28,15 @@ const createProduct = async (req, res) => {
 
     const { productName, description, price, flavorID, expirationDate } =
       req.body;
+
+    const searchedProduct = await ProductService.getByField(
+      "productName",
+      productName
+    );
+
+    if (searchedProduct) {
+      return res.status(400).json({ message: "Product already exist!" });
+    }
 
     const { error, value: validatedProduct } = productSchema.validate(
       {
@@ -45,7 +58,9 @@ const createProduct = async (req, res) => {
 
     const createdProduct = await ProductService.create(validatedProduct);
 
-    return res.status(200).json({ message: "Created Product!" });
+    return res
+      .status(200)
+      .json({ message: "Created Product!", productID: createdProduct.id });
   } catch (e) {
     console.log(e);
   }
