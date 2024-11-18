@@ -2,13 +2,14 @@
 //state store for cart??
 import { useCartStore } from "@/stores/cart";
 import CloseIcon from "@/assets/images/icons/EX.svg";
-
+import { useProductStore } from "@/stores/product";
 const prop = defineProps({
   image: "",
   header: "",
   qty: null,
   price: null,
   id: null,
+  description: "",
   fontSizeHeader: {
     type: String,
     default: "16px",
@@ -17,21 +18,30 @@ const prop = defineProps({
     type: String,
     default: "14px",
   },
+  isActive: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-const cartStore = useCartStore();
+const productStore = useProductStore();
 </script>
 
 <template>
-  <div class="px-5 py-3 bg-[#D9D9D9] flex rounded-xl gap-5 relative">
+  <div
+    class="px-5 py-3 transition-all duration-[400ms] ease-in-out flex rounded-xl gap-5 relative cursor-pointer"
+    tabindex="0"
+    :class="[isActive ? 'bg-white' : 'bg-[#D9D9D9]']"
+    @click="productStore.getProduct(prop.id)"
+  >
     <img
       :src="CloseIcon"
       alt="Close Icon"
       class="absolute right-[5px] top-[5px] w-5 cursor-pointer"
-      @click="cartStore.removeProduct(prop.id)"
+      @click="test2(prop.id)"
     />
 
-    <div class="max-w-[50px]">
+    <div class="max-w-[60px] flex items-center">
       <img :src="image" alt="image" />
     </div>
     <div class="flex-grow">
@@ -42,12 +52,16 @@ const cartStore = useCartStore();
         >
           {{ header }}
         </p>
+        <p>
+          {{ description }}
+        </p>
         <div class="flex justify-between items-center">
           <span
             class="font-semibold myTextShadow"
             :style="{ fontSize: fontSizeBody }"
-            >Qty: {{ qty }}</span
+            >Quantity: {{ qty }}</span
           >
+
           <span
             class="font-medium myTextShadow"
             :style="{ fontSize: fontSizeBody }"

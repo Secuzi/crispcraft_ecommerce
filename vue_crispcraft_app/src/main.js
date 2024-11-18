@@ -2,6 +2,7 @@ import "./assets/main.css";
 import "primeicons/primeicons.css";
 import { createApp } from "vue";
 import App from "./App.vue";
+import axios from "axios";
 import router from "./router/route";
 import PrimeVue from "primevue/config";
 import { definePreset } from "@primevue/themes";
@@ -11,6 +12,8 @@ import ToastService from "primevue/toastservice";
 const pinia = createPinia();
 
 const app = createApp(App);
+axios.defaults.baseURL = "http://localhost:3000";
+axios.defaults.withCredentials = true;
 
 app.use(router);
 app.use(ToastService);

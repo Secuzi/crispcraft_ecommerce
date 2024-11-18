@@ -3,6 +3,7 @@ import { reactive, ref, computed } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
 import useVuelidate from "@vuelidate/core";
+
 import {
   required,
   email,
@@ -23,6 +24,7 @@ const form = reactive({
   state: "",
   confirmPassword: "",
 });
+
 const isPasswordHidden = ref(true);
 const isConfirmPasswordHidden = ref(true);
 
@@ -35,10 +37,12 @@ const toggleConfirmPassword = () => {
 
 const router = useRouter();
 
+// Todo: create a custom validator to check if email is already used
+
 const rules = computed(() => {
   return {
     email: { required, email },
-    password: { required },
+    password: { required, minLength: minLength(8) },
     address: { required },
     phoneNum: {
       required,

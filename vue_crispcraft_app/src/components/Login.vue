@@ -1,18 +1,23 @@
 <script setup>
 import { reactive, ref } from "vue";
 import axios from "axios";
+import { useRouter } from "vue-router";
 import useVuelidate from "@vuelidate/core";
-import { email, required } from "@vuelidate/validators";
+import { email, required, minLength } from "@vuelidate/validators";
+import { useToast } from "primevue/usetoast";
+import { Toast } from "primevue";
+import { useAuthStore } from "@/stores/auth";
 const form = reactive({
   email: "",
   password: "",
 });
-
+const toast = useToast();
+const router = useRouter();
 const rules = {
   email: { required, email },
   password: { required },
 };
-
+const authStore = useAuthStore();
 const v$ = useVuelidate(rules, form);
 
 async function submitForm() {
@@ -22,41 +27,25 @@ async function submitForm() {
     return;
   }
   try {
-    const response = await axios.get("http://localhost:3000/customers");
-    const { customers } = response.data;
-    //Check first if email exists
-    //If email exists then check for password
-    console.log(customers);
+    // const response = await axios.post("http://localhost:3000/auth/login", form);
 
-    let doesEmailExist = false;
+    await authStore.login(form.email, form.password);
 
-    customers.forEach((customer) => {
-      if (customer.email === form.email) {
-        doesEmailExist = true;
-      }
-    });
-
-    if (!doesEmailExist) {
-      alert("Email does not exist!");
-      return;
-    }
-
-    const customer = customers.find(
-      (customer) =>
-        customer.email === form.email && customer.password === form.password
-    );
-
-    if (customer) {
-      alert("Customer logged in!");
+    if (authStore.role === "admin") {
+      router.push("/admin");
     } else {
-      alert("Password is incorrect!");
+      router.push("/");
     }
   } catch (e) {
     console.log(e);
-  }
 
-  //Send a request using axios to get all customers oh my god
-  //Create a service function to get a specific property
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: e.response.data.message,
+      life: 3000,
+    });
+  }
 }
 
 const isPasswordHidden = ref(true);
@@ -71,6 +60,7 @@ const togglePassword = () => {
     <section
       class="container mx-auto bg-[#F2EDED] p-6 rounded-[10px] max-w-[360px]"
     >
+      <Toast />
       <h1 class="font-semibold text-[20px] mb-[19px]">Log in</h1>
       <!-- Put function here -->
       <form @submit.prevent="submitForm">
@@ -92,6 +82,9 @@ const togglePassword = () => {
               placeholder="Email"
             />
           </div>
+          <span v-if="v$.email.$error" class="text-red-500 text-xs">
+            {{ v$.email.$errors[0].$message }}
+          </span>
         </div>
         <!-- Password -->
         <div class="mb-[27px] relative">
@@ -115,6 +108,9 @@ const togglePassword = () => {
               @click="togglePassword"
             ></i>
           </div>
+          <span v-if="v$.password.$error" class="text-red-500 text-xs">
+            {{ v$.password.$errors[0].$message }}
+          </span>
         </div>
         <!-- Login button -->
         <button

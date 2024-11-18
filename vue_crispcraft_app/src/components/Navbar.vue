@@ -4,6 +4,17 @@ import { RouterLink } from "vue-router";
 import IconField from "primevue/iconfield";
 import InputIcon from "primevue/inputicon";
 import InputText from "primevue/inputtext";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
+const authStore = useAuthStore();
+const router = useRouter();
+
+const authenticationClick = () => {
+  if (!authStore.authenticated) {
+    return router.push("/login");
+  }
+  authStore.logout();
+};
 </script>
 
 <template>
@@ -31,9 +42,9 @@ import InputText from "primevue/inputtext";
         <ul class="flex items-center sm:justify-around sm:w-full gap-5">
           <li>
             <RouterLink
-              to="/"
+              to="/checkout"
               class="text-white text-[8px] font-bold sm:text-[20px]"
-              >Notifications</RouterLink
+              >Checkout</RouterLink
             >
           </li>
 
@@ -42,6 +53,14 @@ import InputText from "primevue/inputtext";
               to="/"
               class="text-white text-[8px] font-bold sm:text-[20px]"
               >Help</RouterLink
+            >
+          </li>
+          <li>
+            <RouterLink
+              to="/"
+              class="text-white text-[8px] font-bold sm:text-[20px]"
+              @click="authenticationClick"
+              >{{ authStore.authenticated ? "Logout" : "Log in" }}</RouterLink
             >
           </li>
         </ul>

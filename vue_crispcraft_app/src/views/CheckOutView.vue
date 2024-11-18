@@ -45,7 +45,6 @@ const updateDimensions = () => {
   browserWindow.width = window.innerWidth;
   browserWindow.height = window.innerHeight;
 };
-
 const isWindowMobile = computed(() => {
   return browserWindow.width <= 320;
 });
@@ -102,6 +101,8 @@ onUnmounted(() => {
         </div>
       </section>
 
+      <img src="" alt="" />
+
       <section class="flex-grow self-center">
         <div class="myContainer">
           <div>
@@ -126,11 +127,8 @@ onUnmounted(() => {
             </div>
           </div>
 
-          <div
-            v-if="!isWindowMobile"
-            class="card flex justify-between items-center mt-16"
-          >
-            <Toast class="" position="top-right" />
+          <div class="card flex justify-between items-center mt-16">
+            <Toast v-if="!isWindowMobile" class="" position="top-right" />
             <button
               @click="showSuccessToast()"
               class="myTextShadow bg-blue-700 px-7 py-1 text-white z-10 rounded-lg text-[32px] font-bold myBoxShadow"
@@ -147,19 +145,30 @@ onUnmounted(() => {
 
     <!-- Mobilee -->
     <MobileContainer backgroundColor="bg-[#D6F3FF] relative">
-      <div v-if="isWindowMobile" lass="card flex justify-center md:hidden">
-        <Toast class="!right-[5px] !w-[200px]" position="top-right" />
-        <button
-          @click="showSuccessToast()"
-          class="absolute bottom-[-39px] myTextShadow left-[10%] bg-blue-700 px-7 py-1 text-white z-10 rounded-lg text-[15px] font-bold"
-        >
-          Order
-        </button>
-      </div>
+      <div lass="card flex justify-center md:hidden">
+        <Toast
+          v-if="isWindowMobile"
+          class="!right-[5px] !w-[200px]"
+          position="top-right"
+        />
 
-      <span class="absolute bottom-[-30px] right-[25%] font-bold text-[10px]"
-        >Total Price: {{ cartStore.subtotal }}
-      </span>
+        <div
+          class="bg-white myContainer h-[50px] bg-opacity-95 absolute z-10 bottom-0"
+        >
+          <div class="relative h-full w-full">
+            <button
+              @click="showSuccessToast()"
+              class="absolute myTextShadow left-[5%] top-[50%] translate-y-[-50%] bg-blue-700 px-7 py-1 text-white z-10 rounded-lg text-[15px] font-bold"
+            >
+              Order
+            </button>
+            <span
+              class="absolute top-[50%] right-[15%] translate-y-[-50%] z-10 font-bold text-[14px]"
+              >Total Price: {{ cartStore.subtotal }}
+            </span>
+          </div>
+        </div>
+      </div>
 
       <section class="myContainer">
         <HeaderText
