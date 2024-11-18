@@ -45,7 +45,6 @@ const updateDimensions = () => {
   browserWindow.width = window.innerWidth;
   browserWindow.height = window.innerHeight;
 };
-
 const isWindowMobile = computed(() => {
   return browserWindow.width <= 320;
 });
@@ -128,11 +127,8 @@ onUnmounted(() => {
             </div>
           </div>
 
-          <div
-            v-if="!isWindowMobile"
-            class="card flex justify-between items-center mt-16"
-          >
-            <Toast class="" position="top-right" />
+          <div class="card flex justify-between items-center mt-16">
+            <Toast v-if="!isWindowMobile" class="" position="top-right" />
             <button
               @click="showSuccessToast()"
               class="myTextShadow bg-blue-700 px-7 py-1 text-white z-10 rounded-lg text-[32px] font-bold myBoxShadow"
@@ -149,8 +145,12 @@ onUnmounted(() => {
 
     <!-- Mobilee -->
     <MobileContainer backgroundColor="bg-[#D6F3FF] relative">
-      <div v-if="isWindowMobile" lass="card flex justify-center md:hidden">
-        <Toast class="!right-[5px] !w-[200px]" position="top-right" />
+      <div lass="card flex justify-center md:hidden">
+        <Toast
+          v-if="isWindowMobile"
+          class="!right-[5px] !w-[200px]"
+          position="top-right"
+        />
 
         <div
           class="bg-white myContainer h-[50px] bg-opacity-95 absolute z-10 bottom-0"

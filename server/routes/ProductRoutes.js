@@ -12,13 +12,15 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 const router = express.Router();
+const { validateProduct } = require("../middleware");
 const {
   getAllProducts,
   createProduct,
+  updateProduct,
 } = require("../controllers/productController");
 
 router.get("/", getAllProducts);
 
 router.post("/", upload.single("image"), createProduct);
-
+router.put("/:id", upload.single("image"), updateProduct);
 module.exports = router;

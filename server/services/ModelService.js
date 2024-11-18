@@ -93,14 +93,23 @@ class ModelService {
   async update(id, data, primaryKey = "id") {
     try {
       const pool = await poolPromise;
+
       const updates = Object.keys(data)
-        .map((key) => `${key} = '${data[key]}'`)
+        .map((key, index) => `${key} = @val${index}`) // Use indexed placeholders
         .join(", ");
+
       const query = `UPDATE ${this.tableName} SET ${updates} WHERE ${primaryKey} = @id`;
-      await pool.request().input("id", id).query(query);
+      const request = pool.request();
+      request.input("id", id);
+
+      Object.values(data).forEach((value, index) => {
+        request.input(`val${index}`, value);
+      });
+      await request.query(query);
       return { message: "Update successful" };
     } catch (e) {
       console.log(e);
+      throw new Error("Update failed");
     }
   }
 

@@ -14,7 +14,6 @@ const getAllInventory = async (req, res) => {
 const createInventory = async (req, res) => {
   try {
     let { stockQty, changeDate, productID } = req.body;
-    console.log("Before validation:");
 
     changeDate = dayjs().format("YYYY-MM-DD HH:mm:ss");
     console.log(changeDate);
@@ -26,8 +25,7 @@ const createInventory = async (req, res) => {
       },
       { abortEarly: false }
     );
-    console.log("After validation:");
-    console.log(validatedInventory.changeDate);
+
     if (error) {
       const errorMessages = error.details.map((detail) => detail.message);
       return res.status(400).json({ message: errorMessages });

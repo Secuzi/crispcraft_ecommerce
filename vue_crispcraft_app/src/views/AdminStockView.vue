@@ -11,23 +11,28 @@ import ChecklistIcon from "@/assets/images/icons/checklists.svg";
 import TransactionIcon from "@/assets/images/icons/transaction.svg";
 import ClerkIcon from "@/assets/images/icons/clerk.svg";
 import Button from "@/components/Button.vue";
+import VueButton from "primevue/button";
 import { reactive } from "vue";
 import axios from "axios";
 import DatePicker from "primevue/datepicker";
 import { useToast } from "primevue";
 import Toast from "primevue/toast";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed, onUnmounted } from "vue";
 import useVuelidate from "@vuelidate/core";
 import { required, helpers } from "@vuelidate/validators";
+import { useProductStore } from "@/stores/product";
+import Dialog from "primevue/dialog";
+
 const cartStore = useCartStore();
 const toast = useToast();
+const visible = ref(false);
 const form = reactive({
   productName: "",
   description: "",
   price: null,
   expirationDate: null,
 
-  stockQty: 0,
+  stockQty: 1,
   changeDate: "",
 
   flavorName: "",
@@ -74,7 +79,7 @@ async function submitForm() {
     if (v$.value.$errors.length > 0) {
       return;
     }
-
+    console.log("in submit form");
     let newProduct = ref(null);
     let newFlavor = ref(null);
     let newInventory = ref(null);
@@ -97,6 +102,10 @@ async function submitForm() {
       formData.append("price", form.price);
       formData.append("expirationDate", form.expirationDate);
       formData.append("image", imageObject.value);
+
+      //Error lies in kung mag error ang inventory
+      //Dapat separate gd ni sila
+
       newProduct.value = await axios.post("/products", formData);
       form.productID = newProduct.value.data.productID;
       console.log(newProduct);
@@ -116,15 +125,9 @@ async function submitForm() {
       console.log(newInventory.data);
     } catch (e) {
       console.log(e);
-      toast.add({
-        severity: "error",
-        summary: "Error",
-        detail: e.response.data.message || e.message,
-        life: 3150,
-      });
     }
 
-    if (!newInventory.value || !newProduct.value || !newFlavor.value) {
+    if (!newProduct.value || !newFlavor.value) {
       return;
     }
 
@@ -140,9 +143,34 @@ async function submitForm() {
   } catch (e) {}
 }
 const products = ref([]);
+const checkIndex = (id) => {
+  console.log("product id: ", id);
+  console.log("Store product id: ", productStore.selectedProduct);
+};
+const productStore = useProductStore();
+console.log(productStore.selectedProduct);
+const browserWindow = reactive({
+  width: window.innerWidth,
+  height: window.innerHeight,
+});
+
+const updateDimensions = () => {
+  browserWindow.width = window.innerWidth;
+  browserWindow.height = window.innerHeight;
+};
+const isWindowMobile = computed(() => {
+  return browserWindow.width <= 320;
+});
+
 onMounted(async () => {
   const response = await axios.get("/products");
   products.value = response.data.products;
+  window.addEventListener("resize", updateDimensions);
+});
+onUnmounted(() => {
+  window.removeEventListener("resize", updateDimensions);
+  //In order to reuse the same store I have to disable this
+  productStore.selectedProduct = null;
 });
 </script>
 
@@ -214,11 +242,13 @@ onMounted(async () => {
                 <CheckoutProductCard
                   class="h-[128px] flex-grow-0"
                   v-for="(product, index) in products"
-                  :key="product.id"
-                  :id="product.id"
+                  :key="product.productID"
+                  :id="product.productID"
+                  :isActive="product.productID == productStore.selectedProduct"
                   :class="[index !== 0 ? 'mt-5' : '']"
                   :image="baseUrl + '/' + product.image"
                   :header="product.productName"
+                  :description="product.description"
                   :qty="product.qty"
                   :price="product.price"
                   fontSizeHeader="18px"
@@ -254,10 +284,7 @@ onMounted(async () => {
                   placeholder="Enter product name"
                   class="border-black p-3 border-2 rounded-[5px] myFormInput block w-full myFormInput p-inputtext"
                 />
-                <span
-                  v-if="v$.productName.$error"
-                  class="text-red-500 text-xs absolute"
-                >
+                <span v-if="v$.productName.$error" class="text-red-500 text-xs">
                   {{ v$.productName.$errors[0].$message }}
                 </span>
               </div>
@@ -315,7 +342,7 @@ onMounted(async () => {
                   />
                   <input
                     type="number"
-                    min="0"
+                    min="1"
                     name="product stock"
                     v-model="form.stockQty"
                     id="stock"
@@ -331,6 +358,7 @@ onMounted(async () => {
                 <input
                   type="number"
                   min="0"
+                  max="50000"
                   v-model="form.price"
                   name="price"
                   id="price"
@@ -363,6 +391,7 @@ onMounted(async () => {
                   type="file"
                   name="image"
                   accept="image/*"
+                  class="cursor-pointer"
                   @change="checkImageFile"
                   id="image"
                 />
@@ -372,28 +401,15 @@ onMounted(async () => {
               </div>
 
               <div class="flex justify-end">
-                <Toast />
+                <Toast v-if="!isWindowMobile" />
                 <button
                   type="submit"
                   class="bg-[#74CD5F] text-white px-5 rounded-full myBoxShadow font-bold text-[24px] py-[6px] myTextShadow"
                 >
-                  Save
+                  Edit
                 </button>
               </div>
             </form>
-
-            <div class="flex justify-around mt-6">
-              <button
-                class="font-bold text-[24px] rounded-full text-white bg-[#3672F6] myBoxShadow myTextShadow px-4 py-3"
-              >
-                Edit Item
-              </button>
-              <button
-                class="font-bold text-[24px] rounded-full text-white bg-[#3672F6] myBoxShadow myTextShadow px-4 py-3"
-              >
-                Add Item
-              </button>
-            </div>
           </section>
         </div>
       </section>
@@ -449,7 +465,7 @@ onMounted(async () => {
       <!-- Main section with padding -->
       <section class="h-[544px] overflow-scroll-auto overflow-x-hidden mt-3">
         <div
-          v-for="product in cartStore.products"
+          v-for="product in products"
           :key="product.id"
           class="bg-white px-[10px] py-[14px] myBoxShadow rounded-l-lg w-[95%] mt-4 ml-auto"
         >
@@ -511,10 +527,165 @@ onMounted(async () => {
               </div>
             </div>
             <!-- Image -->
-            <img :src="product.image" alt="Lnion" class="w-[45px] self-end" />
+            <img
+              :src="baseUrl + '/' + product.image"
+              :alt="product.productName"
+              class="w-[45px] self-end"
+            />
           </div>
         </div>
       </section>
+
+      <div
+        class="bg-myPrimaryColor absolute bottom-20 right-5 rounded-full p-4 flex items-center"
+        @click="visible = true"
+      >
+        <i class="pi pi-plus !text-[24px] !text-white"></i>
+      </div>
+
+      <!-- <VueButton
+        label="Add/Edit Product"
+        @click="visible = true"
+        class="absolute !rounded-none !bg-myPrimaryColor w-[50%]"
+      /> -->
+      <Dialog
+        v-model:visible="visible"
+        modal
+        header="Add Product"
+        :style="{ width: '25rem' }"
+      >
+        <form @submit.prevent="submitForm" enctype="multipart/form-data">
+          <div class="form-item">
+            <label for="productName" class="myTextShadow">Product Name:</label>
+            <input
+              type="text"
+              name="productName"
+              id="productName"
+              v-model="form.productName"
+              placeholder="Enter product name"
+              class="border-black p-3 border-2 rounded-[5px] myFormInput block w-full myFormInput p-inputtext"
+            />
+            <span v-if="v$.productName.$error" class="text-red-500 text-xs">
+              {{ v$.productName.$errors[0].$message }}
+            </span>
+          </div>
+          <div class="form-item">
+            <label for="flavorName" class="myTextShadow">Flavor Name:</label>
+            <input
+              type="text"
+              name="flavorName"
+              v-model="form.flavorName"
+              id="flavorName"
+              placeholder="Enter flavor name"
+              class="border-black p-3 border-2 rounded-[5px] block w-full myFormInput p-inputtext"
+            />
+            <span v-if="v$.flavorName.$error" class="text-red-500 text-xs">
+              {{ v$.flavorName.$errors[0].$message }}
+            </span>
+          </div>
+          <div class="form-item">
+            <label for="description" class="myTextShadow"
+              >Product Description:</label
+            >
+            <textarea
+              id="description"
+              v-model="form.description"
+              placeholder="Enter product description"
+              class="border-black w-full p-3 border-2 rounded-[5px] block max-h-[76px] myFormInput p-inputtext"
+            ></textarea>
+            <span v-if="v$.description.$error" class="text-red-500 text-xs">
+              {{ v$.description.$errors[0].$message }}
+            </span>
+          </div>
+          <div class="form-item">
+            <label for="stock" class="myTextShadow">Stocks Available:</label>
+            <div class="gap-2">
+              <input
+                type="number"
+                min="1"
+                name="product stock"
+                v-model="form.stockQty"
+                id="stock"
+                class="border-black border-2 px-2 rounded-[5px] myFormInput p-inputtext w-full"
+              />
+              <div class="mt-3">
+                <Button
+                  text="-"
+                  type="button"
+                  padding_x="1.5rem"
+                  padding_y="0px"
+                  class="!text-[32px]"
+                  @click="form.stockQty > 0 ? form.stockQty-- : 0"
+                />
+                <Button
+                  text="+"
+                  type="button"
+                  padding_x="1.5rem"
+                  padding_y="0px"
+                  class="!text-[32px] ml-3"
+                  @click="form.stockQty += 1"
+                />
+              </div>
+              <span v-if="v$.stockQty.$error" class="text-red-500 text-xs">
+                {{ v$.stockQty.$errors[0].$message }}
+              </span>
+            </div>
+          </div>
+          <div class="form-item">
+            <label for="price" class="myTextShadow">Price:</label>
+            <input
+              type="number"
+              min="0"
+              max="50000"
+              v-model="form.price"
+              name="price"
+              id="price"
+              class="border-black w-full border-2 p-3 rounded-[5px] block myFormInput p-inputtext"
+            />
+            <span v-if="v$.price.$error" class="text-red-500 text-xs">
+              {{ v$.price.$errors[0].$message }}
+            </span>
+          </div>
+          <div class="form-item">
+            <label for="expirationDate" class="myTextShadow"
+              >Expiration Date:</label
+            >
+            <DatePicker
+              v-model="form.expirationDate"
+              inputId="expirationDate"
+              date-format="yy-mm-dd"
+              class="expiration-date mobile"
+              :min-date="today"
+            />
+            <span
+              v-if="v$.expirationDate.$error"
+              class="text-red-500 text-xs block mt-3"
+            >
+              {{ v$.expirationDate.$errors[0].$message }}
+            </span>
+          </div>
+          <div class="form-item">
+            <input
+              type="file"
+              name="image"
+              accept="image/*"
+              @change="checkImageFile"
+              id="image"
+              class="w-full"
+            />
+            <span v-if="v$.image.$error" class="text-red-500 text-xs block">
+              {{ v$.image.$errors[0].$message }}
+            </span>
+          </div>
+          <div class="flex justify-end gap-2">
+            <Toast v-if="isWindowMobile" class="!right-[5px] !w-[200px]" />
+
+            <button class="text-black bg-mySecondaryColor px-3 py-2 rounded-md">
+              Add
+            </button>
+          </div>
+        </form>
+      </Dialog>
     </MobileContainer>
   </MainContainer>
 </template>
@@ -538,6 +709,14 @@ onMounted(async () => {
   margin-left: 10px;
   border: 2px solid black;
 }
+:deep(.expiration-date.mobile .p-inputtext) {
+  margin-left: 0;
+}
+
+:deep(.expiration-date.mobile) {
+  width: 100%;
+}
+
 :deep(.expiration-date .p-inputtext:focus) {
   border-color: white;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25); /* Correct syntax */

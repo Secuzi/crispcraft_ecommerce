@@ -1,4 +1,3 @@
-import AdminView from "@/views/AdminView.vue";
 import CheckOutView from "@/views/CheckOutView.vue";
 import HomepageView from "@/views/HomepageView.vue";
 import LoginView from "@/views/LoginView.vue";
@@ -8,6 +7,8 @@ import RegisterView from "@/views/RegisterView.vue";
 import { useAuthStore } from "@/stores/auth";
 
 import { createRouter, createWebHistory } from "vue-router";
+import CreateProductView from "@/views/CreateProductView.vue";
+import AdminStockView from "@/views/AdminStockView.vue";
 
 const routes = [
   {
@@ -44,9 +45,15 @@ const routes = [
     meta: { requiresAuth: true, role: "customer" },
   },
   {
-    path: "/admin",
+    path: "/admin/stock",
     name: "admin dashboard",
-    component: AdminView,
+    component: AdminStockView,
+    meta: { requiresAuth: false, role: "admin" },
+  },
+  {
+    path: "/admin/create-product",
+    name: "create product",
+    component: CreateProductView,
     meta: { requiresAuth: false, role: "admin" },
   },
 ];
@@ -69,13 +76,15 @@ router.beforeEach(async (to, from, next) => {
       if (to.meta.role && authStore.role !== to.meta.role) {
         next({ name: "Login" }); // Redirect if role doesn't match
       } else {
-        next(); // Allow access
+        next();
       }
     } else {
-      next({ name: "Login" }); // Redirect to login if not authenticated
+      // Redirect to login if not authenticated
+      next({ name: "Login" });
     }
   } else {
-    next(); // Allow navigation if no auth required
+    // Allow navigation if no auth required
+    next();
   }
 });
 export default router;

@@ -1,5 +1,7 @@
 const ProductService = require("../services/ProductService");
 const productSchema = require("../schemas/ProductShema");
+const path = require("path");
+const fs = require("fs");
 //@path GET /products
 const getAllProducts = async (req, res) => {
   try {
@@ -13,10 +15,6 @@ const getAllProducts = async (req, res) => {
 
 const createProduct = async (req, res) => {
   try {
-    console.log("file:");
-    console.log(req.file);
-    console.log("body:");
-    console.log(req.body);
     if (!req.file) {
       return res.status(400).json({ message: "Invalid image" });
     }
@@ -35,6 +33,14 @@ const createProduct = async (req, res) => {
     );
 
     if (searchedProduct) {
+      if (req.file) {
+        const filePath = path.join(`../${__dirname}`, "uploads", imagePath);
+        console.log("path", filePath);
+        fs.unlink(filePath, (err) => {
+          if (err) console.error("Error deleting file:", err);
+          else console.log("Uploaded file deleted due to error.");
+        });
+      }
       return res.status(400).json({ message: "Product already exist!" });
     }
 
@@ -66,7 +72,18 @@ const createProduct = async (req, res) => {
   }
 };
 
+const updateProduct = async (req, res) => {
+  console.log(req.params);
+  console.log(req.body);
+  console.log("Image: ", req.file);
+
+  //@TODO: Dili ni siya mahitabo if
+
+  return res.status(200).json({ message: "Updated successfully!" });
+};
+
 module.exports = {
   getAllProducts,
   createProduct,
+  updateProduct,
 };
