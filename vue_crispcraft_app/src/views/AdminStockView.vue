@@ -1,5 +1,4 @@
 <script setup>
-import { useCartStore } from "@/stores/cart";
 import DesktopContainer from "@/components/DesktopContainer.vue";
 import MainContainer from "@/components/MainContainer.vue";
 import MobileContainer from "@/components/MobileContainer.vue";
@@ -46,6 +45,7 @@ const form = reactive({
 });
 
 const baseUrl = import.meta.env.VITE_APP_BASE_URL;
+
 const imageObject = ref(null);
 
 function checkImageFile(event) {
@@ -73,9 +73,6 @@ const rules = {
   flavorName: {
     required: helpers.withMessage("Flavor name cannot be empty!", required),
   },
-  image: {
-    required: helpers.withMessage("Image cannot be empty!", required),
-  },
 };
 const v$ = useVuelidate(rules, form);
 
@@ -89,12 +86,19 @@ async function submitForm() {
     let newFlavor = ref(null);
     let newInventory = ref(null);
     try {
-      newFlavor.value = await axios.post("/flavors", form);
-      form.flavorID = newFlavor.value.data.flavorID;
+      //Check to see existing flavor
+      // if it equals then don't change id otherwise change
+
+      newFlavor.value = await axios.put(
+        `/flavors/${selectedFlavor.value}`,
+        form
+      );
+      form.flavorID = selectedFlavor.value;
     } catch (e) {
+      console.log("Flavor ERROR");
       toast.add({
         severity: "error",
-        summary: "Error",
+        summary: "Flavor Error",
         detail: e.response.data.message || e.message,
         life: 3150,
       });
@@ -108,10 +112,10 @@ async function submitForm() {
       formData.append("expirationDate", form.expirationDate);
       formData.append("image", imageObject.value);
 
-      //Error lies in kung mag error ang inventory
-      //Dapat separate gd ni sila
-
-      newProduct.value = await axios.post("/products", formData);
+      newProduct.value = await axios.put(
+        `/products/${productStore.selectedProduct}`,
+        formData
+      );
       form.productID = newProduct.value.data.productID;
       console.log(newProduct);
     } catch (e) {
@@ -125,9 +129,11 @@ async function submitForm() {
     }
 
     try {
-      newInventory.value = await axios.post("/inventory", form);
-      console.log("inventory:");
-      console.log(newInventory.data);
+      //delete this
+      newInventory.value = await axios.put(
+        `/inventory/${selectedInventory.value}`,
+        form
+      );
     } catch (e) {
       console.log(e);
     }
@@ -135,21 +141,19 @@ async function submitForm() {
     if (!newProduct.value || !newFlavor.value) {
       return;
     }
-
-    const parseDate = new Date(form.expirationDate);
-    console.log(parseDate.toISOString());
-
     toast.add({
       severity: "success",
       summary: "Success",
-      detail: "Successfully created product!",
+      detail: "Successfully edited product!",
       life: 3000,
     });
-  } catch (e) {}
+  } catch (e) {
+    console.log(e);
+  }
 }
 const products = ref([]);
+
 function removeTimeFromDateString(dateString) {
-  // Split the string at the 'T' character and take the first part (the date)
   return dateString.split("T")[0];
 }
 const browserWindow = reactive({
@@ -164,33 +168,20 @@ const updateDimensions = () => {
 const isWindowMobile = computed(() => {
   return browserWindow.width <= 320;
 });
-
-console.log("window mobile", isWindowMobile.value);
-
-const selectProduct = computed(() => {
-  console.log(products.value);
-  return products.value.find(
-    (product) => product.productID === productStore.selectedProduct
-  );
-});
-
-console.log("Select product: ", selectProduct.value);
-
+const selectedFlavor = ref();
+const selectedInventory = ref();
 watchEffect(async () => {
   if (products.value.length > 0 && productStore.selectedProduct) {
     const selectedProduct = products.value.find(
       (product) => product.productID === productStore.selectedProduct
     );
+
     if (selectedProduct) {
       form.productName = selectedProduct.productName;
       form.description = selectedProduct.description;
       form.price = selectedProduct.price;
       const rawDate = removeTimeFromDateString(selectedProduct.expirationDate);
       form.expirationDate = rawDate;
-
-      //get product id and get the flavor reference
-      //with product id, get inventory with that product id
-      // await axios.get(`products/${selectedProduct}`)
 
       const flavorResponse = await axios.get(
         `flavors/${selectedProduct.flavorID}`
@@ -203,18 +194,22 @@ watchEffect(async () => {
         (inventory) => inventory.productID === selectedProduct.productID
       );
 
-      console.log("Inventories: ", inventories);
-
-      form.stockQty = selectedProduct.qty;
+      form.stockQty = inventory.stockQty;
       form.flavorName = flavor.flavorName;
+      selectedFlavor.value = selectedProduct.flavorID;
+
+      selectedInventory.value = selectedProduct.inventoryID;
+
+      console.log("IMAGEEE: ", selectedProduct.image);
     }
   }
 });
 
 const isLoading = ref(true);
 onMounted(async () => {
-  const response = await axios.get("/products");
-  products.value = response.data.products;
+  const response = await axios.get("/query/stock");
+  products.value = response.data;
+  console.log("PRODUCST: ", products.value);
   productStore.selectedProduct = products.value[0].productID;
   isLoading.value = false;
   window.addEventListener("resize", updateDimensions);
@@ -301,7 +296,7 @@ onUnmounted(() => {
                   :image="baseUrl + '/' + product.image"
                   :header="product.productName"
                   :description="product.description"
-                  :qty="product.qty"
+                  :qty="product.stockQty"
                   :price="product.price"
                   fontSizeHeader="18px"
                   fontSizeBody="16px"
@@ -400,10 +395,10 @@ onUnmounted(() => {
                     id="stock"
                     class="border-black border-2 px-2 rounded-[5px] myFormInput p-inputtext"
                   />
-                  <span v-if="v$.stockQty.$error" class="text-red-500 text-xs">
-                    {{ v$.stockQty.$errors[0].$message }}
-                  </span>
                 </div>
+                <span v-if="v$.stockQty.$error" class="text-red-500 text-xs">
+                  {{ v$.stockQty.$errors[0].$message }}
+                </span>
               </div>
               <div class="form-item">
                 <label for="price" class="myTextShadow">Price:</label>
@@ -447,9 +442,6 @@ onUnmounted(() => {
                   @change="checkImageFile"
                   id="image"
                 />
-                <span v-if="v$.image.$error" class="text-red-500 text-xs block">
-                  {{ v$.image.$errors[0].$message }}
-                </span>
               </div>
 
               <div class="flex justify-end">

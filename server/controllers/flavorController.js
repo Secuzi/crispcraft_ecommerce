@@ -23,10 +23,36 @@ const createFlavor = async (req, res) => {
   }
 };
 
+const updateFlavor = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { flavorName } = req.body;
+    const flavor = await FlavorService.read(id, "flavorID");
+    if (!flavor) {
+      return res.status(400).json({ message: "Flavor does not exist!" });
+    }
+    if (!flavorName) {
+      return res.status(400).json({ message: "Need value for flavor name" });
+    }
+
+    console.log("FLAVOR: ", flavor);
+
+    const updatedFlavor = await FlavorService.update(
+      id,
+      { flavorName },
+      "flavorID"
+    );
+
+    return res.status(200).json(updatedFlavor);
+  } catch (e) {
+    console.log(e);
+  }
+};
+
 const getAllFlavors = async (req, res) => {
   try {
     const flavors = await FlavorService.getAll();
-    res.send({ flavors });
+    res.status(200).json(flavors);
   } catch (e) {
     console.log(e);
   }
@@ -45,4 +71,5 @@ module.exports = {
   createFlavor,
   getAllFlavors,
   getFlavor,
+  updateFlavor,
 };

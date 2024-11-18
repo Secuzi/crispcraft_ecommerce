@@ -10,6 +10,7 @@ const productRoutes = require("./routes/ProductRoutes");
 const session = require("express-session");
 const authRoutes = require("./routes/authRoutes");
 const inventoryRoutes = require("./routes/InventoryRoutes");
+const queryRoutes = require("./routes/queryRoutes");
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(
@@ -34,5 +35,6 @@ app.use("/customers", customerRoutes);
 app.use("/products", productRoutes);
 app.use("/flavors", flavorRoutes);
 app.use("/inventory", inventoryRoutes);
+app.use("/query", queryRoutes);
 
 app.listen(PORT, () => console.log(`Listening on port: ${PORT}`));

@@ -3,6 +3,7 @@ const {
   createFlavor,
   getAllFlavors,
   getFlavor,
+  updateFlavor,
 } = require("../controllers/flavorController");
 const router = express.Router();
 
@@ -10,4 +11,5 @@ const router = express.Router();
 router.post("/", createFlavor);
 router.get("/", getAllFlavors);
 router.get("/:id", getFlavor);
+router.put("/:id", updateFlavor);
 module.exports = router;

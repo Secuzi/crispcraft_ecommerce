@@ -96,13 +96,48 @@ const getProduct = async (req, res) => {
 };
 
 const updateProduct = async (req, res) => {
-  console.log(req.params);
-  console.log(req.body);
-  console.log("Image: ", req.file);
+  const { id } = req.params;
+  const searchedProduct = await ProductService.read(id, "productID");
+  const imageFile = req.file;
+  console.log(searchedProduct);
+  const imagePath = imageFile
+    ? `uploads/${imageFile.filename}`
+    : searchedProduct.image;
 
+  console.log("IMAGEEE: ", imagePath);
+  const { productName, description, price, flavorID, expirationDate } =
+    req.body;
+  const parsedDate = dayjs(expirationDate, "YYYY-MM-DD");
+  const formattedDate = parsedDate.format("YYYY-MM-DD");
+
+  const { error, value: validatedProduct } = productSchema.validate(
+    {
+      productName,
+      description,
+      price,
+      flavorID,
+      expirationDate: formattedDate,
+      image: imagePath,
+    },
+    { abortEarly: false }
+  );
+  if (error) {
+    const errorMessages = error.details.map((detail) => detail.message);
+
+    console.log(errorMessages);
+    return res.status(400).json({ message: errorMessages });
+  }
+
+  const updatedProduct = await ProductService.update(
+    id,
+    validatedProduct,
+    "productID"
+  );
   //@TODO: Dili ni siya mahitabo if
 
-  return res.status(200).json({ message: "Updated successfully!" });
+  return res
+    .status(200)
+    .json({ message: "Updated successfully!", updatedProduct });
 };
 
 module.exports = {

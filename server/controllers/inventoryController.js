@@ -22,6 +22,33 @@ const getInventory = async (req, res) => {
   return res.status(200).json({ inventory });
 };
 
+const updateInventory = async (req, res) => {
+  const { id } = req.params;
+  let { stockQty, changeDate } = req.body;
+  if (!stockQty) {
+    return res
+      .status(400)
+      .json({ message: "stock quantity must not be null!" });
+  }
+
+  const inventory = await InventoryService.read(id, "inventoryID");
+  if (!inventory) {
+    return res.status(400).send("Cannot find Inventory");
+  }
+  changeDate = dayjs().format("YYYY-MM-DD HH:mm:ss");
+
+  const updatedInventory = await InventoryService.update(
+    id,
+    {
+      stockQty,
+      changeDate,
+    },
+    "inventoryID"
+  );
+
+  return res.status(200).json(updatedInventory);
+};
+
 const createInventory = async (req, res) => {
   try {
     let { stockQty, changeDate, productID } = req.body;
@@ -56,4 +83,5 @@ module.exports = {
   getAllInventory,
   createInventory,
   getInventory,
+  updateInventory,
 };
