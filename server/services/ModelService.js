@@ -83,7 +83,6 @@ class ModelService {
 
       const query = `SELECT * FROM ${this.tableName} WHERE ${primaryKey} = @id`;
       const result = await pool.request().input("id", id).query(query);
-      console.log(`Record set: ${result.recordset}`);
       return result.recordset[0];
     } catch (e) {
       console.log(e);

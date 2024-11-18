@@ -6,6 +6,8 @@ import { ref, reactive, onMounted, computed, onUnmounted } from "vue";
 import useVuelidate from "@vuelidate/core";
 import { required, helpers } from "@vuelidate/validators";
 import axios from "axios";
+import { useRouter } from "vue-router";
+
 const toast = useToast();
 const form = reactive({
   productName: "",
@@ -18,8 +20,9 @@ const form = reactive({
   flavorName: "",
   image: "",
 });
-
+const today = new Date();
 const baseUrl = import.meta.env.VITE_APP_BASE_URL;
+const router = useRouter();
 const imageObject = ref(null);
 let newProduct = ref(null);
 let newFlavor = ref(null);
@@ -55,13 +58,11 @@ function checkImageFile(event) {
 
 async function submitForm() {
   try {
-    console.log("IN FOOORM");
     v$.value.$touch();
     if (v$.value.$errors.length > 0) {
       console.log("errors: ", v$.value.$errors);
       return;
     }
-    console.log("past touch");
     try {
       newFlavor.value = await axios.post("/flavors", form);
       form.flavorID = newFlavor.value.data.flavorID;
@@ -82,11 +83,17 @@ async function submitForm() {
       formData.append("price", form.price);
       formData.append("expirationDate", form.expirationDate);
       formData.append("image", imageObject.value);
-      //Ari nalang add function if duplicate ba sila or naay nag exist na product
-      //To handle katong image add bisag naay error
+
+      const searchedProductResponse = await axios.get(
+        `/products/name/${form.productName}`
+      );
+
+      if (searchedProductResponse.data) {
+        throw new Error("Product name already exists!");
+      }
+
       newProduct.value = await axios.post("/products", formData);
       form.productID = newProduct.value.data.productID;
-      console.log(newProduct);
     } catch (e) {
       console.log(e);
       toast.add({
@@ -100,6 +107,10 @@ async function submitForm() {
     if (!newProduct.value || !newFlavor.value) {
       return;
     }
+    form.stockQty = 0;
+
+    const inventoryResponse = await axios.post("/inventory", form);
+    console.log(inventoryResponse.data);
 
     toast.add({
       severity: "success",
@@ -107,7 +118,11 @@ async function submitForm() {
       detail: "Successfully created product!",
       life: 3000,
     });
-  } catch (e) {}
+
+    router.push("/admin/stock");
+  } catch (e) {
+    console.log(e);
+  }
 }
 </script>
 
@@ -205,7 +220,7 @@ async function submitForm() {
     </div>
 
     <div class="flex justify-end">
-      <Toast v-if="!isWindowMobile" />
+      <Toast />
       <button
         type="submit"
         class="bg-[#74CD5F] text-white px-5 rounded-full myBoxShadow font-bold text-[24px] py-[6px] myTextShadow"

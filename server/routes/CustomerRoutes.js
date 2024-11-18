@@ -14,7 +14,7 @@ router.get("/", getAllCustomers);
 
 router.get("/:id", getCustomer);
 
-router.post("/", isLoggedIn, isAdmin, createCustomer);
+router.post("/", createCustomer);
 
 router.delete("/:id", isLoggedIn, isAdmin, deleteCustomer);
 

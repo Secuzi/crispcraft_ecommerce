@@ -11,6 +11,17 @@ const getAllInventory = async (req, res) => {
   }
 };
 
+//@path GET /inventory/:id
+const getInventory = async (req, res) => {
+  const id = Number(req.params.id);
+  const inventory = await InventoryService.read(id, "inventoryID");
+
+  if (!inventory) {
+    return res.status(400).send("Cannot find Inventory");
+  }
+  return res.status(200).json({ inventory });
+};
+
 const createInventory = async (req, res) => {
   try {
     let { stockQty, changeDate, productID } = req.body;
@@ -44,4 +55,5 @@ const createInventory = async (req, res) => {
 module.exports = {
   getAllInventory,
   createInventory,
+  getInventory,
 };

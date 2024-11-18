@@ -34,7 +34,7 @@ const createProduct = async (req, res) => {
       "productName",
       productName
     );
-
+    //Remove this maybe
     if (searchedProduct) {
       if (req.file) {
         const filePath = path.join(`../${__dirname}`, "uploads", imagePath);
@@ -74,6 +74,27 @@ const createProduct = async (req, res) => {
   }
 };
 
+const getProductByName = async (req, res) => {
+  const { productName } = req.params;
+  const searchedProduct = await ProductService.getByField(
+    "productName",
+    productName
+  );
+
+  res.status(200).json(searchedProduct);
+};
+
+//@path GET /products/:id
+const getProduct = async (req, res) => {
+  const id = Number(req.params.id);
+  const product = await ProductService.read(id, "productID");
+
+  if (!product) {
+    return res.status(400).send("Cannot find Product");
+  }
+  return res.status(200).json({ product });
+};
+
 const updateProduct = async (req, res) => {
   console.log(req.params);
   console.log(req.body);
@@ -88,4 +109,6 @@ module.exports = {
   getAllProducts,
   createProduct,
   updateProduct,
+  getProduct,
+  getProductByName,
 };

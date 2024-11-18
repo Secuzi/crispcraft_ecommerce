@@ -23,8 +23,13 @@ import { required, helpers } from "@vuelidate/validators";
 import { useProductStore } from "@/stores/product";
 import Dialog from "primevue/dialog";
 import { watchEffect } from "vue";
+import { useInventoryStore } from "@/stores/inventory";
+import { useFlavorStore } from "@/stores/flavor";
+import { useRoute } from "vue-router";
 const productStore = useProductStore();
-const cartStore = useCartStore();
+const route = new useRoute();
+const inventoryStore = useInventoryStore();
+const flavorStore = useFlavorStore();
 const toast = useToast();
 const visible = ref(false);
 const form = reactive({
@@ -171,7 +176,7 @@ const selectProduct = computed(() => {
 
 console.log("Select product: ", selectProduct.value);
 
-watchEffect(() => {
+watchEffect(async () => {
   if (products.value.length > 0 && productStore.selectedProduct) {
     const selectedProduct = products.value.find(
       (product) => product.productID === productStore.selectedProduct
@@ -182,9 +187,26 @@ watchEffect(() => {
       form.price = selectedProduct.price;
       const rawDate = removeTimeFromDateString(selectedProduct.expirationDate);
       form.expirationDate = rawDate;
-      console.log("expiration date watch: ", form.expirationDate);
+
+      //get product id and get the flavor reference
+      //with product id, get inventory with that product id
+      // await axios.get(`products/${selectedProduct}`)
+
+      const flavorResponse = await axios.get(
+        `flavors/${selectedProduct.flavorID}`
+      );
+      const { flavor } = flavorResponse.data;
+      const inventoryResponse = await axios.get("/inventory");
+      const { inventories } = inventoryResponse.data;
+
+      const inventory = inventories.find(
+        (inventory) => inventory.productID === selectedProduct.productID
+      );
+
+      console.log("Inventories: ", inventories);
+
       form.stockQty = selectedProduct.qty;
-      form.flavorName = selectedProduct.flavorName;
+      form.flavorName = flavor.flavorName;
     }
   }
 });
@@ -267,11 +289,8 @@ onUnmounted(() => {
               </IconField>
             </div>
 
-            <div class="overflow-auto w-full mt-[5rem]">
-              <div
-                v-if="products.length > 0 || isLoading"
-                class="max-h-[800px]"
-              >
+            <div v-if="!isLoading" class="overflow-auto w-full mt-[5rem]">
+              <div v-if="products.length > 0" class="max-h-[800px]">
                 <CheckoutProductCard
                   class="h-[128px] flex-grow-0"
                   v-for="(product, index) in products"
