@@ -5,7 +5,7 @@ const productSchema = Joi.object({
   description: Joi.string().required(),
   price: Joi.number().required(),
   flavorID: Joi.number().required(),
-  expirationDate: Joi.date().required(),
+  expirationDate: Joi.string().required(),
   image: Joi.string().required(),
 });
 

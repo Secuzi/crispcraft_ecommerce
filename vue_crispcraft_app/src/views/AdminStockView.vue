@@ -22,7 +22,8 @@ import useVuelidate from "@vuelidate/core";
 import { required, helpers } from "@vuelidate/validators";
 import { useProductStore } from "@/stores/product";
 import Dialog from "primevue/dialog";
-
+import { watchEffect } from "vue";
+const productStore = useProductStore();
 const cartStore = useCartStore();
 const toast = useToast();
 const visible = ref(false);
@@ -79,7 +80,6 @@ async function submitForm() {
     if (v$.value.$errors.length > 0) {
       return;
     }
-    console.log("in submit form");
     let newProduct = ref(null);
     let newFlavor = ref(null);
     let newInventory = ref(null);
@@ -143,12 +143,10 @@ async function submitForm() {
   } catch (e) {}
 }
 const products = ref([]);
-const checkIndex = (id) => {
-  console.log("product id: ", id);
-  console.log("Store product id: ", productStore.selectedProduct);
-};
-const productStore = useProductStore();
-console.log(productStore.selectedProduct);
+function removeTimeFromDateString(dateString) {
+  // Split the string at the 'T' character and take the first part (the date)
+  return dateString.split("T")[0];
+}
 const browserWindow = reactive({
   width: window.innerWidth,
   height: window.innerHeight,
@@ -162,9 +160,41 @@ const isWindowMobile = computed(() => {
   return browserWindow.width <= 320;
 });
 
+console.log("window mobile", isWindowMobile.value);
+
+const selectProduct = computed(() => {
+  console.log(products.value);
+  return products.value.find(
+    (product) => product.productID === productStore.selectedProduct
+  );
+});
+
+console.log("Select product: ", selectProduct.value);
+
+watchEffect(() => {
+  if (products.value.length > 0 && productStore.selectedProduct) {
+    const selectedProduct = products.value.find(
+      (product) => product.productID === productStore.selectedProduct
+    );
+    if (selectedProduct) {
+      form.productName = selectedProduct.productName;
+      form.description = selectedProduct.description;
+      form.price = selectedProduct.price;
+      const rawDate = removeTimeFromDateString(selectedProduct.expirationDate);
+      form.expirationDate = rawDate;
+      console.log("expiration date watch: ", form.expirationDate);
+      form.stockQty = selectedProduct.qty;
+      form.flavorName = selectedProduct.flavorName;
+    }
+  }
+});
+
+const isLoading = ref(true);
 onMounted(async () => {
   const response = await axios.get("/products");
   products.value = response.data.products;
+  productStore.selectedProduct = products.value[0].productID;
+  isLoading.value = false;
   window.addEventListener("resize", updateDimensions);
 });
 onUnmounted(() => {
@@ -238,7 +268,10 @@ onUnmounted(() => {
             </div>
 
             <div class="overflow-auto w-full mt-[5rem]">
-              <div v-if="products.length > 0" class="max-h-[800px]">
+              <div
+                v-if="products.length > 0 || isLoading"
+                class="max-h-[800px]"
+              >
                 <CheckoutProductCard
                   class="h-[128px] flex-grow-0"
                   v-for="(product, index) in products"

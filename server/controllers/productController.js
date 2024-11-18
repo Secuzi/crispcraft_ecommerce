@@ -1,5 +1,6 @@
 const ProductService = require("../services/ProductService");
 const productSchema = require("../schemas/ProductShema");
+const dayjs = require("dayjs");
 const path = require("path");
 const fs = require("fs");
 //@path GET /products
@@ -26,6 +27,8 @@ const createProduct = async (req, res) => {
 
     const { productName, description, price, flavorID, expirationDate } =
       req.body;
+    const parsedDate = dayjs(expirationDate, "YYYY-MM-DD");
+    const formattedDate = parsedDate.format("YYYY-MM-DD");
 
     const searchedProduct = await ProductService.getByField(
       "productName",
@@ -43,14 +46,13 @@ const createProduct = async (req, res) => {
       }
       return res.status(400).json({ message: "Product already exist!" });
     }
-
     const { error, value: validatedProduct } = productSchema.validate(
       {
         productName,
         description,
         price,
         flavorID,
-        expirationDate,
+        expirationDate: formattedDate,
         image: imagePath,
       },
       { abortEarly: false }

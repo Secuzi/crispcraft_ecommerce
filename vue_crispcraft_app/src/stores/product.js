@@ -21,7 +21,6 @@ export const useProductStore = defineStore("product", () => {
 
   function getProduct(id) {
     selectedProduct.value = id;
-    console.log("selected product", selectedProduct.value);
   }
   return { selectedProduct, getProduct };
 });

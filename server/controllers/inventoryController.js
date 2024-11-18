@@ -16,7 +16,6 @@ const createInventory = async (req, res) => {
     let { stockQty, changeDate, productID } = req.body;
 
     changeDate = dayjs().format("YYYY-MM-DD HH:mm:ss");
-    console.log(changeDate);
     const { error, value: validatedInventory } = inventorySchema.validate(
       {
         stockQty,

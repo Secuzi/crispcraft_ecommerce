@@ -21,7 +21,8 @@ const form = reactive({
 
 const baseUrl = import.meta.env.VITE_APP_BASE_URL;
 const imageObject = ref(null);
-
+let newProduct = ref(null);
+let newFlavor = ref(null);
 const rules = {
   productName: {
     required: helpers.withMessage("Product name cannot be empty!", required),
@@ -60,13 +61,12 @@ async function submitForm() {
       console.log("errors: ", v$.value.$errors);
       return;
     }
-    let newProduct = ref(null);
-    let newFlavor = ref(null);
-
+    console.log("past touch");
     try {
       newFlavor.value = await axios.post("/flavors", form);
       form.flavorID = newFlavor.value.data.flavorID;
     } catch (e) {
+      console.log(e);
       toast.add({
         severity: "error",
         summary: "Error",
@@ -82,7 +82,8 @@ async function submitForm() {
       formData.append("price", form.price);
       formData.append("expirationDate", form.expirationDate);
       formData.append("image", imageObject.value);
-
+      //Ari nalang add function if duplicate ba sila or naay nag exist na product
+      //To handle katong image add bisag naay error
       newProduct.value = await axios.post("/products", formData);
       form.productID = newProduct.value.data.productID;
       console.log(newProduct);

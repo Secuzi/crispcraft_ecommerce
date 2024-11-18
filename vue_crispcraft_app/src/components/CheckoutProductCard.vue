@@ -23,17 +23,6 @@ const prop = defineProps({
     default: false,
   },
 });
-//What should be inside the product store?
-//quantity
-//
-
-function test(id) {
-  console.log(id);
-}
-
-function test2(id) {
-  console.log("remove", id);
-}
 
 const productStore = useProductStore();
 </script>
