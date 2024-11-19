@@ -46,7 +46,7 @@ const calculateSubtotal = computed(() => {
         >
           <td class="px-5">{{ product.productName }}</td>
           <td class="px-5">x{{ product.qty }}</td>
-          <td class="px-5">x{{ product.price }}</td>
+          <td class="px-5">{{ product.price }}</td>
         </tr>
       </tbody>
       <tfoot>

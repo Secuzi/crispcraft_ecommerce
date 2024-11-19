@@ -10,7 +10,6 @@ import ChecklistIcon from "@/assets/images/icons/checklists.svg";
 import TransactionIcon from "@/assets/images/icons/transaction.svg";
 import ClerkIcon from "@/assets/images/icons/clerk.svg";
 import Button from "@/components/Button.vue";
-import VueButton from "primevue/button";
 import { reactive } from "vue";
 import axios from "axios";
 import DatePicker from "primevue/datepicker";
@@ -24,9 +23,9 @@ import Dialog from "primevue/dialog";
 import { watchEffect } from "vue";
 import { useInventoryStore } from "@/stores/inventory";
 import { useFlavorStore } from "@/stores/flavor";
-import { useRoute } from "vue-router";
+import { useRouter } from "vue-router";
 const productStore = useProductStore();
-const route = new useRoute();
+const router = new useRouter();
 const inventoryStore = useInventoryStore();
 const flavorStore = useFlavorStore();
 const toast = useToast();
@@ -147,6 +146,8 @@ async function submitForm() {
       detail: "Successfully edited product!",
       life: 3000,
     });
+    const response = await axios.get("/query/stock");
+    products.value = response.data;
   } catch (e) {
     console.log(e);
   }
@@ -199,8 +200,6 @@ watchEffect(async () => {
       selectedFlavor.value = selectedProduct.flavorID;
 
       selectedInventory.value = selectedProduct.inventoryID;
-
-      console.log("IMAGEEE: ", selectedProduct.image);
     }
   }
 });
@@ -210,7 +209,9 @@ onMounted(async () => {
   const response = await axios.get("/query/stock");
   products.value = response.data;
   console.log("PRODUCST: ", products.value);
-  productStore.selectedProduct = products.value[0].productID;
+  if (products.value.length > 0) {
+    productStore.selectedProduct = products.value[0].productID;
+  }
   isLoading.value = false;
   window.addEventListener("resize", updateDimensions);
 });

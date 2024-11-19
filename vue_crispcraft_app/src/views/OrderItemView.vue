@@ -12,11 +12,11 @@ import ProductSaltedOnion from "@/assets/images/BAG of CHIPS/onion.png";
 import MobileContainer from "@/components/MobileContainer.vue";
 import MultiCarousel from "@/components/MultiCarousel.vue";
 import { RouterLink } from "vue-router";
+import axios from "axios";
 import { useOrderItemStore } from "@/stores/multicarousel";
-import { onUnmounted } from "vue";
+import { onUnmounted, watchEffect, onMounted } from "vue";
 import Button from "@/components/Button.vue";
 import DesktopContainer from "@/components/DesktopContainer.vue";
-
 const formQuantity = ref(null);
 
 const products = ref([
@@ -112,6 +112,10 @@ const products = ref([
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin at risus vel nisi volutpat facilisis. Enjoy the perfect blend of flavor and texture!",
   },
 ]);
+
+onMounted(() => {
+  //Make a call to
+});
 
 onUnmounted(() => {
   orderItemStore.selectedProduct = {};
