@@ -19,5 +19,16 @@ export const useProductStore = defineStore("product", () => {
   function getProduct(id) {
     selectedProduct.value = id;
   }
-  return { selectedProduct, getProduct, deleteProduct, products };
+
+  async function fetchProductDetails(id) {
+    const response = await axios.get(`/products/${id}`);
+    return response.data;
+  }
+  return {
+    selectedProduct,
+    getProduct,
+    deleteProduct,
+    products,
+    fetchProductDetails,
+  };
 });

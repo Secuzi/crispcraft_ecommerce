@@ -5,144 +5,97 @@ import InputNumber from "primevue/inputnumber";
 import Subtotal from "@/components/Subtotal.vue";
 import { ref } from "vue";
 import MainContainer from "@/components/MainContainer.vue";
-import ProductSweetCheese from "@/assets/images/BAG of CHIPS/cheese.png";
-import ProductCheesyHot from "@/assets/images/BAG of CHIPS/cheesyhot.png";
-import ProductChiliHot from "@/assets/images/BAG of CHIPS/chilihot.png";
-import ProductSaltedOnion from "@/assets/images/BAG of CHIPS/onion.png";
 import MobileContainer from "@/components/MobileContainer.vue";
 import MultiCarousel from "@/components/MultiCarousel.vue";
 import { RouterLink } from "vue-router";
 import axios from "axios";
-import { useOrderItemStore } from "@/stores/multicarousel";
-import { onUnmounted, watchEffect, onMounted } from "vue";
+import { onUnmounted, watch, onMounted } from "vue";
 import Button from "@/components/Button.vue";
 import DesktopContainer from "@/components/DesktopContainer.vue";
-const formQuantity = ref(null);
+const formQuantity = ref(0);
+import { useProductStore } from "@/stores/product";
+import { useOrderItemStore } from "@/stores/orderItem";
+const productStore = useProductStore();
+const orderitemStore = useOrderItemStore();
+const product = ref({});
+const baseUrl = import.meta.env.VITE_APP_BASE_URL;
 
-const products = ref([
-  {
-    id: 1,
-    image: ProductCheesyHot,
-    productName: "MC Cheesy Hot",
-    colorTheme: "#EF9426",
-    flavor: "Cheesy Hot",
-    price: 100,
-    stock: 99,
-    qty: 2,
-    isFontBlack: true,
-    description:
-      "Experience the delightful crunch of our Cheesy Hot Malunggay Chips—nutritious, flavorful, and perfect for satisfying your snack cravings!",
-  },
-  {
-    id: 2,
-    image: ProductSaltedOnion,
-    colorTheme: "#AE76B8",
-    productName: "MC Salted Onion",
-    flavor: "Salted Onion",
-    isFontBlack: false,
-    price: 200,
-    stock: 39,
-    qty: 2,
-    description:
-      "Enjoy our Malunggay Chips with Salted Onion flavor—crispy, nutritious, and bursting with savory goodness. A delightful snack for every occasion!",
-  },
-  {
-    id: 3,
-    image: ProductChiliHot,
-    colorTheme: "#863E24",
-    productName: "MC Chili Hot",
-    flavor: "Chili Hot",
-    isFontBlack: false,
-    price: 300,
-    stock: 25,
-    qty: 2,
-    description:
-      "Spice up your snack time with our Malunggay Chips in Chili Hot flavor—crispy, zesty, and packed with a fiery kick! Perfectly addictive!",
-  },
-  {
-    id: 4,
-    image: ProductSweetCheese,
-    colorTheme: "#EBCB5F",
-    productName: "MC Sweet Cheese",
-    flavor: "Sweet Cheese",
-    isFontBlack: true,
-    price: 200,
-    stock: 69,
-    qty: 2,
-    description:
-      "Indulge in our Sweet Cheese Malunggay Chips—crispy and perfectly sweetened with cheesy goodness. A unique treat for every snack lover!",
-  },
-  {
-    id: 5,
-    image: ProductSweetCheese,
-    colorTheme: "#EBCB5F",
-    productName: "MC Sweet Cheese",
-    flavor: "Sweet Cheese",
-    isFontBlack: true,
-    price: 345,
-    stock: 69,
-    qty: 2,
-    description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin at risus vel nisi volutpat facilisis. Enjoy the perfect blend of flavor and texture!",
-  },
-  {
-    id: 6,
-    image: ProductSweetCheese,
-    colorTheme: "#EBCB5F",
-    productName: "MC Sweet Cheese",
-    flavor: "Sweet Cheese",
-    isFontBlack: true,
-    price: 345,
-    stock: 69,
-    qty: 2,
-    description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin at risus vel nisi volutpat facilisis. Enjoy the perfect blend of flavor and texture!",
-  },
-  {
-    id: 7,
-    image: ProductSweetCheese,
-    colorTheme: "#EBCB5F",
-    productName: "MC Sweet Cheese",
-    flavor: "Sweet Cheese",
-    isFontBlack: true,
-    price: 345,
-    stock: 69,
-    qty: 2,
-    description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin at risus vel nisi volutpat facilisis. Enjoy the perfect blend of flavor and texture!",
-  },
-]);
+watch(
+  () => formQuantity,
+  (newQuantity) => {
+    if (newQuantity <= 0) {
+      return;
+    }
 
-onMounted(() => {
-  //Make a call to
+    const cartProduct = orderitemStore.products.find(
+      (p) => p.productID == productStore.selectedProduct
+    );
+
+    //Need mag join for unique cart products/order items
+    if (cartProduct) {
+      formQuantity = cartProduct;
+    }
+
+    const product = productStore.products.find(
+      (p) => p.productID == productStore.selectedProduct
+    );
+    orderItems.value.push(product);
+  }
+);
+
+watch(
+  () => productStore.selectedProduct, // Getter function for the reactive property
+  (newID) => {
+    if (newID) {
+      try {
+        // product.value = await productStore.fetchProductDetails(newID);
+        product.value = productStore.products.find((x) => x.productID == newID);
+        formQuantity.value = 0;
+      } catch (error) {
+        console.error("Error fetching product details:", error);
+      }
+    }
+  }
+);
+
+watch();
+
+const isLoading = ref(true);
+onMounted(async () => {
+  const response = await axios.get("/query/stock");
+  productStore.products = response.data;
+
+  const orderItemResponse = await axios.get("/order-item");
+  orderitemStore.products = orderItemResponse.data;
+
+  console.log(`ORDER ITEEM: `, orderitemStore.products);
+
+  if (productStore.products.length > 0) {
+    productStore.selectedProduct = productStore.products[0].productID;
+  }
+
+  isLoading.value = false;
 });
 
 onUnmounted(() => {
-  orderItemStore.selectedProduct = {};
+  productStore.selectedProduct = {};
 });
-
-const orderItemStore = useOrderItemStore();
-
-orderItemStore.selectedProduct = products.value[0];
 </script>
 
 <template>
   <MainContainer>
     <Navbar />
 
-    <DesktopContainer
-      alignItems="md:start"
-      :backgroundColor="orderItemStore.selectedProduct.colorTheme"
-    >
+    <DesktopContainer alignItems="md:start" background-color="!bg-[#D6F3FF]">
       <section class="basis-[415px] self-center">
         <!-- Selected Product -->
         <div class="flex justify-center">
           <Transition name="slide-fade">
             <img
-              v-show="orderItemStore.selectedProduct"
-              :key="orderItemStore.selectedProduct.id"
-              :src="orderItemStore.selectedProduct.image"
-              :alt="orderItemStore.selectedProduct.flavor"
+              v-show="product"
+              :key="product.productID"
+              :src="baseUrl + '/' + product.image"
+              :alt="product.flavorName"
               class="w-[70%]"
             />
           </Transition>
@@ -166,28 +119,18 @@ orderItemStore.selectedProduct = products.value[0];
             'myTextShadow mt-2',
           ]"
         >
-          MALUNGGAY CHIPS:
+          {{ product.productName }}
           <span
             class="font-rubik tracking-tighter font-bold text-[#EBCB5F] block mt-[-11px] mb-2"
             style="-webkit-text-stroke: 2px; -webkit-text-stroke-color: black"
-            >{{ orderItemStore.selectedProduct.flavor }}</span
+            >{{ product.flavorName }}</span
           >
         </h2>
 
         <div class="h-[84px] overflow-y-auto">
-          <p
-            :class="[
-              'italic',
-              'max-w-[360px]',
-              'text-[14px]',
-              'mb-[10px]',
-              orderItemStore.selectedProduct.isFontBlack
-                ? 'text-black'
-                : 'text-white',
-            ]"
-          >
+          <p :class="['italic', 'max-w-[360px]', 'text-[14px]', 'mb-[10px]']">
             <span class="font-bold">Description:</span>
-            {{ orderItemStore.selectedProduct.description }}
+            {{ product.description }}
           </p>
         </div>
 
@@ -200,20 +143,31 @@ orderItemStore.selectedProduct = products.value[0];
 
             <InputNumber
               v-model="formQuantity"
-              inputId="integeronly"
+              inputId="minmax"
               class="h-[24px]"
+              :min="0"
+              :max="product.stockQty"
               :pt="{
                 inputtext: {
                   root: '!rounded-[5px]',
                 },
-                root: '!rounded-[5px]',
               }"
               style="width: 212px; height: 48px"
             />
             <!-- Button Container -->
             <div class="mt-3">
-              <Button text="-" padding_x="1.5rem" padding_y="0px" />
               <Button
+                text="-"
+                padding_x="1.5rem"
+                padding_y="0px"
+                @click="formQuantity > 0 ? (formQuantity -= 1) : formQuantity"
+              />
+              <Button
+                @click="
+                  formQuantity < product.stockQty
+                    ? (formQuantity += 1)
+                    : formQuantity
+                "
                 text="+"
                 padding_x="1.5rem"
                 padding_y="0px"
@@ -225,29 +179,20 @@ orderItemStore.selectedProduct = products.value[0];
           <!-- Product info -->
           <div class="grow fluid">
             <h3 class="font-extrabold text-opacity-50 text-[16px]">
-              Available Stock: {{ orderItemStore.selectedProduct.stock }}
+              Available Stock: {{ product.stockQty }}
             </h3>
             <h3 class="font-extrabold text-[18px]">
-              Price: {{ orderItemStore.selectedProduct.price }}
+              Price: {{ product.price }}
             </h3>
           </div>
         </div>
 
-        <h3
-          class="font-medium"
-          :class="[
-            orderItemStore.selectedProduct.isFontBlack
-              ? 'text-black'
-              : 'text-white',
-          ]"
-        >
-          Choose Other Flavors:
-        </h3>
+        <h3 class="font-medium mt-3">Choose Other Flavors:</h3>
 
         <div class="flex justify-around mt-[22px]">
           <MultiCarousel
             :style="'width: 400px'"
-            :items="products"
+            :items="productStore.products"
             slidesPerView="3"
             spaceBetween="20"
           />
@@ -257,7 +202,7 @@ orderItemStore.selectedProduct = products.value[0];
       <section class="self-center p-4">
         <div>
           <Subtotal
-            :products="products"
+            :products="orderitemStore.products"
             tableHeaderTextSize="12px"
             subTotalTextSize="14px"
             dataTextSize="14px"
@@ -278,7 +223,7 @@ orderItemStore.selectedProduct = products.value[0];
       </section>
     </DesktopContainer>
 
-    <!-- MOBILEEE -->
+    <!-- MOBILEEE
     <MobileContainer>
       <section class="myContainer">
         <HeaderText
@@ -287,16 +232,7 @@ orderItemStore.selectedProduct = products.value[0];
           products-text="ITEM"
           featured-text="ORDER"
         />
-        <p
-          class="italic font-medium text-[14px]"
-          :class="[
-            orderItemStore.selectedProduct.isFontBlack
-              ? 'text-black'
-              : 'text-white',
-          ]"
-        >
-          Choose other flavors:
-        </p>
+        <p class="italic font-medium text-[14px]">Choose other flavors:</p>
       </section>
 
       <section class="relative">
@@ -313,7 +249,7 @@ orderItemStore.selectedProduct = products.value[0];
         </div>
       </section>
 
-      <section v-if="orderItemStore.selectedProduct" class="myContainer">
+      <section v-if="productStore.selectedProduct" class="myContainer">
         <h2
           :class="[
             'text-[32px]',
@@ -331,17 +267,7 @@ orderItemStore.selectedProduct = products.value[0];
           >
         </h2>
         <div class="h-[84px] overflow-y-auto">
-          <p
-            :class="[
-              'italic',
-
-              'text-[14px]',
-              'mb-[10px]',
-              orderItemStore.selectedProduct.isFontBlack
-                ? 'text-black'
-                : 'text-white',
-            ]"
-          >
+          <p :class="['italic', 'text-[14px]', 'mb-[10px]']">
             <span class="font-bold">Description:</span>
             {{ orderItemStore.selectedProduct.description }}
           </p>
@@ -365,13 +291,14 @@ orderItemStore.selectedProduct = products.value[0];
 
               <InputNumber
                 v-model="formQuantity"
-                inputId="integeronly"
+                inputId="minmax"
+                min="0"
+                max="99"
                 class="h-[24px]"
                 :pt="{
                   inputtext: {
                     root: '!rounded-[5px]',
                   },
-                  root: '!rounded-[5px]',
                 }"
                 style="width: 150px"
               />
@@ -410,7 +337,7 @@ orderItemStore.selectedProduct = products.value[0];
           </button>
         </RouterLink>
       </section>
-    </MobileContainer>
+    </MobileContainer> -->
   </MainContainer>
 </template>
 

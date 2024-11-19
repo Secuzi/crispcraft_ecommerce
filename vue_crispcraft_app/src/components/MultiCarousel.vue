@@ -3,10 +3,11 @@ import { Swiper, SwiperSlide } from "swiper/vue";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import { useOrderItemStore } from "@/stores/multicarousel";
+import { useProductStore } from "@/stores/product";
+import { useOrderItemStore } from "@/stores/orderItem";
 import { ref, watch } from "vue";
 const props = defineProps({
-  items: ref({}),
+  items: ref([]),
   slidesPerView: {
     type: String,
     default: "1",
@@ -19,22 +20,20 @@ const props = defineProps({
 });
 
 const orderItemStore = useOrderItemStore();
+const productStore = useProductStore();
+// const products = ref([...props.items]);
 
-const products = ref([...props.items]);
-
-watch(
-  () => props.items,
-  (newItems) => {
-    products.value = [...newItems];
-  }
-);
-
+// watch(
+//   () => props.items,
+//   (newItems) => {
+//     products.value = [...newItems];
+//   }
+// );
+const baseUrl = import.meta.env.VITE_APP_BASE_URL;
 const foundProductId = ref(orderItemStore.selectedProduct.id);
 
-const selectedProduct = (product) => {
-  orderItemStore.selectedProduct = product;
-
-  foundProductId.value = product.id;
+const selectedProduct = (id) => {
+  productStore.selectedProduct = id;
 };
 </script>
 
@@ -46,13 +45,17 @@ const selectedProduct = (product) => {
       dynamicBullets="true"
     >
       <SwiperSlide
-        v-for="product in products"
-        :key="product.id"
-        @click="selectedProduct(product)"
+        v-for="product in items"
+        :key="product.productID"
+        @click="selectedProduct(product.productID)"
         class="product-item cursor-pointer"
-        :class="{ active: foundProductId === product.id }"
+        :class="{ active: productStore.selectedProduct == product.productID }"
       >
-        <img :src="product.image" :alt="product.name" class="z-10" />
+        <img
+          :src="baseUrl + '/' + product.image"
+          :alt="product.name"
+          class="z-10"
+        />
       </SwiperSlide>
     </Swiper>
   </div>

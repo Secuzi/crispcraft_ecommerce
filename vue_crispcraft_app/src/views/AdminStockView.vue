@@ -206,7 +206,7 @@ watchEffect(async () => {
 const isLoading = ref(true);
 onMounted(async () => {
   const response = await axios.get("/query/stock");
-  products.value = response.data;
+
   productStore.products = response.data;
 
   console.log("PRODUCT STORE: ", productStore.products);
@@ -221,6 +221,7 @@ onUnmounted(() => {
   window.removeEventListener("resize", updateDimensions);
   //In order to reuse the same store I have to disable this
   productStore.selectedProduct = null;
+  productStore.products = null;
 });
 </script>
 

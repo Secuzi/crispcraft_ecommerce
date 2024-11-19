@@ -4,5 +4,7 @@ import { defineStore } from "pinia";
 export const useOrderItemStore = defineStore("orderItem", () => {
   const selectedProduct = ref({});
 
-  return { selectedProduct };
+  const products = ref([]);
+
+  return { selectedProduct, products };
 });
