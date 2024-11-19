@@ -67,9 +67,21 @@ const getFlavor = async (req, res) => {
   return res.status(200).json({ flavor });
 };
 
+const deleteFlavor = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    await FlavorService.delete(id, "flavorID");
+
+    return res.status(200).json({ message: "Deleted flavor!" });
+  } catch (e) {
+    console.log(e);
+  }
+};
+
 module.exports = {
   createFlavor,
   getAllFlavors,
   getFlavor,
   updateFlavor,
+  deleteFlavor,
 };

@@ -288,7 +288,10 @@ onUnmounted(() => {
             </div>
 
             <div v-if="!isLoading" class="overflow-auto w-full mt-[5rem]">
-              <div v-if="products.length > 0" class="max-h-[800px]">
+              <div
+                v-if="productStore.products.length > 0"
+                class="max-h-[800px]"
+              >
                 <CheckoutProductCard
                   class="h-[128px] flex-grow-0"
                   v-for="(product, index) in productStore.products"

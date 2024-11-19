@@ -4,6 +4,7 @@ const {
   getAllFlavors,
   getFlavor,
   updateFlavor,
+  deleteFlavor,
 } = require("../controllers/flavorController");
 const router = express.Router();
 
@@ -12,4 +13,5 @@ router.post("/", createFlavor);
 router.get("/", getAllFlavors);
 router.get("/:id", getFlavor);
 router.put("/:id", updateFlavor);
+router.delete("/:id", deleteFlavor);
 module.exports = router;
