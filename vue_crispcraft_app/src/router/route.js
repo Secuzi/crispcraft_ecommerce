@@ -30,7 +30,7 @@ const routes = [
     path: "/order",
     name: "order",
     component: OrderItemView,
-    meta: { requiresAuth: true, role: "customer" },
+    meta: { requiresAuth: false, role: "customer" },
   },
   {
     path: "/checkout",
