@@ -3,6 +3,7 @@
 import { useCartStore } from "@/stores/cart";
 import CloseIcon from "@/assets/images/icons/EX.svg";
 import { useProductStore } from "@/stores/product";
+import axios from "axios";
 const prop = defineProps({
   image: "",
   header: "",
@@ -24,6 +25,10 @@ const prop = defineProps({
   },
 });
 
+const hello = (id) => {
+  console.log(`Hello Clicked: ${id}`);
+};
+
 const productStore = useProductStore();
 </script>
 
@@ -38,7 +43,7 @@ const productStore = useProductStore();
       :src="CloseIcon"
       alt="Close Icon"
       class="absolute right-[5px] top-[5px] w-5 cursor-pointer"
-      @click="test2(prop.id)"
+      @click="productStore.deleteProduct(prop.id)"
     />
 
     <div class="max-w-[60px] flex items-center">

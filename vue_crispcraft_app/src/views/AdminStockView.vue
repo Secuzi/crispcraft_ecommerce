@@ -128,7 +128,6 @@ async function submitForm() {
     }
 
     try {
-      //delete this
       newInventory.value = await axios.put(
         `/inventory/${selectedInventory.value}`,
         form
@@ -147,7 +146,7 @@ async function submitForm() {
       life: 3000,
     });
     const response = await axios.get("/query/stock");
-    products.value = response.data;
+    productStore.products = response.data;
   } catch (e) {
     console.log(e);
   }
@@ -172,8 +171,8 @@ const isWindowMobile = computed(() => {
 const selectedFlavor = ref();
 const selectedInventory = ref();
 watchEffect(async () => {
-  if (products.value.length > 0 && productStore.selectedProduct) {
-    const selectedProduct = products.value.find(
+  if (productStore.products.length > 0 && productStore.selectedProduct) {
+    const selectedProduct = productStore.products.find(
       (product) => product.productID === productStore.selectedProduct
     );
 
@@ -208,9 +207,12 @@ const isLoading = ref(true);
 onMounted(async () => {
   const response = await axios.get("/query/stock");
   products.value = response.data;
-  console.log("PRODUCST: ", products.value);
-  if (products.value.length > 0) {
-    productStore.selectedProduct = products.value[0].productID;
+  productStore.products = response.data;
+
+  console.log("PRODUCT STORE: ", productStore.products);
+  console.log("Product count: ", productStore.products.length);
+  if (productStore.products.length > 0) {
+    productStore.selectedProduct = productStore.products[0].productID;
   }
   isLoading.value = false;
   window.addEventListener("resize", updateDimensions);
@@ -289,7 +291,7 @@ onUnmounted(() => {
               <div v-if="products.length > 0" class="max-h-[800px]">
                 <CheckoutProductCard
                   class="h-[128px] flex-grow-0"
-                  v-for="(product, index) in products"
+                  v-for="(product, index) in productStore.products"
                   :key="product.productID"
                   :id="product.productID"
                   :isActive="product.productID == productStore.selectedProduct"
