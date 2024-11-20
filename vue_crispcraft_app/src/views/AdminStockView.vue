@@ -36,7 +36,7 @@ const form = reactive({
   price: null,
   expirationDate: null,
 
-  stockQty: 1,
+  stockQty: 0,
   changeDate: "",
 
   flavorName: "",
@@ -209,8 +209,6 @@ onMounted(async () => {
 
   productStore.products = response.data;
 
-  console.log("PRODUCT STORE: ", productStore.products);
-  console.log("Product count: ", productStore.products.length);
   if (productStore.products.length > 0) {
     productStore.selectedProduct = productStore.products[0].productID;
   }
@@ -396,7 +394,7 @@ onUnmounted(() => {
                   />
                   <input
                     type="number"
-                    min="1"
+                    min="0"
                     name="product stock"
                     v-model="form.stockQty"
                     id="stock"

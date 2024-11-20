@@ -12,9 +12,11 @@ import axios from "axios";
 import { onUnmounted, watch, onMounted } from "vue";
 import Button from "@/components/Button.vue";
 import DesktopContainer from "@/components/DesktopContainer.vue";
-const formQuantity = ref(0);
 import { useProductStore } from "@/stores/product";
 import { useOrderItemStore } from "@/stores/orderItem";
+import { useAuthStore } from "@/stores/auth";
+const formQuantity = ref(0);
+const authStore = useAuthStore();
 const productStore = useProductStore();
 const orderitemStore = useOrderItemStore();
 const product = ref({});
@@ -50,6 +52,8 @@ watch(
       try {
         // product.value = await productStore.fetchProductDetails(newID);
         product.value = productStore.products.find((x) => x.productID == newID);
+        orderitemStore.produdts;
+
         formQuantity.value = 0;
       } catch (error) {
         console.error("Error fetching product details:", error);
@@ -63,7 +67,9 @@ watch();
 const isLoading = ref(true);
 onMounted(async () => {
   const response = await axios.get("/query/stock");
-  productStore.products = response.data;
+  productStore.products = response.data.filter(
+    (product) => product.stockQty > 0
+  );
 
   const orderItemResponse = await axios.get("/order-item");
   orderitemStore.products = orderItemResponse.data;
@@ -87,7 +93,7 @@ onUnmounted(() => {
     <Navbar />
 
     <DesktopContainer alignItems="md:start" background-color="!bg-[#D6F3FF]">
-      <section class="basis-[415px] self-center">
+      <section v-if="product" class="basis-[415px] self-center">
         <!-- Selected Product -->
         <div class="flex justify-center">
           <Transition name="slide-fade">
@@ -102,7 +108,7 @@ onUnmounted(() => {
         </div>
       </section>
 
-      <section class="basis-[630px]">
+      <section v-if="product" class="basis-[630px]">
         <h1>
           <HeaderText
             featured-text="ORDER"
@@ -199,7 +205,7 @@ onUnmounted(() => {
         </div>
       </section>
 
-      <section class="self-center p-4">
+      <section v-if="orderitemStore.products" class="self-center p-4">
         <div>
           <Subtotal
             :products="orderitemStore.products"

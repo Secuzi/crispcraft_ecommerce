@@ -25,7 +25,8 @@ const getInventory = async (req, res) => {
 const updateInventory = async (req, res) => {
   const { id } = req.params;
   let { stockQty, changeDate } = req.body;
-  if (!stockQty) {
+  console.log("STOOCK: ", stockQty);
+  if (stockQty === null || typeof stockQty === "undefined") {
     return res
       .status(400)
       .json({ message: "stock quantity must not be null!" });

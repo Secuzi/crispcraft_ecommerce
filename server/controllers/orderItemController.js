@@ -35,7 +35,7 @@ const createOrderItem = async (req, res) => {
 
     return res.status(200).json({
       message: "Created Order Item!",
-      orderItemID: createdOrderItem.id,
+      orderItemID: createdOrderItem.orderItemID,
     });
   } catch (e) {
     console.log(e);
