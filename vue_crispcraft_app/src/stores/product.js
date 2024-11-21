@@ -7,6 +7,8 @@ export const useProductStore = defineStore("product", () => {
 
   async function deleteProduct(id) {
     const test = await axios.delete(`/products/${id}`);
+
+    console.log("IN DELETE PRODUCTS: ");
     const product = products.value.find((x) => x.productID == id);
     await axios.delete(`/flavors/${product.flavorID}`);
     const newProducts = products.value.filter(

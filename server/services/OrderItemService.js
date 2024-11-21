@@ -12,7 +12,8 @@ class OrderItemService extends ModelService {
       const query = `
    SELECT Customer.customerID, OrderItem.productID,
 OrderItem.orderItemID, OrderItem.quantity, 
-Product.price, Product.productName, Flavor.flavorName
+Product.price, Product.productName, Flavor.flavorName, 
+Product.active 
 
 FROM Customer 
 INNER JOIN OrderItem ON Customer.customerID = OrderItem.customerID

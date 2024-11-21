@@ -36,7 +36,7 @@ const routes = [
     path: "/checkout",
     name: "checkout",
     component: CheckOutView,
-    meta: { requiresAuth: true, role: "customer" },
+    meta: { requiresAuth: true, requiresActiveProduct: true, role: "customer" },
   },
   {
     path: "/trackorder",

@@ -19,15 +19,15 @@ const prop = defineProps({
     type: String,
     default: "14px",
   },
+  deleteProduct: {
+    type: Function,
+  },
+
   isActive: {
     type: Boolean,
     default: false,
   },
 });
-
-const hello = (id) => {
-  console.log(`Hello Clicked: ${id}`);
-};
 
 const productStore = useProductStore();
 </script>
@@ -43,7 +43,7 @@ const productStore = useProductStore();
       :src="CloseIcon"
       alt="Close Icon"
       class="absolute right-[5px] top-[5px] w-5 cursor-pointer"
-      @click="productStore.deleteProduct(prop.id)"
+      @click="deleteProduct(prop.id)"
     />
 
     <div class="max-w-[60px] flex items-center">

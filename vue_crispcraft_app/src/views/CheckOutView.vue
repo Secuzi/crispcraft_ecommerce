@@ -6,35 +6,22 @@ import Navbar from "@/components/Navbar.vue";
 import AddressCard from "@/components/AddressCard.vue";
 import CheckoutProductCard from "@/components/CheckoutProductCard.vue";
 import { reactive, computed, onMounted, onUnmounted } from "vue";
-import ProductSweetCheese from "@/assets/images/BAG of CHIPS/cheese.png";
-import ProductCheesyHot from "@/assets/images/BAG of CHIPS/cheesyhot.png";
+
 import GcashIcon from "@/assets/images/icons/gcash_icon.svg";
 import CODIcon from "@/assets/images/icons/cashondelivery_icon.svg";
 import { useToast } from "primevue";
 import Toast from "primevue/toast";
 import { useCartStore } from "@/stores/cart";
 import DesktopContainer from "@/components/DesktopContainer.vue";
-
+import { useOrderItemStore } from "@/stores/orderItem";
+import { useAuthStore } from "@/stores/auth";
+import { useOrderStore } from "@/stores/order";
 const cartStore = useCartStore();
-
+const orderItemStore = useOrderItemStore();
+const authStore = useAuthStore();
+const orderStore = useOrderStore();
 const toast = useToast();
-
-// const products = ref([
-//   {
-//     id: 1,
-//     image: ProductCheesyHot,
-//     header: "Malunggay Chips: Cheesy Hot",
-//     qty: 2,
-//     price: 2000,
-//   },
-//   {
-//     id: 2,
-//     image: ProductSweetCheese,
-//     header: "Malunggay Chips: Sweet Cheese",
-//     qty: 69,
-//     price: 99,
-//   },
-// ]);
+import axios from "axios";
 
 const browserWindow = reactive({
   width: window.innerWidth,
@@ -56,9 +43,18 @@ const showSuccessToast = () => {
     life: 3000,
   });
 };
+const baseUrl = import.meta.env.VITE_APP_BASE_URL;
 
-onMounted(() => {
+onMounted(async () => {
   window.addEventListener("resize", updateDimensions);
+
+  const getCheckoutResponse = await axios.get(
+    `/query/checkout/${authStore.user_id}`
+  );
+
+  orderStore.products = getCheckoutResponse.data;
+
+  console.log("RESPONSE: ", getCheckoutResponse.data);
 });
 onUnmounted(() => {
   window.removeEventListener("resize", updateDimensions);
@@ -87,12 +83,12 @@ onUnmounted(() => {
           >
             <CheckoutProductCard
               class="mt-3"
-              v-for="product in cartStore.products"
-              :key="product.id"
-              :id="product.id"
-              :image="product.image"
+              v-for="product in orderStore.products"
+              :key="product.productID"
+              :id="product.productID"
+              :image="baseUrl + '/' + product.image"
               :header="product.productName"
-              :qty="product.qty"
+              :qty="product.quantity"
               :price="product.price"
               fontSizeHeader="18px"
               fontSizeBody="16px"

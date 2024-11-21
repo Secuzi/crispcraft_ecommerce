@@ -76,7 +76,7 @@ async function submitForm() {
       });
     }
     let formData;
-    let searchedProductResponse;
+
     try {
       formData = new FormData();
       formData.append("productName", form.productName);
@@ -85,14 +85,7 @@ async function submitForm() {
       formData.append("price", form.price);
       formData.append("expirationDate", form.expirationDate);
       formData.append("image", imageObject.value);
-
-      searchedProductResponse = await axios.get(
-        `/products/name/${form.productName}`
-      );
-
-      if (searchedProductResponse.data) {
-        throw new Error("Product name already exists!");
-      }
+      newProduct.value = await axios.post("/products", formData);
 
       // newProduct.value = await axios.post("/products", formData);
       // form.productID = newProduct.value.data.productID;
@@ -106,10 +99,10 @@ async function submitForm() {
       });
     }
 
-    if (searchedProductResponse.data || !newFlavor.value) {
+    if (!newFlavor.value) {
       return;
     }
-    newProduct.value = await axios.post("/products", formData);
+
     console.log(`NEW PRODUUCT: `, newProduct.value);
     form.productID = newProduct.value.data.productID;
     form.stockQty = 0;

@@ -30,22 +30,6 @@ const createProduct = async (req, res) => {
     const parsedDate = dayjs(expirationDate, "YYYY-MM-DD");
     const formattedDate = parsedDate.format("YYYY-MM-DD");
 
-    const searchedProduct = await ProductService.getByField(
-      "productName",
-      productName
-    );
-    //Remove this maybe
-    if (searchedProduct) {
-      if (req.file) {
-        const filePath = path.join(`../${__dirname}`, "uploads", imagePath);
-        console.log("path", filePath);
-        fs.unlink(filePath, (err) => {
-          if (err) console.error("Error deleting file:", err);
-          else console.log("Uploaded file deleted due to error.");
-        });
-      }
-      return res.status(400).json({ message: "Product already exist!" });
-    }
     const { error, value: validatedProduct } = productSchema.validate(
       {
         productName,
@@ -105,7 +89,7 @@ const updateProduct = async (req, res) => {
     : searchedProduct.image;
 
   console.log("IMAGEEE: ", imagePath);
-  const { productName, description, price, flavorID, expirationDate } =
+  const { productName, description, price, flavorID, expirationDate, active } =
     req.body;
   const parsedDate = dayjs(expirationDate, "YYYY-MM-DD");
   const formattedDate = parsedDate.format("YYYY-MM-DD");
@@ -127,6 +111,7 @@ const updateProduct = async (req, res) => {
     console.log(errorMessages);
     return res.status(400).json({ message: errorMessages });
   }
+  validatedProduct.active = active;
 
   const updatedProduct = await ProductService.update(
     id,

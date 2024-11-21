@@ -9,19 +9,20 @@ import MobileContainer from "@/components/MobileContainer.vue";
 import MultiCarousel from "@/components/MultiCarousel.vue";
 import { RouterLink } from "vue-router";
 import axios from "axios";
-import { onUnmounted, watch, onMounted } from "vue";
+import { onUnmounted, watch, onMounted, watchEffect } from "vue";
 import Button from "@/components/Button.vue";
 import DesktopContainer from "@/components/DesktopContainer.vue";
 import { useProductStore } from "@/stores/product";
 import { useOrderItemStore } from "@/stores/orderItem";
 import { useAuthStore } from "@/stores/auth";
+
 const formQuantity = ref(0);
 const authStore = useAuthStore();
 const productStore = useProductStore();
 const orderitemStore = useOrderItemStore();
 const product = ref({});
 const baseUrl = import.meta.env.VITE_APP_BASE_URL;
-
+const subtotal = ref(0);
 watch(
   () => formQuantity.value,
   async (newQuantity) => {
@@ -84,9 +85,11 @@ watch(
 );
 
 const isLoading = ref(true);
+const isAnyProductNotActive = ref(true);
+
 onMounted(async () => {
   const response = await axios.get("/query/stock");
-  productStore.products = response.data.filter((p) => p.stockQty > 0);
+  productStore.products = response.data.filter((p) => p.active == 1);
 
   const orderItemResponse = await axios.get("/order-item", {
     params: {
@@ -96,6 +99,11 @@ onMounted(async () => {
 
   orderitemStore.products = orderItemResponse.data;
 
+  console.log("PRODUUCTS: ", orderitemStore.products);
+
+  isAnyProductNotActive.value = orderitemStore.products.some((p) => !p.active);
+
+  console.log("IS ANY ACTIVE: ", isAnyProductNotActive.value);
   if (productStore.products.length > 0) {
     productStore.selectedProduct = productStore.products[0].productID;
   }
@@ -105,6 +113,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   productStore.selectedProduct = {};
+  // orderitemStore.products = {};
 });
 </script>
 
@@ -136,6 +145,7 @@ onUnmounted(() => {
             textSize="55px"
           />
         </h1>
+
         <h2
           :class="[
             'text-[30px]',
@@ -227,7 +237,7 @@ onUnmounted(() => {
       </section>
 
       <section class="self-center p-4">
-        <div>
+        <div v-if="!isLoading">
           <Subtotal
             :products="orderitemStore.products"
             tableHeaderTextSize="12px"
@@ -236,9 +246,18 @@ onUnmounted(() => {
             sumNumberTextSize="14px"
             class="mt-[15px]"
             height="100%"
+            :subtotal="subtotal"
+            :imageClick="orderitemStore.deleteProduct"
+            :active="!orderitemStore.isAnyProductNotActive"
           />
           <div class="flex justify-end">
-            <RouterLink to="/checkout">
+            <RouterLink
+              v-if="
+                !orderitemStore.isAnyProductNotActive &&
+                orderitemStore.products.length > 0
+              "
+              to="/checkout"
+            >
               <button
                 class="bg-mySecondaryColor myTextShadow mt-3 myBoxShadow text-white font-bold text-[24px] px-5 py-2 rounded-[25px] text-center"
               >

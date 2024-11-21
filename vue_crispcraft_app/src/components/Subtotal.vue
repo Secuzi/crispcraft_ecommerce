@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref } from "vue";
+import CloseIcon from "@/assets/images/icons/EX.svg";
 
 const props = defineProps({
   products: ref([]),
@@ -8,8 +9,16 @@ const props = defineProps({
   dataTextSize: "",
   sumNumberTextSize: "",
   height: "",
+  imageClick: {
+    type: Function,
+  },
+  subtotal: null,
+  active: {
+    type: Boolean,
+  },
 });
 // Query this
+
 const calculateSubtotal = computed(() => {
   let sum = 0;
   for (let product of props.products) {
@@ -42,11 +51,24 @@ const calculateSubtotal = computed(() => {
         <tr
           v-for="(product, index) in props.products"
           :key="product.productID"
-          class="text-opacity-50 text-black"
+          :class="[
+            product.active == 1
+              ? 'text-black'
+              : 'text-red-500 !text-opacity-100',
+          ]"
+          class="text-opacity-50 text-black cursor-pointer relative"
         >
-          <td class="px-5">{{ product.productName }}</td>
+          <td class="px-5">{{ product.flavorName }}</td>
           <td class="px-5">x{{ product.quantity }}</td>
           <td class="px-5">{{ product.price }}</td>
+          <div>
+            <img
+              :src="CloseIcon"
+              @click="imageClick(product.orderItemID)"
+              alt="Close icon"
+              class="absolute right-2 top-[50%] translate-y-[-50%] w-[12px]"
+            />
+          </div>
         </tr>
       </tbody>
       <tfoot>
@@ -64,6 +86,13 @@ const calculateSubtotal = computed(() => {
           >
             Php {{ calculateSubtotal }}
           </td>
+        </tr>
+        <tr v-if="!props.active">
+          <th class="py-1 px-5 text-opacity-50 text-black rounded-bl-xl">
+            <span class="font-medium text-[12px] text-red-500"
+              >A product is unavailable</span
+            >
+          </th>
         </tr>
       </tfoot>
     </table>

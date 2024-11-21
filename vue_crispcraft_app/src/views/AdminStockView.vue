@@ -111,6 +111,14 @@ async function submitForm() {
       formData.append("expirationDate", form.expirationDate);
       formData.append("image", imageObject.value);
 
+      if (form.stockQty === 0) {
+        formData.append("active", 0);
+      } else {
+        formData.append("active", 1);
+      }
+
+      console.log("ACTIVE: ", formData.active);
+
       newProduct.value = await axios.put(
         `/products/${productStore.selectedProduct}`,
         formData
@@ -170,7 +178,12 @@ const isWindowMobile = computed(() => {
 });
 const selectedFlavor = ref();
 const selectedInventory = ref();
+const isLoading = ref(true);
 watchEffect(async () => {
+  if (isLoading.value) {
+    return;
+  }
+
   if (productStore.products.length > 0 && productStore.selectedProduct) {
     const selectedProduct = productStore.products.find(
       (product) => product.productID === productStore.selectedProduct
@@ -203,7 +216,6 @@ watchEffect(async () => {
   }
 });
 
-const isLoading = ref(true);
 onMounted(async () => {
   const response = await axios.get("/query/stock");
 
@@ -300,6 +312,7 @@ onUnmounted(() => {
                   :class="[index !== 0 ? 'mt-5' : '']"
                   :image="baseUrl + '/' + product.image"
                   :header="product.productName"
+                  :deleteProduct="productStore.deleteProduct"
                   :description="product.description"
                   :qty="product.stockQty"
                   :price="product.price"
