@@ -57,6 +57,13 @@ const authenticationClick = () => {
           </li>
           <li>
             <RouterLink
+              to="/order"
+              class="text-white text-[8px] font-bold sm:text-[20px]"
+              >Order</RouterLink
+            >
+          </li>
+          <li>
+            <RouterLink
               to="/"
               class="text-white text-[8px] font-bold sm:text-[20px]"
               @click="authenticationClick"

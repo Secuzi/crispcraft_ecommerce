@@ -2,7 +2,14 @@ const OrderItemService = require("../services/OrderItemService");
 const orderItemSchema = require("../schemas/OrderItemSchema.js");
 const getAllOrderItems = async (req, res) => {
   try {
-    const orderItems = await OrderItemService.getAll();
+    const customerID = req.query.id;
+    if (!customerID) {
+      return res.status(400).json({ message: "User does not exist!" });
+    }
+    const orderItems = await OrderItemService.findOrderItemsByCustomerID(
+      customerID
+    );
+
     return res.status(200).json(orderItems);
   } catch (e) {
     console.log(e);
@@ -11,12 +18,11 @@ const getAllOrderItems = async (req, res) => {
 
 const createOrderItem = async (req, res) => {
   try {
-    const { quantity, subtotal, productID, customerID } = req.body;
+    const { quantity, productID, customerID } = req.body;
 
     const { error, value: validatedOrderItem } = orderItemSchema.validate(
       {
         quantity,
-        subtotal,
         productID,
         customerID,
       },
@@ -35,7 +41,7 @@ const createOrderItem = async (req, res) => {
 
     return res.status(200).json({
       message: "Created Order Item!",
-      orderItemID: createdOrderItem.orderItemID,
+      orderItemID: createdOrderItem.id,
     });
   } catch (e) {
     console.log(e);
@@ -45,7 +51,7 @@ const createOrderItem = async (req, res) => {
 const updateOrderItem = async (req, res) => {
   try {
     const id = Number(req.params.id);
-    const { quantity, subtotal, productID, customerID } = req.body;
+    const { quantity, productID, customerID } = req.body;
     const searchedOrderItem = await OrderItemService.read(id, "orderItemID");
 
     if (!searchedOrderItem) {
@@ -55,7 +61,6 @@ const updateOrderItem = async (req, res) => {
     const { error, value: validatedOrderItem } = orderItemSchema.validate(
       {
         quantity,
-        subtotal,
         productID,
         customerID,
       },

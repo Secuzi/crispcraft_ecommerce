@@ -19,7 +19,6 @@ INNER JOIN Inventory ON Inventory.productID = Product.productID
     console.log(e);
   }
 };
-
 module.exports = {
   getStockData,
 };

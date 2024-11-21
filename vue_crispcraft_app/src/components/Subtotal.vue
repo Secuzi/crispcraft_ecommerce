@@ -13,7 +13,7 @@ const props = defineProps({
 const calculateSubtotal = computed(() => {
   let sum = 0;
   for (let product of props.products) {
-    sum += product.price * product.stockQty;
+    sum += product.quantity * product.price;
   }
   return sum;
 });
@@ -45,7 +45,7 @@ const calculateSubtotal = computed(() => {
           class="text-opacity-50 text-black"
         >
           <td class="px-5">{{ product.productName }}</td>
-          <td class="px-5">x{{ product.stockQty }}</td>
+          <td class="px-5">x{{ product.quantity }}</td>
           <td class="px-5">{{ product.price }}</td>
         </tr>
       </tbody>

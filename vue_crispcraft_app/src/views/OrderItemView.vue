@@ -23,25 +23,48 @@ const product = ref({});
 const baseUrl = import.meta.env.VITE_APP_BASE_URL;
 
 watch(
-  () => formQuantity,
-  (newQuantity) => {
-    if (newQuantity <= 0) {
-      return;
-    }
-
+  () => formQuantity.value,
+  async (newQuantity) => {
     const cartProduct = orderitemStore.products.find(
       (p) => p.productID == productStore.selectedProduct
     );
 
-    //Need mag join for unique cart products/order items
-    if (cartProduct) {
-      formQuantity = cartProduct;
+    console.log(`Created CART: `, cartProduct);
+    if (typeof newQuantity === "undefined" || newQuantity === null) {
+      return;
     }
 
-    const product = productStore.products.find(
-      (p) => p.productID == productStore.selectedProduct
-    );
-    orderItems.value.push(product);
+    if (newQuantity === 0) {
+      await axios.delete(`/order-item/${cartProduct.orderItemID}`);
+      orderitemStore.products = orderitemStore.products.filter(
+        (p) => p.orderItemID != cartProduct.orderItemID
+      );
+      return;
+    }
+
+    if (!cartProduct) {
+      //If 0 wala na siya sa cart product
+      product.value.quantity = newQuantity;
+
+      console.log("CREATED PRODUUCT: ", product.value);
+      const orderItemResponse = await axios.post("/order-item", {
+        ...product.value,
+        customerID: authStore.user_id,
+      });
+      const { orderItemID } = orderItemResponse.data;
+      console.log("ORDER ITEM ID: ", orderItemID);
+      orderitemStore.products.push({
+        ...product.value,
+        orderItemID,
+        customerID: authStore.user_id,
+      });
+      console.log("PRODUCTS: ", orderitemStore.products);
+      return;
+    }
+
+    cartProduct.quantity = newQuantity;
+    console.log(`Updated PRODUCT`, cartProduct);
+    await axios.put(`/order-item/${cartProduct.orderItemID}`, cartProduct);
   }
 );
 
@@ -52,9 +75,7 @@ watch(
       try {
         // product.value = await productStore.fetchProductDetails(newID);
         product.value = productStore.products.find((x) => x.productID == newID);
-        orderitemStore.produdts;
-
-        formQuantity.value = 0;
+        formQuantity.value = null;
       } catch (error) {
         console.error("Error fetching product details:", error);
       }
@@ -62,19 +83,18 @@ watch(
   }
 );
 
-watch();
-
 const isLoading = ref(true);
 onMounted(async () => {
   const response = await axios.get("/query/stock");
-  productStore.products = response.data.filter(
-    (product) => product.stockQty > 0
-  );
+  productStore.products = response.data.filter((p) => p.stockQty > 0);
 
-  const orderItemResponse = await axios.get("/order-item");
+  const orderItemResponse = await axios.get("/order-item", {
+    params: {
+      id: authStore.user_id,
+    },
+  });
+
   orderitemStore.products = orderItemResponse.data;
-
-  console.log(`ORDER ITEEM: `, orderitemStore.products);
 
   if (productStore.products.length > 0) {
     productStore.selectedProduct = productStore.products[0].productID;
@@ -151,6 +171,7 @@ onUnmounted(() => {
               v-model="formQuantity"
               inputId="minmax"
               class="h-[24px]"
+              defaultValue="0"
               :min="0"
               :max="product.stockQty"
               :pt="{
@@ -205,7 +226,7 @@ onUnmounted(() => {
         </div>
       </section>
 
-      <section v-if="orderitemStore.products" class="self-center p-4">
+      <section class="self-center p-4">
         <div>
           <Subtotal
             :products="orderitemStore.products"
