@@ -313,6 +313,7 @@ onUnmounted(() => {
                   :image="baseUrl + '/' + product.image"
                   :header="product.productName"
                   :deleteProduct="productStore.deleteProduct"
+                  :getProduct="productStore.getProduct"
                   :description="product.description"
                   :qty="product.stockQty"
                   :price="product.price"

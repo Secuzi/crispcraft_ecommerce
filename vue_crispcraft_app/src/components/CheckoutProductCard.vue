@@ -27,6 +27,10 @@ const prop = defineProps({
     type: Boolean,
     default: false,
   },
+  getProduct: {
+    type: Function,
+    default: null,
+  },
 });
 
 const productStore = useProductStore();
@@ -37,7 +41,7 @@ const productStore = useProductStore();
     class="px-5 py-3 transition-all duration-[400ms] ease-in-out flex rounded-xl gap-5 relative cursor-pointer"
     tabindex="0"
     :class="[isActive ? 'bg-white' : 'bg-[#D9D9D9]']"
-    @click="productStore.getProduct(prop.id)"
+    @click="getProduct(prop.id)"
   >
     <img
       :src="CloseIcon"

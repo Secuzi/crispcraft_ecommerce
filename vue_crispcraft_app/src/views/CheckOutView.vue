@@ -5,8 +5,8 @@ import MobileContainer from "@/components/MobileContainer.vue";
 import Navbar from "@/components/Navbar.vue";
 import AddressCard from "@/components/AddressCard.vue";
 import CheckoutProductCard from "@/components/CheckoutProductCard.vue";
-import { reactive, computed, onMounted, onUnmounted } from "vue";
-
+import { reactive, computed, onMounted, onUnmounted, ref, watch } from "vue";
+import PaymongoIcon from "@/assets/images/icons/paymongo.svg";
 import GcashIcon from "@/assets/images/icons/gcash_icon.svg";
 import CODIcon from "@/assets/images/icons/cashondelivery_icon.svg";
 import { useToast } from "primevue";
@@ -16,10 +16,12 @@ import DesktopContainer from "@/components/DesktopContainer.vue";
 import { useOrderItemStore } from "@/stores/orderItem";
 import { useAuthStore } from "@/stores/auth";
 import { useOrderStore } from "@/stores/order";
+import { useDeliveryStore } from "@/stores/delivery";
 const cartStore = useCartStore();
 const orderItemStore = useOrderItemStore();
 const authStore = useAuthStore();
 const orderStore = useOrderStore();
+const deliveryStore = useDeliveryStore();
 const toast = useToast();
 import axios from "axios";
 
@@ -27,6 +29,8 @@ const browserWindow = reactive({
   width: window.innerWidth,
   height: window.innerHeight,
 });
+
+const subtotal = ref(0);
 
 const updateDimensions = () => {
   browserWindow.width = window.innerWidth;
@@ -36,6 +40,9 @@ const isWindowMobile = computed(() => {
   return browserWindow.width <= 320;
 });
 const showSuccessToast = () => {
+  if (orderItemStore.paymentMethod === "paymongo") {
+  }
+
   toast.add({
     severity: "success",
     summary: "Success",
@@ -43,18 +50,38 @@ const showSuccessToast = () => {
     life: 3000,
   });
 };
+const isPaymongoActive = ref(true);
+watch(
+  () => orderStore.paymentMethod,
+  (newValue) => {
+    console.log("NEW VALUE: ", newValue);
+  }
+);
+
 const baseUrl = import.meta.env.VITE_APP_BASE_URL;
 
 onMounted(async () => {
   window.addEventListener("resize", updateDimensions);
+  const getCustomerInfoResponse = await axios.get(
+    `/customers/${authStore.user_id}`
+  );
 
   const getCheckoutResponse = await axios.get(
     `/query/checkout/${authStore.user_id}`
   );
 
+  subtotal.value = await orderItemStore.getSubTotal(authStore.user_id);
+
+  console.log("SUBTOTALL: ", subtotal.value);
+
+  const { customer } = getCustomerInfoResponse.data;
+
+  deliveryStore.address = customer.address;
+  deliveryStore.deliveryCharge = 60;
+
   orderStore.products = getCheckoutResponse.data;
 
-  console.log("RESPONSE: ", getCheckoutResponse.data);
+  console.log("Order Store: ", orderStore.products);
 });
 onUnmounted(() => {
   window.removeEventListener("resize", updateDimensions);
@@ -85,7 +112,8 @@ onUnmounted(() => {
               class="mt-3"
               v-for="product in orderStore.products"
               :key="product.productID"
-              :id="product.productID"
+              :id="product.orderItemID"
+              :deleteProduct="orderItemStore.deleteOrderItem"
               :image="baseUrl + '/' + product.image"
               :header="product.productName"
               :qty="product.quantity"
@@ -96,8 +124,6 @@ onUnmounted(() => {
           </div>
         </div>
       </section>
-
-      <img src="" alt="" />
 
       <section class="flex-grow self-center">
         <div class="myContainer">
@@ -110,16 +136,36 @@ onUnmounted(() => {
             />
           </div>
 
-          <div
-            class="px-5 py-5 bg-white rounded-lg flex items-center gap-5 mt-3"
-          >
-            <h2 class="text-[20px] italic font-bold">Pay with:</h2>
-            <div class="relative w-[66px]">
-              <img :src="GcashIcon" alt="Gcash Icon" class="rounded-lg" />
+          <div class="px-5 py-5 bg-white rounded-lg flex gap-5 mt-3">
+            <h2 class="text-[20px] italic font-bold self-center">Pay with:</h2>
+            <div
+              class="relative w-[66px] hover:bg-green-300 cursor-pointer"
+              :class="[isPaymongoActive ? 'bg-green-400' : '']"
+              @click="
+                () => {
+                  orderStore.paymentMethod = 'paymongo';
+                  isPaymongoActive = true;
+                }
+              "
+            >
+              <img :src="PaymongoIcon" alt="Paymongo Icon" />
             </div>
 
-            <div class="w-[66px] relative">
-              <img :src="CODIcon" alt="Cash On Delivery Icon" />
+            <div
+              class="w-[66px] relative hover:bg-green-300 cursor-pointer flex items-center"
+              :class="[!isPaymongoActive ? 'bg-green-400' : '']"
+              @click="
+                () => {
+                  orderStore.paymentMethod = 'cash-on-delivery';
+                  isPaymongoActive = false;
+                }
+              "
+            >
+              <img
+                :src="CODIcon"
+                alt="Cash On Delivery Icon"
+                class="w-[66px]"
+              />
             </div>
           </div>
 
@@ -132,7 +178,7 @@ onUnmounted(() => {
               Order
             </button>
             <span class="font-bold text-[26px]"
-              >Total Price: {{ cartStore.subtotal }}
+              >Total Price: {{ subtotal }}
             </span>
           </div>
         </div>
@@ -160,7 +206,7 @@ onUnmounted(() => {
             </button>
             <span
               class="absolute top-[50%] right-[15%] translate-y-[-50%] z-10 font-bold text-[14px]"
-              >Total Price: {{ cartStore.subtotal }}
+              >Total Price: {{ subtotal }}
             </span>
           </div>
         </div>

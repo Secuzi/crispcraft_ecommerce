@@ -16,9 +16,9 @@ export const useOrderItemStore = defineStore("orderItem", () => {
     return subtotal;
   }
 
-  async function deleteProduct(id) {
+  async function deleteOrderItem(id) {
     const test = await axios.delete(`/order-item/${id}`);
-
+    console.log("IN DELETE ORDER ITEM");
     const newProducts = products.value.filter(
       (product) => product.orderItemID != id
     );
@@ -31,7 +31,7 @@ export const useOrderItemStore = defineStore("orderItem", () => {
   return {
     selectedProduct,
     products,
-    deleteProduct,
+    deleteOrderItem,
     isAnyProductNotActive,
     getSubTotal,
   };

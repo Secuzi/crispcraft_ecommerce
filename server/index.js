@@ -12,6 +12,7 @@ const authRoutes = require("./routes/authRoutes");
 const inventoryRoutes = require("./routes/InventoryRoutes");
 const queryRoutes = require("./routes/queryRoutes");
 const orderItemRoutes = require("./routes/OrderItemRoutes.js");
+const orderRoutes = require("./routes/orderRoutes.js");
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(
@@ -38,5 +39,6 @@ app.use("/flavors", flavorRoutes);
 app.use("/inventory", inventoryRoutes);
 app.use("/query", queryRoutes);
 app.use("/order-item", orderItemRoutes);
+app.use("/order", orderRoutes);
 
 app.listen(PORT, () => console.log(`Listening on port: ${PORT}`));

@@ -247,7 +247,7 @@ onUnmounted(() => {
             class="mt-[15px]"
             height="100%"
             :subtotal="subtotal"
-            :imageClick="orderitemStore.deleteProduct"
+            :imageClick="orderitemStore.deleteOrderItem"
             :active="!orderitemStore.isAnyProductNotActive"
           />
           <div class="flex justify-end">
