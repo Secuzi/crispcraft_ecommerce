@@ -23,7 +23,8 @@ import Dialog from "primevue/dialog";
 import { watchEffect } from "vue";
 import { useInventoryStore } from "@/stores/inventory";
 import { useFlavorStore } from "@/stores/flavor";
-import { useRouter } from "vue-router";
+import AdminButton from "@/components/AdminButton.vue";
+import { RouterLink, useRouter } from "vue-router";
 const productStore = useProductStore();
 const router = new useRouter();
 const inventoryStore = useInventoryStore();
@@ -255,7 +256,13 @@ onUnmounted(() => {
             <div
               class="bg-white flex py-[5rem] flex-col gap-9 justify-center px-5 rounded-2xl mt-[5rem]"
             >
-              <button>
+              <AdminButton
+                route="/admin/stock"
+                :imageIcon="ChecklistIcon"
+                text="Inventory"
+              />
+
+              <!-- <RouterLink>
                 <div
                   class="flex items-center justify-center xl:gap-3 2xl:gap-5 bg-[#63A553] rounded-2xl px-4 py-2 myBoxShadow"
                 >
@@ -265,8 +272,13 @@ onUnmounted(() => {
                     >Inventory</span
                   >
                 </div>
-              </button>
-              <button>
+              </RouterLink> -->
+              <AdminButton
+                route="/admin/transactions"
+                :imageIcon="TransactionIcon"
+                text="Transactions"
+              />
+              <!-- <button>
                 <div
                   class="flex items-center justify-center xl:gap-3 2xl:gap-5 bg-[#63A553] rounded-2xl px-4 py-2 myBoxShadow"
                 >
@@ -276,7 +288,7 @@ onUnmounted(() => {
                     >Transactions</span
                   >
                 </div>
-              </button>
+              </button> -->
               <button>
                 <div
                   class="flex items-center justify-center xl:gap-3 2xl:gap-5 bg-[#63A553] rounded-2xl px-4 py-2 myBoxShadow"
@@ -335,7 +347,7 @@ onUnmounted(() => {
           <section class="mt-[10rem] pb-[5rem]">
             <form
               v-on:submit.prevent="submitForm"
-              class="bg-white rounded-xl px-10 py-5"
+              class="bg-white rounded-xl px-10 py-5 mb-5"
               enctype="multipart/form-data"
             >
               <div class="form-item">
@@ -473,6 +485,13 @@ onUnmounted(() => {
                 </button>
               </div>
             </form>
+
+            <RouterLink
+              to="/admin/create-product"
+              class="text-[24px] font-bold rounded-full px-[15px] py-[12px] bg-[#3672F6] text-white myBoxShadow myTextShadow"
+            >
+              Create Product
+            </RouterLink>
           </section>
         </div>
       </section>

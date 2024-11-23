@@ -64,7 +64,7 @@ const calculateSubtotal = computed(() => {
           <div>
             <img
               :src="CloseIcon"
-              @click="imageClick(product.orderItemID)"
+              @click="imageClick(product.cartItemID)"
               alt="Close icon"
               class="absolute right-2 top-[50%] translate-y-[-50%] w-[12px]"
             />

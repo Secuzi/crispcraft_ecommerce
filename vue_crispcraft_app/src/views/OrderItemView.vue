@@ -14,8 +14,10 @@ import Button from "@/components/Button.vue";
 import DesktopContainer from "@/components/DesktopContainer.vue";
 import { useProductStore } from "@/stores/product";
 import { useOrderItemStore } from "@/stores/orderItem";
+import { useCartStore } from "@/stores/cartItem";
 import { useAuthStore } from "@/stores/auth";
 
+const cartItemStore = useCartStore();
 const formQuantity = ref(0);
 const authStore = useAuthStore();
 const productStore = useProductStore();
@@ -26,7 +28,7 @@ const subtotal = ref(0);
 watch(
   () => formQuantity.value,
   async (newQuantity) => {
-    const cartProduct = orderitemStore.products.find(
+    const cartProduct = cartItemStore.products.find(
       (p) => p.productID == productStore.selectedProduct
     );
 
@@ -36,9 +38,9 @@ watch(
     }
 
     if (newQuantity === 0) {
-      await axios.delete(`/order-item/${cartProduct.orderItemID}`);
-      orderitemStore.products = orderitemStore.products.filter(
-        (p) => p.orderItemID != cartProduct.orderItemID
+      await axios.delete(`/cart-item/${cartProduct.cartItemID}`);
+      cartItemStore.products = cartItemStore.products.filter(
+        (p) => p.cartItemID != cartProduct.cartItemID
       );
       return;
     }
@@ -48,24 +50,25 @@ watch(
       product.value.quantity = newQuantity;
 
       console.log("CREATED PRODUUCT: ", product.value);
-      const orderItemResponse = await axios.post("/order-item", {
+      const cartItemResponse = await axios.post("/cart-item", {
         ...product.value,
         customerID: authStore.user_id,
       });
-      const { orderItemID } = orderItemResponse.data;
-      console.log("ORDER ITEM ID: ", orderItemID);
-      orderitemStore.products.push({
+      const { cartItemID } = cartItemResponse.data;
+      console.log("CART DATAAAA: ", cartItemResponse.data);
+      console.log("CART ITEM ID: ", cartItemID);
+      cartItemStore.products.push({
         ...product.value,
-        orderItemID,
+        cartItemID,
         customerID: authStore.user_id,
       });
-      console.log("PRODUCTS: ", orderitemStore.products);
+      console.log("PRODUCTS: ", cartItemStore.products);
       return;
     }
-
+    console.log("CART PRODUCTTTT: ", cartProduct);
+    console.log("CART PRODUUCTSSSS: ", cartItemStore.products);
     cartProduct.quantity = newQuantity;
-    console.log(`Updated PRODUCT`, cartProduct);
-    await axios.put(`/order-item/${cartProduct.orderItemID}`, cartProduct);
+    await axios.put(`/cart-item/${cartProduct.cartItemID}`, cartProduct);
   }
 );
 
@@ -85,25 +88,30 @@ watch(
 );
 
 const isLoading = ref(true);
-const isAnyProductNotActive = ref(true);
 
 onMounted(async () => {
   const response = await axios.get("/query/stock");
   productStore.products = response.data.filter((p) => p.active == 1);
 
-  const orderItemResponse = await axios.get("/order-item", {
-    params: {
-      id: authStore.user_id,
-    },
-  });
+  const cartItemResponse = await axios.get(
+    `/cart-item/customer/${authStore.user_id}`
+  );
+  cartItemStore.products = cartItemResponse.data;
+  console.log("PRODUUCTS: ", cartItemStore.products);
 
-  orderitemStore.products = orderItemResponse.data;
+  // const orderItemResponse = await axios.get("/order-item", {
+  //   params: {
+  //     id: authStore.user_id,
+  //   },
+  // });
 
-  console.log("PRODUUCTS: ", orderitemStore.products);
+  // orderitemStore.products = orderItemResponse.data;
 
-  isAnyProductNotActive.value = orderitemStore.products.some((p) => !p.active);
+  // console.log("PRODUUCTS: ", orderitemStore.products);
 
-  console.log("IS ANY ACTIVE: ", isAnyProductNotActive.value);
+  // isAnyProductNotActive.value = cartitemStore.products.some((p) => !p.active);
+
+  // console.log("IS ANY ACTIVE: ", isAnyProductNotActive.value);
   if (productStore.products.length > 0) {
     productStore.selectedProduct = productStore.products[0].productID;
   }
@@ -239,7 +247,7 @@ onUnmounted(() => {
       <section class="self-center p-4">
         <div v-if="!isLoading">
           <Subtotal
-            :products="orderitemStore.products"
+            :products="cartItemStore.products"
             tableHeaderTextSize="12px"
             subTotalTextSize="14px"
             dataTextSize="14px"
@@ -247,14 +255,14 @@ onUnmounted(() => {
             class="mt-[15px]"
             height="100%"
             :subtotal="subtotal"
-            :imageClick="orderitemStore.deleteOrderItem"
-            :active="!orderitemStore.isAnyProductNotActive"
+            :imageClick="cartItemStore.deleteCartItem"
+            :active="!cartItemStore.isAnyProductNotActive"
           />
           <div class="flex justify-end">
             <RouterLink
               v-if="
-                !orderitemStore.isAnyProductNotActive &&
-                orderitemStore.products.length > 0
+                !cartItemStore.isAnyProductNotActive &&
+                cartItemStore.products.length > 0
               "
               to="/checkout"
             >

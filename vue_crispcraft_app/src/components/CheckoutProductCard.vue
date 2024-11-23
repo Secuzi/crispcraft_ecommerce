@@ -1,6 +1,7 @@
 <script setup>
 //state store for cart??
-import { useCartStore } from "@/stores/cart";
+
+import { useCartStore } from "@/stores/cartItem";
 import CloseIcon from "@/assets/images/icons/EX.svg";
 import { useProductStore } from "@/stores/product";
 import axios from "axios";

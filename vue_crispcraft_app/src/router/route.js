@@ -9,6 +9,7 @@ import { useAuthStore } from "@/stores/auth";
 import { createRouter, createWebHistory } from "vue-router";
 import CreateProductView from "@/views/CreateProductView.vue";
 import AdminStockView from "@/views/AdminStockView.vue";
+import TransactionMonitoring from "@/views/TransactionMonitoring.vue";
 
 const routes = [
   {
@@ -56,6 +57,12 @@ const routes = [
     component: CreateProductView,
     meta: { requiresAuth: false, role: "admin" },
   },
+  {
+    path: "/admin/transactions",
+    name: "transactions",
+    component: TransactionMonitoring,
+    meta: { requiresAuth: false, role: "admin" },
+  },
 ];
 
 const router = createRouter({
@@ -66,24 +73,31 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
 
-  // Ensure session is checked
-  if (!authStore.authenticated) {
-    await authStore.checkSession();
-  }
-  // Guard routes based on auth and role
+  console.log("Navigating to:", to.path);
+  console.log("Meta.requiresAuth:", to.meta.requiresAuth);
+  console.log("User authenticated:", authStore.authenticated);
+  console.log("User role:", authStore.role);
+
   if (to.meta.requiresAuth) {
+    if (!authStore.authenticated) {
+      console.log("Checking session...");
+      await authStore.checkSession();
+    }
+
     if (authStore.authenticated) {
       if (to.meta.role && authStore.role !== to.meta.role) {
-        next({ name: "Login" }); // Redirect if role doesn't match
+        console.log("Role mismatch. Redirecting to Login...");
+        next({ name: "Login" });
       } else {
+        console.log("Authentication and role valid. Proceeding...");
         next();
       }
     } else {
-      // Redirect to login if not authenticated
+      console.log("Not authenticated. Redirecting to Login...");
       next({ name: "Login" });
     }
   } else {
-    // Allow navigation if no auth required
+    console.log("No authentication required. Proceeding...");
     next();
   }
 });

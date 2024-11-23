@@ -9,15 +9,17 @@ const getAllOrders = async (req, res) => {
     console.log(e);
   }
 };
+
+//@PATH: /order
 const createOrder = async (req, res) => {
   try {
-    let { orderDate, orderItemID, customerID } = req.body;
+    let { orderDate, customerID, status } = req.body;
     orderDate = dayjs().format("YYYY-MM-DD HH:mm:ss");
     const { error, value: validatedOrder } = orderSchema.validate(
       {
         orderDate,
-        orderItemID,
         customerID,
+        status,
       },
       { abortEarly: false }
     );
@@ -33,7 +35,7 @@ const createOrder = async (req, res) => {
     console.log("CREATED ORDEER:", createdOrder);
     return res.status(200).json({
       message: "Created Order!",
-      orderItemID: createdOrder.id,
+      orderID: createdOrder.id,
     });
   } catch (e) {
     console.log(e);

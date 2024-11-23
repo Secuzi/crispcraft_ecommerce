@@ -32,7 +32,7 @@ async function submitForm() {
     await authStore.login(form.email, form.password);
 
     if (authStore.role === "admin") {
-      router.push("/admin");
+      router.push("/admin/stock");
     } else {
       router.push("/");
     }

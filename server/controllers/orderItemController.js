@@ -2,7 +2,17 @@ const OrderItemService = require("../services/OrderItemService");
 const orderItemSchema = require("../schemas/OrderItemSchema.js");
 const getAllOrderItems = async (req, res) => {
   try {
-    const customerID = req.query.id;
+    const orderItems = await OrderItemService.getAll();
+
+    return res.status(200).json(orderItems);
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+const getOrderItemsByCustomerID = async (req, res) => {
+  try {
+    const customerID = req.params.id;
     if (!customerID) {
       return res.status(400).json({ message: "User does not exist!" });
     }
@@ -18,13 +28,15 @@ const getAllOrderItems = async (req, res) => {
 
 const createOrderItem = async (req, res) => {
   try {
-    const { quantity, productID, customerID } = req.body;
+    const { quantity, productID, customerID, orderID, price } = req.body;
 
     const { error, value: validatedOrderItem } = orderItemSchema.validate(
       {
         quantity,
         productID,
         customerID,
+        orderID,
+        price,
       },
       { abortEarly: false }
     );
@@ -48,10 +60,31 @@ const createOrderItem = async (req, res) => {
   }
 };
 
+const updateOrderItemOrderID = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { orderID } = req.body;
+
+    const searchedOrderItem = await OrderItemService.read(id, "orderItemID");
+    if (!searchedOrderItem) {
+      return res.status(400).json({ message: "Order Item does not exist!" });
+    }
+
+    const response = await OrderItemService.update(
+      id,
+      { orderID },
+      "orderItemID"
+    );
+    res.status(200).json(response);
+  } catch (e) {
+    console.log(e);
+  }
+};
+
 const updateOrderItem = async (req, res) => {
   try {
     const id = Number(req.params.id);
-    const { quantity, productID, customerID } = req.body;
+    const { quantity, productID, customerID, orderID, price } = req.body;
     const searchedOrderItem = await OrderItemService.read(id, "orderItemID");
 
     if (!searchedOrderItem) {
@@ -63,6 +96,8 @@ const updateOrderItem = async (req, res) => {
         quantity,
         productID,
         customerID,
+        orderID,
+        price,
       },
       { abortEarly: false }
     );
@@ -108,5 +143,7 @@ module.exports = {
   getAllOrderItems,
   createOrderItem,
   updateOrderItem,
+  getOrderItemsByCustomerID,
   deleteOrderItem,
+  updateOrderItemOrderID,
 };

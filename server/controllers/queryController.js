@@ -27,10 +27,10 @@ const getCheckoutData = async (req, res) => {
     const pool = await poolPromise;
     const query = `
     SELECT Product.productID, Product.[image], Product.price, Customer.address,
-Product.productName, OrderItem.quantity, OrderItem.orderItemID
+Product.productName, CartItems.quantity, CartItems.cartItemID
 FROM Product 
-INNER JOIN OrderItem ON Product.productID = OrderItem.productID
-INNER JOIN Customer ON Customer.customerID = OrderItem.customerID
+INNER JOIN CartItems ON Product.productID = CartItems.productID
+INNER JOIN Customer ON Customer.customerID = CartItems.customerID
 
 WHERE Customer.customerID = @customerID
     
@@ -52,11 +52,11 @@ const getSubTotal = async (req, res) => {
   const pool = await poolPromise;
 
   const query = `
-  SELECT  SUM(Product.price * OrderItem.quantity) AS subtotal
-FROM OrderItem
-INNER JOIN Product ON OrderItem.productID = Product.productID
-INNER JOIN Customer ON OrderItem.customerID = Customer.customerID
-WHERE Customer.customerID = @customerID
+   SELECT  SUM(Product.price * CartItems.quantity) AS subtotal
+  FROM CartItems
+  INNER JOIN Product ON CartItems.productID = Product.productID
+  INNER JOIN Customer ON CartItems.customerID = Customer.customerID
+  WHERE Customer.customerID = @customerID
   
   `;
 
@@ -68,8 +68,32 @@ WHERE Customer.customerID = @customerID
   res.status(200).json(result.recordset[0]);
 };
 
+const updateOrderItemOrders = async (req, res) => {
+  const { orderID, customerID } = req.body;
+  console.log(req.body);
+  console.log("ORDER ID: ", orderID);
+  console.log("Customer ID: ", customerID);
+  const pool = await poolPromise;
+
+  const query = ` 
+    UPDATE OrderItem
+    SET orderID = @orderID
+    WHERE customerID = @customerID
+  `;
+
+  const result = await pool
+    .request()
+    .input("customerID", customerID)
+    .input("orderID", orderID)
+    .query(query);
+
+  console.log("REEEY: ", result);
+  res.status(200).json(result.recordset);
+};
+
 module.exports = {
   getStockData,
   getCheckoutData,
   getSubTotal,
+  updateOrderItemOrders,
 };

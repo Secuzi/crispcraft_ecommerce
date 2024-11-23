@@ -11,6 +11,7 @@ import Aura from "@primevue/themes/aura";
 import ToastService from "primevue/toastservice";
 import { useOrderItemStore } from "./stores/orderItem";
 const pinia = createPinia();
+import { useCartStore } from "./stores/cartItem";
 
 const app = createApp(App);
 axios.defaults.baseURL = "http://localhost:3000";
@@ -18,9 +19,12 @@ axios.defaults.withCredentials = true;
 
 router.beforeEach((to, from, next) => {
   const orderItemStore = useOrderItemStore();
-  const isAnyProductActive = orderItemStore.products.some((p) => p.active);
+  const cartItemStore = useCartStore();
+  const isAnyNotProductActive = cartItemStore.isAnyProductNotActive;
 
-  if (to.meta.requiresActiveProduct && !isAnyProductActive) {
+  if (to.meta.requiresActiveProduct && isAnyNotProductActive) {
+    console.log("isAnyProductActive: ", isAnyNotProductActive);
+
     next("/order"); // Redirect back to the current page
   } else {
     next(); // Allow navigation
