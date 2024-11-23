@@ -31,6 +31,21 @@ const createPayment = async (req, res) => {
   }
 };
 
+const getPaymentByOrderID = async (req, res) => {
+  try {
+    const orderID = req.params.id;
+    if (!orderID) {
+      return res.status(400).json({ message: "Order does not exist!" });
+    }
+    const payment = await PaymentService.getByField("orderID", orderID);
+
+    return res.status(200).json(payment);
+  } catch (e) {
+    console.log(e);
+  }
+};
+
 module.exports = {
   createPayment,
+  getPaymentByOrderID,
 };

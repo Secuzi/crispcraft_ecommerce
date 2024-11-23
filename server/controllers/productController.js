@@ -118,7 +118,6 @@ const updateProduct = async (req, res) => {
     validatedProduct,
     "productID"
   );
-  //@TODO: Dili ni siya mahitabo if
 
   return res
     .status(200)

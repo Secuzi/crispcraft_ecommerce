@@ -15,6 +15,9 @@ const orderItemRoutes = require("./routes/OrderItemRoutes.js");
 const orderRoutes = require("./routes/orderRoutes.js");
 const paymentRoutes = require("./routes/paymentRoutes.js");
 const cartItemRoutes = require("./routes/CartItemRoutes.js");
+const transactionLogRoutes = require("./routes/transactionLogRoutes.js");
+const deliveryRoutes = require("./routes/deliveryRoutes.js");
+const merchantRoutes = require("./routes/merchantRoutes.js");
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(
@@ -44,5 +47,8 @@ app.use("/order-item", orderItemRoutes);
 app.use("/order", orderRoutes);
 app.use("/payment", paymentRoutes);
 app.use("/cart-item", cartItemRoutes);
+app.use("/transaction-log", transactionLogRoutes);
+app.use("/delivery", deliveryRoutes);
+app.use("/merchant", merchantRoutes);
 
 app.listen(PORT, () => console.log(`Listening on port: ${PORT}`));

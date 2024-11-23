@@ -33,8 +33,6 @@ const prop = defineProps({
     default: null,
   },
 });
-
-const productStore = useProductStore();
 </script>
 
 <template>

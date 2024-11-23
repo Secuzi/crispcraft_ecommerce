@@ -68,6 +68,22 @@ const getSubTotal = async (req, res) => {
   res.status(200).json(result.recordset[0]);
 };
 
+const getOrderSubTotal = async (req, res) => {
+  const { id: orderID } = req.params;
+  const pool = await poolPromise;
+
+  const query = `
+    SELECT * FROM OrderItem
+    SELECT SUM(price * quantity) 
+    FROM OrderItem
+    WHERE orderID = @orderID
+    
+  `;
+
+  const result = await pool.request().input("orderID", orderID).query(query);
+  res.status(200).json(result.recordset[0]);
+};
+
 const updateOrderItemOrders = async (req, res) => {
   const { orderID, customerID } = req.body;
   console.log(req.body);
@@ -91,9 +107,49 @@ const updateOrderItemOrders = async (req, res) => {
   res.status(200).json(result.recordset);
 };
 
+const getTransactionLogData = async (req, res) => {
+  try {
+    const { id: orderID } = req.params;
+
+    const pool = await poolPromise;
+    const query = `
+   SELECT 
+    t.transactionID,
+    t.orderID,
+    t.deliveryID,
+    o.orderDate,
+    oi.orderItemID,
+    oi.quantity,
+	oi.price,
+    p.productID,
+    p.productName,
+    f.flavorID,
+    f.flavorName
+FROM TransactionLog t
+INNER JOIN [Order] o ON t.orderID = o.orderID
+INNER JOIN OrderItem oi ON o.orderID = oi.orderID
+INNER JOIN Product p ON oi.productID = p.productID
+LEFT JOIN Flavor f ON p.flavorID = f.flavorID
+ORDER BY t.transactionID, oi.orderItemID;
+    
+    `;
+
+    const result = await pool
+      .request()
+      .input("customerID", orderID)
+      .query(query);
+
+    res.status(200).json(result.recordset);
+  } catch (e) {
+    console.log(e);
+  }
+};
+
 module.exports = {
   getStockData,
   getCheckoutData,
   getSubTotal,
   updateOrderItemOrders,
+  getTransactionLogData,
+  getOrderSubTotal,
 };

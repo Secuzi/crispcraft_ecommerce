@@ -8,6 +8,57 @@ import Navbar from "@/components/Navbar.vue";
 import AdminButton from "@/components/AdminButton.vue";
 import HeaderText from "@/components/HeaderText.vue";
 import { IconField, InputIcon, InputText } from "primevue";
+import { onMounted, ref, watch } from "vue";
+import { useTransactionLogStore } from "@/stores/transactionlog";
+import axios from "axios";
+
+const transactionLogStore = useTransactionLogStore();
+function removeTimeFromDateString(dateString) {
+  return dateString.split("T")[0];
+}
+
+// Track the currently active orderID
+const activeOrderID = ref(null);
+
+// Function to set the active transaction
+function getTransactionContainer(orderID) {
+  activeOrderID.value = orderID;
+}
+
+const merchant = ref(null);
+const delivery = ref(null);
+const payment = ref(null);
+
+watch(
+  () => activeOrderID.value,
+  async (newID) => {
+    //Make a call to delivery first then get the merchant it
+    const deliveryResponse = await axios.get(`/delivery/orderID/${newID}`);
+    delivery.value = deliveryResponse.data.delivery;
+    console.log("DELIVERYYY: ", delivery.value);
+    const { merchantID } = deliveryResponse.data;
+    //Make a call to merchant using merchant id!
+    const merchantResponse = await axios.get(`/merchant/${merchantID}`);
+    merchant.value = merchantResponse.data.merchant;
+    console.log("Merchaant: ", merchant.value);
+
+    const paymentResponse = await axios.get(`/payment/orderID/${newID}`);
+    console.log("PAYMEENT: ", paymentResponse.data);
+    payment.value = paymentResponse.data;
+  }
+);
+
+onMounted(async () => {
+  const transactionsResponse = await axios.get("/query/transaction-data");
+  transactionLogStore.transactions = transactionLogStore.formatTransactions(
+    transactionsResponse.data
+  );
+
+  activeOrderID.value = transactionLogStore.transactions[0].orderID;
+
+  console.log("active id: ", activeOrderID.value);
+  console.log("Transaction log: ", transactionLogStore.transactions);
+});
 </script>
 
 <template>
@@ -88,25 +139,50 @@ import { IconField, InputIcon, InputText } from "primevue";
             >
               <h2 class="text-[20px] font-semibold mb-4">Transaction Log</h2>
               <!-- Main container for the list of logs -->
-              <div>
+              <div v-if="transactionLogStore.transactions.length > 0">
                 <!-- Log Container -->
-                <div class="myBoxShadow bg-[#ECECEC] rounded-lg px-5 py-2">
-                  <!-- For loop for the products in the specific order -->
-                  <div class="text-[18px] flex justify-between">
+                <!-- For loop for the products in the specific order -->
+                <div
+                  v-for="(
+                    transaction, index
+                  ) in transactionLogStore.transactions"
+                  class="myBoxShadow cursor-pointer bg-[#ECECEC] rounded-lg px-5 py-2"
+                  :class="[
+                    index !== 0 ? 'mt-3' : '',
+                    activeOrderID === transaction.orderID
+                      ? 'bg-white'
+                      : 'bg-[#ECECEC]',
+                  ]"
+                  @click="getTransactionContainer(transaction.orderID)"
+                >
+                  <div
+                    v-for="orderItem in transaction.orderItems"
+                    class="text-[18px] flex justify-between"
+                  >
                     <!-- Product name + Flavor name -->
                     <span class="font-extrabold"
-                      >Malunggay Chips: Cheesy Hot</span
+                      >{{ orderItem.productName }}:
+                      {{ orderItem.flavorName }}</span
                     >
                     <!--  -->
-                    <span class="font-semibold">Qty: 23</span>
+                    <span class="font-semibold"
+                      >Qty: {{ orderItem.quantity }}</span
+                    >
                   </div>
                   <!-- second row -->
                   <div
                     class="text-[15px] italic mt-8 flex justify-between font-medium"
                   >
-                    <span>OrderID: ####</span>
-                    <span>Order Date: #####</span>
-                    <span class="not-italic font-semibold">Total: Php 100</span>
+                    <span>OrderID: {{ transaction.orderID }}</span>
+                    <span
+                      >Order Date:
+                      {{
+                        removeTimeFromDateString(transaction.orderDate)
+                      }}</span
+                    >
+                    <span class="not-italic font-semibold"
+                      >Total: {{ transaction.subtotal + 60 }}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -118,27 +194,34 @@ import { IconField, InputIcon, InputText } from "primevue";
 
             <!-- Merchant container -->
             <div
+              v-if="merchant"
               class="font-medium text-[16px] mb-11 px-6 py-4 myTextShadow myBoxShadow bg-white rounded-[30px]"
             >
-              <p>Name: Nameofmerchant</p>
-              <p>ID: 29392</p>
+              <p>Name: {{ merchant.fName }} {{ merchant.lName }}</p>
+              <p>ID: {{ merchant.merchantID }}</p>
               <div class="mt-3">
                 <p>Contact Details:</p>
-                <p>Cell# 09696969</p>
-                <p>Tell#: 123456</p>
-                <p>Email: asasdasd@gmail.com</p>
+                <p>Cell# {{ merchant.phoneNumber }}</p>
+                <p>Tell#: {{ merchant.telNumber }}</p>
+                <p>Email: {{ merchant.email }}</p>
               </div>
             </div>
 
             <span>Customer Payment Details</span>
             <!-- Payment container -->
             <div
+              v-if="payment"
               class="font-medium text-[16px] px-6 py-4 myTextShadow myBoxShadow bg-white rounded-[30px]"
             >
-              <p>Payment Method: Gcash</p>
-              <p>Payment amount: Php 635</p>
-              <p>Payment date: 10/10/24</p>
-              <p class="text-end text-[13px] italic">Payment ID: 2323232</p>
+              <p>Payment Method: {{ payment.paymentMethod }}</p>
+              <p>Payment amount: Php {{ payment.paymentAmount }}</p>
+              <p>
+                Payment date:
+                {{ removeTimeFromDateString(payment.paymentDate) }}
+              </p>
+              <p class="text-end text-[13px] italic">
+                Payment ID: {{ payment.paymentID }}
+              </p>
             </div>
           </section>
         </div>
