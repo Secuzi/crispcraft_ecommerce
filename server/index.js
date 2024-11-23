@@ -13,11 +13,13 @@ const inventoryRoutes = require("./routes/InventoryRoutes");
 const queryRoutes = require("./routes/queryRoutes");
 const orderItemRoutes = require("./routes/OrderItemRoutes.js");
 const orderRoutes = require("./routes/orderRoutes.js");
+const paymentRoutes = require("./routes/paymentRoutes.js");
+const cartItemRoutes = require("./routes/CartItemRoutes.js");
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(
   cors({
-    origin: "http://localhost:4000",
+    origin: ["http://localhost:4000", "https://api.paymongo.com"],
     credentials: true,
   })
 );
@@ -40,5 +42,7 @@ app.use("/inventory", inventoryRoutes);
 app.use("/query", queryRoutes);
 app.use("/order-item", orderItemRoutes);
 app.use("/order", orderRoutes);
+app.use("/payment", paymentRoutes);
+app.use("/cart-item", cartItemRoutes);
 
 app.listen(PORT, () => console.log(`Listening on port: ${PORT}`));
