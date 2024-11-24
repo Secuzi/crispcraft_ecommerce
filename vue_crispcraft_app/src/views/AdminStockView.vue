@@ -329,33 +329,12 @@ onUnmounted(() => {
                 text="Inventory"
               />
 
-              <!-- <RouterLink>
-                <div
-                  class="flex items-center justify-center xl:gap-3 2xl:gap-5 bg-[#63A553] rounded-2xl px-4 py-2 myBoxShadow"
-                >
-                  <img :src="ChecklistIcon" class="w-[47px] h-[46px]" />
-                  <span
-                    class="text-white flex-grow font-bold myTextShadow text-[24px] text-left"
-                    >Inventory</span
-                  >
-                </div>
-              </RouterLink> -->
               <AdminButton
                 route="/admin/transactions"
                 :imageIcon="TransactionIcon"
                 text="Transactions"
               />
-              <!-- <button>
-                <div
-                  class="flex items-center justify-center xl:gap-3 2xl:gap-5 bg-[#63A553] rounded-2xl px-4 py-2 myBoxShadow"
-                >
-                  <img :src="TransactionIcon" class="w-[47px] h-[46px]" />
-                  <span
-                    class="text-white flex-grow font-bold myTextShadow text-[24px] text-left"
-                    >Transactions</span
-                  >
-                </div>
-              </button> -->
+
               <AdminButton
                 route="/admin/merchants"
                 :imageIcon="ClerkIcon"

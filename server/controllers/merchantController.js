@@ -1,6 +1,6 @@
 const MerchantService = require("../services/MerchantService");
 const merchantSchema = require("../schemas/MerchantSchema");
-
+const bcrypt = require("bcrypt");
 //@PATH: /merchant
 const getAllMerchants = async (req, res) => {
   try {
@@ -13,7 +13,7 @@ const getAllMerchants = async (req, res) => {
 
 const createMerchant = async (req, res) => {
   try {
-    const { fName, lName, phoneNumber, telNumber, email } = req.body;
+    const { fName, lName, phoneNumber, telNumber, email, password } = req.body;
     const { error, value: validatedMerchant } = merchantSchema.validate(
       {
         fName,
@@ -21,6 +21,7 @@ const createMerchant = async (req, res) => {
         phoneNumber,
         telNumber,
         email,
+        password,
       },
       { abortEarly: false }
     );
@@ -31,7 +32,15 @@ const createMerchant = async (req, res) => {
       console.log(errorMessages);
       return res.status(400).json({ message: errorMessages });
     }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    validatedMerchant.password = hashedPassword;
+    validatedMerchant.role = "merchant";
     const createdMerchant = await MerchantService.create(validatedMerchant);
+    if (!createdMerchant) {
+      return res.status(400).send({ message: "Could not create merchant" });
+    }
+
     return res.status(200).json({
       message: "Created Merchant!",
       merchantID: createdMerchant.id,

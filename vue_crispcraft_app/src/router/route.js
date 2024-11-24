@@ -11,6 +11,7 @@ import CreateProductView from "@/views/CreateProductView.vue";
 import AdminStockView from "@/views/AdminStockView.vue";
 import TransactionMonitoring from "@/views/TransactionMonitoring.vue";
 import MerchantMonitoringView from "@/views/MerchantMonitoringView.vue";
+import MerchantPageView from "@/views/MerchantPageView.vue";
 
 const routes = [
   {
@@ -70,6 +71,12 @@ const routes = [
     name: "merchants",
     component: MerchantMonitoringView,
     meta: { requiresAuth: false, role: "admin" },
+  },
+  {
+    path: "/merchant",
+    name: "merchant page",
+    component: MerchantPageView,
+    meta: { requiresAuth: true, role: "merchant" },
   },
   {
     // path: "*",

@@ -32,7 +32,6 @@ watch(
       (p) => p.productID == productStore.selectedProduct
     );
 
-    console.log(`Created CART: `, cartProduct);
     if (typeof newQuantity === "undefined" || newQuantity === null) {
       return;
     }
@@ -49,24 +48,18 @@ watch(
       //If 0 wala na siya sa cart product
       product.value.quantity = newQuantity;
 
-      console.log("CREATED PRODUUCT: ", product.value);
       const cartItemResponse = await axios.post("/cart-item", {
         ...product.value,
         customerID: authStore.user_id,
       });
       const { cartItemID } = cartItemResponse.data;
-      console.log("CART DATAAAA: ", cartItemResponse.data);
-      console.log("CART ITEM ID: ", cartItemID);
       cartItemStore.products.push({
         ...product.value,
         cartItemID,
         customerID: authStore.user_id,
       });
-      console.log("PRODUCTS: ", cartItemStore.products);
       return;
     }
-    console.log("CART PRODUCTTTT: ", cartProduct);
-    console.log("CART PRODUUCTSSSS: ", cartItemStore.products);
     cartProduct.quantity = newQuantity;
     await axios.put(`/cart-item/${cartProduct.cartItemID}`, cartProduct);
   }

@@ -28,13 +28,22 @@ const form = reactive({
   phoneNumber: "",
   telNumber: "",
   email: "",
+  password: "",
 });
+
+const isPasswordHidden = ref(true);
+const togglePassword = () => {
+  isPasswordHidden.value = !isPasswordHidden.value;
+};
 const rules = {
   fName: {
     required: helpers.withMessage("First name cannot be empty!", required),
   },
   lName: {
     required: helpers.withMessage("Last name cannot be empty!", required),
+  },
+  password: {
+    required: helpers.withMessage("Password cannot be empty!", required),
   },
   phoneNumber: {
     required: helpers.withMessage("Phone number cannot be empty!", required),
@@ -82,6 +91,12 @@ async function submitForm() {
     //Post to merchant
     const response = await axios.post("/merchant", form);
     console.log("MERCHANT RESPONSE: ", response.data);
+    console.log("merchant: ", response.data);
+    const getMerchant = await axios.get(
+      `/merchant/${response.data.merchantID}`
+    );
+    console.log("got merchatn: ", getMerchant.data);
+    merchantStore.merchants.push(getMerchant.data.merchant);
 
     toast.add({
       severity: "success",
@@ -156,7 +171,7 @@ onMounted(async () => {
               </IconField>
             </div>
             <div
-              class="bg-white py-[24px] px-[19px] rounded-[10px] myTextShadow mt-[5rem]"
+              class="bg-white py-[24px] px-[19px] rounded-[10px] myTextShadow mt-[5rem] h-[600px] overflow-auto"
             >
               <h2 class="text-[20px] font-semibold mb-4">Merchant List</h2>
               <!-- Main container for the list of logs -->
@@ -251,6 +266,26 @@ onMounted(async () => {
                   />
                   <span v-if="v$.email.$error" class="text-red-500 text-xs">
                     {{ v$.email.$errors[0].$message }}
+                  </span>
+                </div>
+
+                <div class="form-item relative">
+                  <label for="password" class="myTextShadow">Password:</label>
+                  <input
+                    name="password"
+                    v-model="form.password"
+                    id="password"
+                    v-bind:type="isPasswordHidden ? 'password' : 'text'"
+                    placeholder="Enter temporary password"
+                    class="border-black p-3 border-2 rounded-[5px] block w-full myFormInput p-inputtext"
+                  />
+                  <i
+                    class="pi text-black absolute bottom-3 right-3 cursor-pointer text-base"
+                    :class="isPasswordHidden ? 'pi-eye-slash' : 'pi-eye'"
+                    @click="togglePassword"
+                  ></i>
+                  <span v-if="v$.password.$error" class="text-red-500 text-xs">
+                    {{ v$.password.$errors[0].$message }}
                   </span>
                 </div>
 

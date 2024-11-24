@@ -129,7 +129,7 @@ onMounted(async () => {
               </IconField>
             </div>
             <div
-              class="bg-white py-[24px] px-[19px] rounded-[10px] myTextShadow mt-[5rem]"
+              class="bg-white py-[24px] px-[19px] rounded-[10px] myTextShadow mt-[5rem] h-[600px] overflow-auto"
             >
               <h2 class="text-[20px] font-semibold mb-4">Transaction Log</h2>
               <!-- Main container for the list of logs -->

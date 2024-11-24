@@ -5,6 +5,7 @@ const merchantSchema = Joi.object({
   lName: Joi.string().required(),
   phoneNumber: Joi.string().max(11).required(),
   telNumber: Joi.string().required(),
+  password: Joi.string().required(),
   email: Joi.string().email().required(),
 });
 

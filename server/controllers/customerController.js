@@ -1,5 +1,5 @@
 const CustomerService = require("../services/CustomerService");
-const bycrypt = require("bcrypt");
+const bcrypt = require("bcrypt");
 const customerSchema = require("../schemas/CustomerSchema");
 //@path GET /customers
 const getAllCustomers = async (req, res) => {
@@ -52,7 +52,7 @@ const createCustomer = async (req, res) => {
     }
 
     console.log(validatedCustomer);
-    const hashedPassword = await bycrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     validatedCustomer.password = hashedPassword;
     const newCustomer = await CustomerService.create(validatedCustomer);
 
