@@ -6,16 +6,21 @@ export const useProductStore = defineStore("product", () => {
   const products = ref([]);
 
   async function deleteProduct(id) {
-    const test = await axios.delete(`/products/${id}`);
-
-    console.log("IN DELETE PRODUCTS: ");
-    const product = products.value.find((x) => x.productID == id);
-    await axios.delete(`/flavors/${product.flavorID}`);
+    const getProductResponse = await axios.get(`/products/${id}`);
+    const getProduct = getProductResponse.data.product;
+    const inventoryProduct = products.value.find(
+      (p) => p.productID === getProduct.productID
+    );
+    const test = await axios.delete(
+      `/inventory/${inventoryProduct.inventoryID}`
+    );
+    getProduct.active = 0;
+    await axios.put(`/products/${getProduct.productID}`, getProduct);
+    console.log("GET PRODUCT: ", getProduct);
     const newProducts = products.value.filter(
-      (product) => product.productID != id
+      (product) => product.inventoryID != inventoryProduct.inventoryID
     );
     products.value = newProducts;
-    console.log("Selected product:", selectedProduct.value);
   }
 
   function getProduct(id) {

@@ -83,6 +83,29 @@ const getOrderSubTotal = async (req, res) => {
   res.status(200).json(result.recordset[0]);
 };
 
+const getOrderList = async (req, res) => {
+  try {
+    const { id: customerID } = req.params;
+    const pool = await poolPromise;
+
+    const query = `
+    SELECT [Order].orderID, Delivery.deliveryDate, Delivery.deliveryID
+FROM [Order]
+INNER JOIN Delivery ON Delivery.orderID = [Order].orderID
+WHERE [Order].customerID = @customerID
+    
+  `;
+
+    const result = await pool
+      .request()
+      .input("customerID", customerID)
+      .query(query);
+    res.status(200).json(result.recordset);
+  } catch (e) {
+    console.log(e);
+  }
+};
+
 const updateOrderItemOrders = async (req, res) => {
   const { orderID, customerID } = req.body;
   console.log(req.body);
@@ -151,4 +174,5 @@ module.exports = {
   updateOrderItemOrders,
   getTransactionLogData,
   getOrderSubTotal,
+  getOrderList,
 };

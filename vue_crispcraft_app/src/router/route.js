@@ -44,6 +44,7 @@ const routes = [
     name: "order tracker",
     component: OrderTrackerView,
     meta: { requiresAuth: true, role: "customer" },
+    props: true,
   },
   {
     path: "/admin/stock",

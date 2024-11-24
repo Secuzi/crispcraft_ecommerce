@@ -7,6 +7,7 @@ const productSchema = Joi.object({
   flavorID: Joi.number().required(),
   expirationDate: Joi.string().required(),
   image: Joi.string().required(),
+  active: Joi.number(),
 });
 
 module.exports = productSchema;

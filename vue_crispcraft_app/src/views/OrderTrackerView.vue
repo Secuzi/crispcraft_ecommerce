@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import Timeline from "primevue/timeline";
 import MobileContainer from "@/components/MobileContainer.vue";
 import DesktopContainer from "@/components/DesktopContainer.vue";
@@ -112,6 +112,27 @@ const timelineEvents = computed(() => {
 //   },
 // ]);
 
+watch(
+  () => route.params.id,
+  (newId, oldId) => {
+    if (newId !== oldId) {
+      fetchDelivery();
+    }
+  }
+);
+
+function fetchDelivery() {
+  const deliveryID = route.params.id;
+  axios
+    .get(`/delivery/${deliveryID}`)
+    .then((response) => {
+      delivery.value = response.data.delivery;
+    })
+    .catch(() => {
+      router.push({ name: "NotFound" });
+    });
+}
+
 const isDelivered = computed(() => {
   return deliveryStates.value[1].active;
 });
@@ -120,16 +141,7 @@ if (delivery.value.deliveryStatus === "delivered") {
   isDelivered.value = true;
 }
 
-onMounted(async () => {
-  const deliveryID = route.params.id;
-  try {
-    const deliveryResponse = await axios.get(`/delivery/${deliveryID}`);
-    delivery.value = deliveryResponse.data.delivery;
-    console.log("DELIVERYY!", delivery.value);
-  } catch (e) {
-    router.push({ name: "NotFound" });
-  }
-});
+onMounted(fetchDelivery);
 </script>
 
 <template>

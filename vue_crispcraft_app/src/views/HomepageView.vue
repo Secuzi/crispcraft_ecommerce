@@ -11,12 +11,14 @@ import ProductCheesyHot from "@/assets/images/BAG of CHIPS/cheesyhot.png";
 import ProductChiliHot from "@/assets/images/BAG of CHIPS/chilihot.png";
 import ProductSaltedOnion from "@/assets/images/BAG of CHIPS/onion.png";
 import MainContainer from "@/components/MainContainer.vue";
-
+import { onMounted } from "vue";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import router from "@/router/route";
 import MobileContainer from "@/components/MobileContainer.vue";
 import DesktopContainer from "@/components/DesktopContainer.vue";
+import axios from "axios";
 register();
 
 // Featured products
@@ -27,28 +29,46 @@ const bestSeller = ref({
   colorTheme: "#AE76B8",
 });
 
-const items = ref([
-  {
-    id: 1,
-    image: ProductCheesyHot,
-    colorTheme: "#EF9426",
-  },
-  {
-    id: 2,
-    image: ProductSaltedOnion,
-    colorTheme: "#AE76B8",
-  },
-  {
-    id: 3,
-    image: ProductChiliHot,
-    colorTheme: "#863E24",
-  },
-  {
-    id: 4,
-    image: ProductSweetCheese,
-    colorTheme: "#EBCB5F",
-  },
-]);
+// const items = ref([
+//   {
+//     id: 1,
+//     image: ProductCheesyHot,
+//     colorTheme: "#EF9426",
+//   },
+//   {
+//     id: 2,
+//     image: ProductSaltedOnion,
+//     colorTheme: "#AE76B8",
+//   },
+//   {
+//     id: 3,
+//     image: ProductChiliHot,
+//     colorTheme: "#863E24",
+//   },
+//   {
+//     id: 4,
+//     image: ProductSweetCheese,
+//     colorTheme: "#EBCB5F",
+//   },
+// ]);
+const baseUrl = import.meta.env.VITE_APP_BASE_URL;
+const featuredProducts = ref([]);
+function getRandomFeaturedProducts(products, count = 3) {
+  if (!Array.isArray(products) || products.length === 0) {
+    throw new Error("Products must be a non-empty array");
+  }
+
+  const shuffled = [...products].sort(() => 0.5 - Math.random());
+
+  return shuffled.slice(0, count);
+}
+
+const products = ref([]);
+onMounted(async () => {
+  const productsResponse = await axios.get("/products");
+  products.value = productsResponse.data.products.filter((x) => x.active == 1);
+  featuredProducts.value = getRandomFeaturedProducts(products.value);
+});
 </script>
 
 <template>
@@ -61,7 +81,7 @@ const items = ref([
         class="md:flex md:justify-between hidden bg-mySecondaryColor flex-grow md:items-center h-full"
       >
         <!-- Carousel -->
-        <Carousel :items="items" />
+        <Carousel v-if="products" :items="products" />
         <!-- Featured Products -->
         <div class="w-[.8] h-full flex justify-center">
           <div class="flex flex-col justify-center">
@@ -72,12 +92,15 @@ const items = ref([
               >
                 <div class="featured-products max-w-[600px] flex-shrink">
                   <div
-                    v-for="(item, index) in items"
-                    :key="item.id"
+                    v-for="(item, index) in featuredProducts"
+                    :key="item.productID"
                     class="product-image w-full"
                     :style="{ marginLeft: index === 0 ? '0' : '-80px' }"
                   >
-                    <img :src="item.image" alt="product name" />
+                    <img
+                      :src="baseUrl + '/' + item.image"
+                      :alt="item.productName"
+                    />
                   </div>
                 </div>
               </div>
@@ -92,12 +115,8 @@ const items = ref([
           >
             <div
               class="transition hover:scale-125 ease-in-out z-10 cursor-pointer"
+              @click="router.push('/order')"
             >
-              <HeaderText
-                textSize="32px"
-                featuredText="NEW"
-                productsText="PRODUCT LAUNCH"
-              />
               <img :src="bestSeller.image" alt="name" class="w-[229px]" />
             </div>
             <!-- Circle Section -->

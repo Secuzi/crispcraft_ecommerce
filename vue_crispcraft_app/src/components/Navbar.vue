@@ -10,9 +10,14 @@ import OrdersIcon from "@/assets/images/icons/orders_icon.svg";
 import { Popover } from "primevue";
 import HeaderText from "./HeaderText.vue";
 import { ref, onMounted } from "vue";
+import axios from "axios";
+import Badge from "primevue/badge";
+import OverlayBadge from "primevue/overlaybadge";
 const authStore = useAuthStore();
 const router = useRouter();
-
+function removeTimeFromDateString(dateString) {
+  return dateString.split("T")[0];
+}
 const authenticationClick = () => {
   if (!authStore.authenticated) {
     return router.push("/login");
@@ -24,8 +29,39 @@ const op = ref();
 const togglePopover = (event) => {
   op.value.toggle(event);
 };
+const selectOrder = (deliveryID) => {
+  op.value.toggle();
+  router
+    .push({
+      path: `/track-order/${deliveryID}`,
+    })
+    .catch((err) => {
+      if (err.name !== "NavigationDuplicated") {
+        console.error(err);
+      }
+    });
+};
 
-onMounted(() => {});
+const severity = ref();
+
+const orderList = ref([]);
+onMounted(async () => {
+  const orderListResponse = await axios.get(
+    `/query/order-list/${authStore.user_id}`
+  );
+  if (orderListResponse.data.length > 0) {
+    severity.value = "danger";
+  } else {
+    severity.value = null;
+  }
+  orderList.value = orderListResponse.data;
+  for (const order of orderList.value) {
+    const subtotalResponse = await axios.get(
+      `/query/order-subtotal/${order.orderID}`
+    );
+    order.subtotal = subtotalResponse.data.subtotal;
+  }
+});
 </script>
 
 <template>
@@ -68,9 +104,12 @@ onMounted(() => {});
           </li>
 
           <li>
-            <button @click="togglePopover">
-              <img :src="OrdersIcon" class="w-[36px]" />
-            </button>
+            <OverlayBadge :severity="severity">
+              <button @click="togglePopover">
+                <img :src="OrdersIcon" class="w-[36px]" />
+              </button>
+            </OverlayBadge>
+
             <Popover ref="op">
               <div class="flex flex-col gap-4">
                 <div class="myTextShadow">
@@ -81,21 +120,30 @@ onMounted(() => {});
                   />
                   <ul class="list-none p-0 m-0 flex flex-col">
                     <li
-                      v-for="member in members"
-                      :key="member.name"
+                      v-for="order in orderList"
+                      :key="order.orderID"
                       class="flex items-center gap-2 px-2 py-3 hover:bg-emphasis cursor-pointer rounded-border"
-                      @click="selectMember(member)"
+                      @click="selectOrder(order.deliveryID)"
                     >
                       <div>
-                        <HeaderText
-                          featuredText="Order"
-                          productsText="1"
-                          textSize="20px"
-                        />
-                        <span class="text-[16px] font-bold">Php 160</span>
-                      </div>
-                      <div>
-                        <span>Delivery Date: 24/11/11</span>
+                        <div class="flex justify-between">
+                          <HeaderText
+                            featuredText="Order"
+                            :productsText="String(order.orderID)"
+                            textSize="20px"
+                          />
+                          <span class="text-[16px] font-bold"
+                            >Php {{ order.subtotal + 60 }}</span
+                          >
+                        </div>
+                        <div>
+                          <span
+                            >Delivery Date:
+                            {{
+                              removeTimeFromDateString(order.deliveryDate)
+                            }}</span
+                          >
+                        </div>
                       </div>
                     </li>
                   </ul>

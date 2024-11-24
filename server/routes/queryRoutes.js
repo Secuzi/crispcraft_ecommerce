@@ -9,6 +9,7 @@ const {
   updateOrderItemOrders,
   getTransactionLogData,
   getOrderSubTotal,
+  getOrderList,
 } = require("../controllers/queryController.js");
 
 router.get("/stock", getStockData);
@@ -17,4 +18,5 @@ router.get("/total/:id", getSubTotal);
 router.put("/updateOrder", updateOrderItemOrders);
 router.get("/transaction-data", getTransactionLogData);
 router.get("/order-subtotal/:id", getOrderSubTotal);
+router.get("/order-list/:id", getOrderList);
 module.exports = router;

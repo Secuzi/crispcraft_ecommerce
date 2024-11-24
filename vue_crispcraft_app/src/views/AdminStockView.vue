@@ -123,7 +123,7 @@ async function submitForm() {
       formData.append("expirationDate", form.expirationDate);
       formData.append("image", imageObject.value);
 
-      if (form.stockQty === 0) {
+      if (form.stockQty == 0) {
         formData.append("active", 0);
       } else {
         formData.append("active", 1);
@@ -136,7 +136,7 @@ async function submitForm() {
         formData
       );
       form.productID = newProduct.value.data.productID;
-      console.log(newProduct);
+      console.log("MEW PRODUCTT: ", newProduct.value);
     } catch (e) {
       console.log(e);
       toast.add({
@@ -237,7 +237,6 @@ watchEffect(async () => {
       const { flavor } = flavorResponse.data;
       const inventoryResponse = await axios.get("/inventory");
       const { inventories } = inventoryResponse.data;
-      console.log("INVENTORIES: ", inventories);
       const inventory = inventories.find(
         (inventory) => inventory.productID === selectedProduct.productID
       );
@@ -392,7 +391,7 @@ onUnmounted(() => {
                   :class="[index !== 0 ? 'mt-5' : '']"
                   :image="baseUrl + '/' + product.image"
                   :header="product.productName"
-                  :deleteProduct="inventoryStore.deleteInventory"
+                  :deleteProduct="productStore.deleteProduct"
                   :getProduct="productStore.getProduct"
                   :description="product.description"
                   :qty="product.stockQty"

@@ -80,9 +80,21 @@ const createInventory = async (req, res) => {
   }
 };
 
+const deleteInventory = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    await InventoryService.delete(id, "inventoryID");
+
+    return res.status(200).json({ message: "Deleted Inventory!" });
+  } catch (e) {
+    console.log(e);
+  }
+};
+
 module.exports = {
   getAllInventory,
   createInventory,
   getInventory,
   updateInventory,
+  deleteInventory,
 };
