@@ -16,7 +16,7 @@ export const useProductStore = defineStore("product", () => {
     );
     getProduct.active = 0;
     await axios.put(`/products/${getProduct.productID}`, getProduct);
-    console.log("GET PRODUCT: ", getProduct);
+
     const newProducts = products.value.filter(
       (product) => product.inventoryID != inventoryProduct.inventoryID
     );

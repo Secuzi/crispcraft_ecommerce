@@ -86,9 +86,21 @@ const updateMerchant = async (req, res) => {
     .json({ message: "Updated successfully!", updatedMerchant });
 };
 
+const deleteMerchant = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    await MerchantService.delete(id, "merchantID");
+
+    return res.status(200).json({ message: "Deleted merchant!" });
+  } catch (e) {
+    console.log(e);
+  }
+};
+
 module.exports = {
   getAllMerchants,
   createMerchant,
   getMerchant,
   updateMerchant,
+  deleteMerchant,
 };

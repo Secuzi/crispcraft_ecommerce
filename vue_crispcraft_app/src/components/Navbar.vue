@@ -46,6 +46,10 @@ const severity = ref();
 
 const orderList = ref([]);
 onMounted(async () => {
+  if (authStore.role === "admin" || !authStore.role) {
+    return;
+  }
+
   const orderListResponse = await axios.get(
     `/query/order-list/${authStore.user_id}`
   );
@@ -66,35 +70,14 @@ onMounted(async () => {
 
 <template>
   <nav class="bg-myPrimaryColor">
-    <div class="flex justify-between items-center">
+    <div class="flex justify-around items-center">
       <div class="flex items-center">
-        <RouterLink to="/">
+        <RouterLink to="/" class="cursor-pointer">
           <img :src="logo" class="w-[64px] sm:w-[117px] inline-block" />
         </RouterLink>
-        <IconField class="text-[8px] inline-block sm:text-[20px]">
-          <InputIcon class="pi pi-search text-sm md:text-base" />
-          <InputText
-            v-model="value1"
-            placeholder="Search"
-            :pt="{
-              root: {
-                style: { borderRadius: '25px' },
-              },
-            }"
-            class="rounded-[25px] max-w-[126px] sm:max-w-[256px] lg:max-w-[382px] test"
-          />
-        </IconField>
       </div>
-      <div class="grow flex lg:justify-evenly justify-around items-center">
-        <ul class="flex items-center sm:justify-around sm:w-full gap-5">
-          <li>
-            <RouterLink
-              to="/checkout"
-              class="text-white text-[8px] font-bold sm:text-[20px]"
-              >Checkout</RouterLink
-            >
-          </li>
-
+      <div class="flex items-center">
+        <ul class="flex items-center sm:justify-around sm:w-full gap-16">
           <li>
             <RouterLink
               to="/order"
@@ -103,7 +86,7 @@ onMounted(async () => {
             >
           </li>
 
-          <li>
+          <li v-if="authStore.user_id">
             <OverlayBadge :severity="severity">
               <button @click="togglePopover">
                 <img :src="OrdersIcon" class="w-[36px]" />

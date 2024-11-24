@@ -10,6 +10,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import CreateProductView from "@/views/CreateProductView.vue";
 import AdminStockView from "@/views/AdminStockView.vue";
 import TransactionMonitoring from "@/views/TransactionMonitoring.vue";
+import MerchantMonitoringView from "@/views/MerchantMonitoringView.vue";
 
 const routes = [
   {
@@ -62,6 +63,12 @@ const routes = [
     path: "/admin/transactions",
     name: "transactions",
     component: TransactionMonitoring,
+    meta: { requiresAuth: false, role: "admin" },
+  },
+  {
+    path: "/admin/merchants",
+    name: "merchants",
+    component: MerchantMonitoringView,
     meta: { requiresAuth: false, role: "admin" },
   },
   {

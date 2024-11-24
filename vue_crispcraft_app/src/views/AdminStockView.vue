@@ -356,17 +356,11 @@ onUnmounted(() => {
                   >
                 </div>
               </button> -->
-              <button>
-                <div
-                  class="flex items-center justify-center xl:gap-3 2xl:gap-5 bg-[#63A553] rounded-2xl px-4 py-2 myBoxShadow"
-                >
-                  <img :src="ClerkIcon" class="w-[47px]" />
-                  <span
-                    class="text-white flex-grow font-bold myTextShadow text-[24px] text-left"
-                    >Merchants</span
-                  >
-                </div>
-              </button>
+              <AdminButton
+                route="/admin/merchants"
+                :imageIcon="ClerkIcon"
+                text="Merchants"
+              />
             </div>
           </section>
           <section class="basis-[500px] flex-grow">
