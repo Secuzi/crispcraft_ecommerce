@@ -40,7 +40,7 @@ const routes = [
     meta: { requiresAuth: true, requiresActiveProduct: true, role: "customer" },
   },
   {
-    path: "/trackorder",
+    path: "/track-order/:id",
     name: "order tracker",
     component: OrderTrackerView,
     meta: { requiresAuth: true, role: "customer" },

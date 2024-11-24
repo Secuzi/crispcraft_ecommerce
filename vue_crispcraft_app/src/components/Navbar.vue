@@ -6,6 +6,10 @@ import InputIcon from "primevue/inputicon";
 import InputText from "primevue/inputtext";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import OrdersIcon from "@/assets/images/icons/orders_icon.svg";
+import { Popover } from "primevue";
+import HeaderText from "./HeaderText.vue";
+import { ref, onMounted } from "vue";
 const authStore = useAuthStore();
 const router = useRouter();
 
@@ -15,6 +19,13 @@ const authenticationClick = () => {
   }
   authStore.logout();
 };
+const op = ref();
+
+const togglePopover = (event) => {
+  op.value.toggle(event);
+};
+
+onMounted(() => {});
 </script>
 
 <template>
@@ -50,17 +61,47 @@ const authenticationClick = () => {
 
           <li>
             <RouterLink
-              to="/"
-              class="text-white text-[8px] font-bold sm:text-[20px]"
-              >Help</RouterLink
-            >
-          </li>
-          <li>
-            <RouterLink
               to="/order"
               class="text-white text-[8px] font-bold sm:text-[20px]"
               >Order</RouterLink
             >
+          </li>
+
+          <li>
+            <button @click="togglePopover">
+              <img :src="OrdersIcon" class="w-[36px]" />
+            </button>
+            <Popover ref="op">
+              <div class="flex flex-col gap-4">
+                <div class="myTextShadow">
+                  <HeaderText
+                    featuredText="Ordered"
+                    productsText="Products"
+                    textSize="20px"
+                  />
+                  <ul class="list-none p-0 m-0 flex flex-col">
+                    <li
+                      v-for="member in members"
+                      :key="member.name"
+                      class="flex items-center gap-2 px-2 py-3 hover:bg-emphasis cursor-pointer rounded-border"
+                      @click="selectMember(member)"
+                    >
+                      <div>
+                        <HeaderText
+                          featuredText="Order"
+                          productsText="1"
+                          textSize="20px"
+                        />
+                        <span class="text-[16px] font-bold">Php 160</span>
+                      </div>
+                      <div>
+                        <span>Delivery Date: 24/11/11</span>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </Popover>
           </li>
           <li>
             <RouterLink

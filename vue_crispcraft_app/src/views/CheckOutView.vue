@@ -78,7 +78,8 @@ const showSuccessToast = async () => {
   //   console.log("whaat");
   // }
 
-  const orderObject = { status: "pending", customerID: authStore.user_id };
+  //Status immediately basta payment method is COD
+  const orderObject = { status: "completed", customerID: authStore.user_id };
   const orderResponse = await axios.post("/order", orderObject);
   console.log("ORDER RESPONSE: ", orderResponse.data);
   const { orderID } = orderResponse.data;
@@ -105,6 +106,15 @@ const showSuccessToast = async () => {
 
   console.log("PAYMENT RESPONSE: ", paymentResponse);
 
+  const deliveryObject = {
+    orderID,
+    deliveryStatus: "pending",
+  };
+  const deliveryResponse = await axios.post("/delivery", deliveryObject);
+
+  console.log("delivery response: ", deliveryResponse.data);
+
+  const { deliveryID } = deliveryResponse.data;
   //1. user orders, it creates orderID
   //2. update orderItemID in orderItemStore to newly created orderID
 
@@ -120,9 +130,11 @@ const showSuccessToast = async () => {
     life: 3000,
   });
 
-  // setTimeout(() => {
-  //   // window.open(data.value.data.attributes.checkout_url, "_blank");
-  // }, 1500);
+  setTimeout(() => {
+    // Cases where other people can see other's track-order
+    router.push(`/track-order/${deliveryID}`);
+    // window.open(data.value.data.attributes.checkout_url, "_blank");
+  }, 1500);
 };
 const isPaymongoActive = ref(false);
 

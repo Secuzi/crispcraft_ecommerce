@@ -1,6 +1,6 @@
 const DeliveryService = require("../services/DeliveryService");
 const deliverySchema = require("../schemas/DeliverySchema");
-
+const dayjs = require("dayjs");
 const getAllDeliveries = async (req, res) => {
   try {
     const deliveries = await DeliveryService.getAll();
@@ -9,11 +9,12 @@ const getAllDeliveries = async (req, res) => {
     console.log(e);
   }
 };
-
+//@PATH /delivery
 const createDelivery = async (req, res) => {
   try {
-    const { deliveryDate, cashCollected, deliveryStatus, orderID, merchantID } =
+    let { deliveryDate, cashCollected, deliveryStatus, orderID, merchantID } =
       req.body;
+    deliveryDate = dayjs().format("YYYY-MM-DD HH:mm:ss");
     const { error, value: validatedDelivery } = deliverySchema.validate(
       {
         deliveryDate,

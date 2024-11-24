@@ -73,8 +73,7 @@ const getOrderSubTotal = async (req, res) => {
   const pool = await poolPromise;
 
   const query = `
-    SELECT * FROM OrderItem
-    SELECT SUM(price * quantity) 
+    SELECT SUM(price * quantity) AS subtotal
     FROM OrderItem
     WHERE orderID = @orderID
     
