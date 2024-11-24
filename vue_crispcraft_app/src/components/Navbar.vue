@@ -46,7 +46,7 @@ const severity = ref();
 
 const orderList = ref([]);
 onMounted(async () => {
-  if (authStore.role === "admin" || !authStore.role) {
+  if (authStore.role !== "customer" || !authStore.user_id) {
     return;
   }
 
@@ -86,7 +86,7 @@ onMounted(async () => {
             >
           </li>
 
-          <li v-if="authStore.user_id">
+          <li v-if="authStore.role == 'customer'">
             <OverlayBadge :severity="severity">
               <button @click="togglePopover">
                 <img :src="OrdersIcon" class="w-[36px]" />

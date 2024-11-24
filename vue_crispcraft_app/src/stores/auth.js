@@ -7,12 +7,12 @@ export const useAuthStore = defineStore("auth", () => {
   const role = ref(null);
   const authenticated = ref(false); // Track authentication status
 
-  async function login(email, password) {
+  async function login(credentials) {
     try {
-      const response = await axios.post("http://localhost:3000/auth/login", {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        "http://localhost:3000/auth/login",
+        credentials
+      );
 
       const { user } = response.data;
       user_id.value = user.user_id;
