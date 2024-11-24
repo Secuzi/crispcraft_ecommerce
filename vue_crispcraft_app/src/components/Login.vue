@@ -29,7 +29,9 @@ async function submitForm() {
   try {
     // const response = await axios.post("http://localhost:3000/auth/login", form);
 
-    await authStore.login(form.email, form.password);
+    const returnedData = await authStore.login(form.email, form.password);
+
+    console.log("returned data: ", returnedData);
 
     if (authStore.role === "admin") {
       router.push("/admin/stock");
@@ -42,7 +44,7 @@ async function submitForm() {
     toast.add({
       severity: "error",
       summary: "Error",
-      detail: e.response.data.message,
+      detail: e.message,
       life: 3000,
     });
   }

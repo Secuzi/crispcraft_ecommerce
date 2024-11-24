@@ -5,7 +5,7 @@ import OrderItemView from "@/views/OrderItemView.vue";
 import OrderTrackerView from "@/views/OrderTrackerView.vue";
 import RegisterView from "@/views/RegisterView.vue";
 import { useAuthStore } from "@/stores/auth";
-
+import NotFoundView from "@/views/NotFoundView.vue";
 import { createRouter, createWebHistory } from "vue-router";
 import CreateProductView from "@/views/CreateProductView.vue";
 import AdminStockView from "@/views/AdminStockView.vue";
@@ -62,6 +62,15 @@ const routes = [
     name: "transactions",
     component: TransactionMonitoring,
     meta: { requiresAuth: false, role: "admin" },
+  },
+  {
+    // path: "*",
+    path: "/:catchAll(.*)*",
+    name: "NotFound",
+    component: NotFoundView,
+    meta: {
+      requiresAuth: false,
+    },
   },
 ];
 

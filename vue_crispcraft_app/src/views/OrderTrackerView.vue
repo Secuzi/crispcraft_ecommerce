@@ -19,6 +19,7 @@ import { useRoute } from "vue-router";
 import MainContainer from "@/components/MainContainer.vue";
 import axios from "axios";
 import Drawer from "primevue/drawer";
+import router from "@/router/route";
 
 // const delivery = ref({
 //   deliveryID: 9594,
@@ -121,8 +122,13 @@ if (delivery.value.deliveryStatus === "delivered") {
 
 onMounted(async () => {
   const deliveryID = route.params.id;
-  const deliveryResponse = await axios.get(`/delivery/${deliveryID}`);
-  delivery.value = deliveryResponse.data.delivery;
+  try {
+    const deliveryResponse = await axios.get(`/delivery/${deliveryID}`);
+    delivery.value = deliveryResponse.data.delivery;
+    console.log("DELIVERYY!", delivery.value);
+  } catch (e) {
+    router.push({ name: "NotFound" });
+  }
 });
 </script>
 

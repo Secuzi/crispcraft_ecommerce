@@ -20,7 +20,7 @@ export const useAuthStore = defineStore("auth", () => {
       authenticated.value = true;
     } catch (error) {
       this.logout();
-      throw new Error("Login failed");
+      throw { message: "Login failed!, either incorrect password or email!" };
     }
   }
 

@@ -5,10 +5,18 @@ import MobileContainer from "@/components/MobileContainer.vue";
 import Navbar from "@/components/Navbar.vue";
 import HeaderText from "@/components/HeaderText.vue";
 import CheckoutProductCard from "@/components/CheckoutProductCard.vue";
-import { IconField, InputIcon, InputText } from "primevue";
+import {
+  IconField,
+  InputIcon,
+  InputText,
+  Dialog,
+  DataTable,
+  Column,
+} from "primevue";
 import ChecklistIcon from "@/assets/images/icons/checklists.svg";
 import TransactionIcon from "@/assets/images/icons/transaction.svg";
 import ClerkIcon from "@/assets/images/icons/clerk.svg";
+import VueButton from "primevue/button";
 import Button from "@/components/Button.vue";
 import { reactive } from "vue";
 import axios from "axios";
@@ -19,12 +27,13 @@ import { ref, onMounted, computed, onUnmounted } from "vue";
 import useVuelidate from "@vuelidate/core";
 import { required, helpers } from "@vuelidate/validators";
 import { useProductStore } from "@/stores/product";
-import Dialog from "primevue/dialog";
-import { watchEffect } from "vue";
+
+import { watchEffect, watch } from "vue";
 import { useInventoryStore } from "@/stores/inventory";
 import { useFlavorStore } from "@/stores/flavor";
 import AdminButton from "@/components/AdminButton.vue";
 import { RouterLink, useRouter } from "vue-router";
+
 const productStore = useProductStore();
 const router = new useRouter();
 const inventoryStore = useInventoryStore();
@@ -47,6 +56,8 @@ const form = reactive({
 const baseUrl = import.meta.env.VITE_APP_BASE_URL;
 
 const imageObject = ref(null);
+
+const dialogVisible = ref(false);
 
 function checkImageFile(event) {
   const { files } = event.target;
@@ -135,7 +146,7 @@ async function submitForm() {
         life: 3150,
       });
     }
-
+    console.log("SELECTED INVENTORY: ", selectedInventory.value);
     try {
       newInventory.value = await axios.put(
         `/inventory/${selectedInventory.value}`,
@@ -161,6 +172,7 @@ async function submitForm() {
   }
 }
 const products = ref([]);
+const addSelectedProduct = ref();
 
 function removeTimeFromDateString(dateString) {
   return dateString.split("T")[0];
@@ -169,6 +181,28 @@ const browserWindow = reactive({
   width: window.innerWidth,
   height: window.innerHeight,
 });
+
+const addToInventory = async () => {
+  // form.productID = newProduct.value.data.productID;
+  // form.stockQty = 0;
+  if (products.value.length <= 0) {
+    return;
+  }
+
+  addSelectedProduct.value.stockQty = 0;
+
+  const inventoryResponse = await axios.post("/inventory", {
+    ...addSelectedProduct.value,
+  });
+
+  const { inventoryID } = inventoryResponse.data;
+  addSelectedProduct.value.inventoryID = inventoryID;
+
+  console.log(addSelectedProduct.value);
+  productStore.products.push(addSelectedProduct.value);
+
+  dialogVisible.value = false;
+};
 
 const updateDimensions = () => {
   browserWindow.width = window.innerWidth;
@@ -203,7 +237,7 @@ watchEffect(async () => {
       const { flavor } = flavorResponse.data;
       const inventoryResponse = await axios.get("/inventory");
       const { inventories } = inventoryResponse.data;
-
+      console.log("INVENTORIES: ", inventories);
       const inventory = inventories.find(
         (inventory) => inventory.productID === selectedProduct.productID
       );
@@ -217,10 +251,44 @@ watchEffect(async () => {
   }
 });
 
+watch(
+  () => addSelectedProduct.value,
+  (newSelect) => {
+    console.log("SELECTED ADD PRODUCT: ", newSelect);
+  }
+);
+
+const dialogClick = async () => {
+  dialogVisible.value = true;
+  //get products
+  const productsResponse = await axios.get("/products");
+  const gotProducts = productsResponse.data.products;
+  console.log("GOT PRODUCTS!", gotProducts);
+  products.value = gotProducts.filter(
+    (product) =>
+      !productStore.products.some(
+        (inventoryProduct) => inventoryProduct.productID === product.productID
+      )
+  );
+  //Get flavors
+
+  const flavorsResponse = await axios.get("/flavors");
+  const flavors = flavorsResponse.data;
+  for (const product of products.value) {
+    for (const flavor of flavors) {
+      if (product.flavorID === flavor.flavorID) {
+        product.flavorName = flavor.flavorName;
+      }
+    }
+  }
+};
+
 onMounted(async () => {
   const response = await axios.get("/query/stock");
 
   productStore.products = response.data;
+
+  console.log("PRODUUCTS STOOORE: ", productStore.products);
 
   if (productStore.products.length > 0) {
     productStore.selectedProduct = productStore.products[0].productID;
@@ -324,7 +392,7 @@ onUnmounted(() => {
                   :class="[index !== 0 ? 'mt-5' : '']"
                   :image="baseUrl + '/' + product.image"
                   :header="product.productName"
-                  :deleteProduct="productStore.deleteProduct"
+                  :deleteProduct="inventoryStore.deleteInventory"
                   :getProduct="productStore.getProduct"
                   :description="product.description"
                   :qty="product.stockQty"
@@ -486,12 +554,50 @@ onUnmounted(() => {
               </div>
             </form>
 
-            <RouterLink
-              to="/admin/create-product"
-              class="text-[24px] font-bold rounded-full px-[15px] py-[12px] bg-[#3672F6] text-white myBoxShadow myTextShadow"
+            <div class="flex justify-between">
+              <RouterLink
+                to="/admin/create-product"
+                class="text-[24px] font-bold rounded-full px-4 py-3 bg-[#3672F6] text-white myBoxShadow myTextShadow"
+              >
+                Create Product
+              </RouterLink>
+              <button
+                @click="dialogClick"
+                class="text-[24px] font-bold rounded-full px-4 py-3 bg-[#3672F6] text-white myBoxShadow myTextShadow"
+              >
+                Add Product
+              </button>
+            </div>
+            <Dialog
+              v-model:visible="dialogVisible"
+              header="Add Product to Inventory"
+              :style="{ width: '75vw' }"
+              modal
+              :contentStyle="{ height: '300px' }"
             >
-              Create Product
-            </RouterLink>
+              <DataTable
+                :value="products"
+                v-model:selection="addSelectedProduct"
+                selectionMode="single"
+                :metaKeySelection="false"
+                scrollable
+                scrollHeight="flex"
+                datakey="productID"
+                tableStyle="min-width: 50rem"
+              >
+                <Column field="productID" header="productID"></Column>
+                <Column field="productName" header="Product Name"></Column>
+                <Column field="flavorName" header="Flavor Name"></Column>
+                <Column field="price" header="Price"></Column>
+              </DataTable>
+              <template #footer>
+                <VueButton
+                  label="Add to Inventory"
+                  icon="pi pi-check"
+                  @click="addToInventory"
+                />
+              </template>
+            </Dialog>
           </section>
         </div>
       </section>
@@ -776,7 +882,10 @@ onUnmounted(() => {
 .form-item {
   margin-bottom: 1rem;
 }
-
+:deep(.p-datatable-row-selected) {
+  background-color: #74cd5f !important;
+  color: black !important;
+}
 :deep(.p-inputtext:focus) {
   border-color: #74cd5f !important;
 }

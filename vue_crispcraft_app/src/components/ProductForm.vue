@@ -107,8 +107,8 @@ async function submitForm() {
     form.productID = newProduct.value.data.productID;
     form.stockQty = 0;
 
-    const inventoryResponse = await axios.post("/inventory", form);
-    console.log(inventoryResponse.data);
+    // const inventoryResponse = await axios.post("/inventory", form);
+    // console.log(inventoryResponse.data);
 
     toast.add({
       severity: "success",

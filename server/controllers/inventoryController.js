@@ -73,7 +73,7 @@ const createInventory = async (req, res) => {
 
     res.status(200).json({
       message: "Inventory successfully created",
-      inventoryID: newInventory.inventoryID,
+      inventoryID: newInventory.id,
     });
   } catch (e) {
     console.log(e);
