@@ -147,7 +147,10 @@ onMounted(async () => {
                   </template>
                 </Column>
                 <Column field="phoneNum" header="Contact #"></Column>
-                <Column field="address" header="Delivery Address"></Column>
+                <Column
+                  field="deliveryAddress"
+                  header="Delivery Address"
+                ></Column>
                 <Column field="reason" header="Reason"></Column>
                 <Column field="totalAmount" header="Total Amount"></Column>
               </DataTable>

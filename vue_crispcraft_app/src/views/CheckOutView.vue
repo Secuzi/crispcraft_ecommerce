@@ -110,10 +110,10 @@ const showSuccessToast = async () => {
   const paymentResponse = await axios.post("/payment", paymentObject);
 
   console.log("PAYMENT RESPONSE: ", paymentResponse);
-
   const deliveryObject = {
     orderID,
     deliveryStatus: "pending",
+    deliveryAddress: deliveryStore.deliveryAddress,
   };
   const deliveryResponse = await axios.post("/delivery", deliveryObject);
 
@@ -176,7 +176,7 @@ onMounted(async () => {
 
   const { customer } = getCustomerInfoResponse.data;
 
-  deliveryStore.address = customer.address;
+  deliveryStore.deliveryAddress = customer.address;
   deliveryStore.deliveryCharge = 60;
   paymentStore.paymentMethod = "cash-on-delivery";
 

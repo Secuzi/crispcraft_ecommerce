@@ -2,7 +2,7 @@ import { ref, computed } from "vue";
 import { defineStore } from "pinia";
 
 export const useDeliveryStore = defineStore("delivery", () => {
-  const address = ref("");
+  const deliveryAddress = ref("");
   const deliveryCharge = ref(0);
   const pendingDeliveries = ref([]);
 
@@ -11,6 +11,7 @@ export const useDeliveryStore = defineStore("delivery", () => {
       deliveryID: row.deliveryID,
       deliveryDate: row.deliveryDate,
       paymentID: row.paymentID,
+      deliveryAddress: row.deliveryAddress,
       fName: row.fName,
       lName: row.lName,
       reason: row.reason,
@@ -25,5 +26,10 @@ export const useDeliveryStore = defineStore("delivery", () => {
     return deliveryDetails;
   }
 
-  return { address, deliveryCharge, pendingDeliveries, formatDeliveryData };
+  return {
+    deliveryAddress,
+    deliveryCharge,
+    pendingDeliveries,
+    formatDeliveryData,
+  };
 });

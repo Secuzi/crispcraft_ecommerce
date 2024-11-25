@@ -176,7 +176,7 @@ const getMerchantDeliveryData = async (req, res) => {
 	d.deliveryDate,
     c.fName, c.lName,
     c.phoneNum,
-    c.address, 
+    d.deliveryAddress, 
 	d.reason,
 	pm.paymentID,
     o.orderID,
@@ -201,7 +201,7 @@ INNER JOIN OrderItem oi ON o.orderID = oi.orderID
 INNER JOIN Product p ON oi.productID = p.productID
 INNER JOIN Payment pm ON pm.orderID = o.orderID
 WHERE d.deliveryStatus = @data -- Replace with your deliveryID parameter
-GROUP BY d.deliveryID, d.deliveryDate, c.fName, c.lName, c.phoneNum, c.[address], o.orderID, d.reason, pm.paymentID;
+GROUP BY d.deliveryID, d.deliveryDate, c.fName, c.lName, c.phoneNum, d.deliveryAddress, o.orderID, d.reason, pm.paymentID;
     
     
     `;

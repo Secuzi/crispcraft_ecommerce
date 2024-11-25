@@ -6,6 +6,7 @@ const deliverySchema = Joi.object({
   deliveryStatus: Joi.string().required(),
   orderID: Joi.number().required(),
   merchantID: Joi.number(),
+  deliveryAddress: Joi.string(),
 });
 
 module.exports = deliverySchema;
