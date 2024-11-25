@@ -60,17 +60,6 @@ onMounted(async () => {
   isLoading.value = false;
   console.log("PENDING DELEVERIES: ", deliveryStore.pendingDeliveries);
 });
-
-const searchTerm = ref("");
-const filteredPendingDeliveries = computed(() => {
-  const term = searchTerm.value.toLowerCase();
-  return deliveryStore.pendingDeliveries.filter(
-    (delivery) =>
-      delivery.fName.toLowerCase().includes(term) ||
-      delivery.lName.toLowerCase().includes(term) ||
-      delivery.orderID
-  );
-});
 </script>
 
 <template>
@@ -94,16 +83,6 @@ const filteredPendingDeliveries = computed(() => {
               productsText="Page"
               textSize="55px"
             />
-            <div class="ml-[137px]">
-              <IconField>
-                <InputIcon class="pi pi-search" />
-                <InputText
-                  v-model="searchTerm"
-                  placeholder="Search Order"
-                  class="!text-[20px] !focus:border-myPrimaryColor"
-                />
-              </IconField>
-            </div>
           </div>
           <!-- buttons and table container -->
           <div class="grid grid-cols-[1fr_3fr] w-[90%] mt-[19px]">
@@ -123,6 +102,12 @@ const filteredPendingDeliveries = computed(() => {
               >
                 Returned
               </RouterLink>
+              <RouterLink
+                to="/merchant/delivery-tracker"
+                class="bg-mySecondaryColor block w-full mt-12 py-3 myTextShadow text-center"
+              >
+                Delivery Tracker
+              </RouterLink>
             </div>
             <!-- Table container -->
             <div
@@ -138,7 +123,7 @@ const filteredPendingDeliveries = computed(() => {
               </button>
               <DataTable
                 v-model:selection="selectedDelivery"
-                :value="filteredPendingDeliveries"
+                :value="deliveryStore.pendingDeliveries"
                 selectionMode="single"
                 dataKey="orderID"
                 :metaKeySelection="false"

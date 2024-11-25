@@ -10,6 +10,7 @@ export const useDeliveryStore = defineStore("delivery", () => {
     const deliveryDetails = deliveries.map((row) => ({
       deliveryID: row.deliveryID,
       deliveryDate: row.deliveryDate,
+      paymentID: row.paymentID,
       fName: row.fName,
       lName: row.lName,
       reason: row.reason,

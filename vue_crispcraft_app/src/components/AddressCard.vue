@@ -59,15 +59,15 @@ const props = defineProps({
         class="font-semibold myTextShadow"
         :style="{ fontSize: deliveryChargeTextSize }"
       >
-        Delivery Charge: Php {{ deliveryStore.deliveryCharge }}
+        Delivery Charge: &#8369;{{ deliveryStore.deliveryCharge }}
       </h3>
-      <p
+      <!-- <p
         class="font-medium text-[9px] myTextShadow cursor-pointer"
         @click="toggleDisabled"
         :style="{ fontSize: deliveryAddressTextSize }"
       >
         Change Delivery Address
-      </p>
+      </p> -->
     </div>
   </div>
 </template>

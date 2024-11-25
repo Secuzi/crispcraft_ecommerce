@@ -21,6 +21,7 @@ export const useProductStore = defineStore("product", () => {
       (product) => product.inventoryID != inventoryProduct.inventoryID
     );
     products.value = newProducts;
+    selectedProduct.value = products.value[0].productID;
   }
 
   function getProduct(id) {

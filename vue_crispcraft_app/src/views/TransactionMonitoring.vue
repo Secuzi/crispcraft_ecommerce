@@ -156,7 +156,7 @@ onMounted(async () => {
                         }}</span
                       >
                       <span class="not-italic font-semibold"
-                        >Total: {{ transaction.subtotal + 60 }}
+                        >Total: &#8369;{{ transaction.subtotal + 60 }}
                       </span>
                     </div>
                   </div>
