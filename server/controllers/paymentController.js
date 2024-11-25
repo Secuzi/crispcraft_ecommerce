@@ -1,5 +1,6 @@
 const PaymentService = require("../services/PaymentService");
 const paymentSchema = require("../schemas/PaymentSchema");
+const dayjs = require("dayjs");
 //@PATH /payment
 const createPayment = async (req, res) => {
   try {
@@ -45,7 +46,41 @@ const getPaymentByOrderID = async (req, res) => {
   }
 };
 
+const updatePayment = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    let { paymentAmount, paymentDate } = req.body;
+    paymentDate = dayjs().format("YYYY-MM-DD HH:mm:ss");
+
+    const { error, value: validatedPayment } = paymentSchema.validate(
+      {
+        paymentAmount,
+        paymentDate,
+      },
+      { abortEarly: false }
+    );
+    if (error) {
+      const errorMessages = error.details.map((detail) => detail.message);
+
+      console.log(errorMessages);
+      return res.status(400).json({ message: errorMessages });
+    }
+
+    const updatedPayment = await PaymentService.update(
+      id,
+      validatedPayment,
+      "paymentID"
+    );
+    return res
+      .status(200)
+      .json({ message: "Updated successfully!", updatedPayment });
+  } catch (e) {
+    console.log(e);
+  }
+};
+
 module.exports = {
   createPayment,
   getPaymentByOrderID,
+  updatePayment,
 };

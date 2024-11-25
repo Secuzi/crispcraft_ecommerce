@@ -82,15 +82,6 @@ onMounted(async () => {
               productsText="Page"
               textSize="55px"
             />
-            <div class="ml-[137px]">
-              <IconField>
-                <InputIcon class="pi pi-search" />
-                <InputText
-                  placeholder="Search Order"
-                  class="!text-[20px] !focus:border-myPrimaryColor"
-                />
-              </IconField>
-            </div>
           </div>
           <!-- buttons and table container -->
           <div class="grid grid-cols-[1fr_3fr] w-[90%] mt-[19px]">
@@ -109,6 +100,12 @@ onMounted(async () => {
                 class="bg-myPrimaryColor block w-full mt-12 py-3 myTextShadow text-center"
               >
                 Returned
+              </RouterLink>
+              <RouterLink
+                to="/merchant/delivery-tracker"
+                class="bg-mySecondaryColor block w-full mt-12 py-3 myTextShadow text-center"
+              >
+                Delivery Tracker
               </RouterLink>
             </div>
             <!-- Table container -->

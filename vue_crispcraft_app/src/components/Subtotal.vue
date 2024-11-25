@@ -84,7 +84,7 @@ const calculateSubtotal = computed(() => {
             class="py-1 text-opacity-50 text-black rounded-br-xl"
             :style="{ fontSize: sumNumberTextSize }"
           >
-            Php {{ calculateSubtotal }}
+            &#8369; {{ calculateSubtotal }}
           </td>
         </tr>
         <tr v-if="!props.active">

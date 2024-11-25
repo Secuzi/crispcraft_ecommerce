@@ -253,7 +253,7 @@ onUnmounted(() => {
                 class="w-[66px]"
               />
             </div>
-            <div
+            <!-- <div
               class="relative w-[66px] hover:bg-green-300 cursor-pointer"
               :class="[isPaymongoActive ? 'bg-green-400' : '']"
               @click="
@@ -264,7 +264,7 @@ onUnmounted(() => {
               "
             >
               <img :src="PaymongoIcon" alt="Paymongo Icon" />
-            </div>
+            </div> -->
           </div>
 
           <div class="card flex justify-between items-center mt-16">
@@ -276,7 +276,7 @@ onUnmounted(() => {
               Order
             </button>
             <span class="font-bold text-[26px]"
-              >Total Price: {{ subtotal + deliveryStore.deliveryCharge }}
+              >Total Price: &#8369;{{ subtotal + deliveryStore.deliveryCharge }}
             </span>
           </div>
         </div>

@@ -7,7 +7,7 @@ import { onMounted, ref } from "vue";
 import axios from "axios";
 import { useDeliveryStore } from "@/stores/delivery";
 import Drawer from "primevue/drawer";
-
+import { RouterLink } from "vue-router";
 const deliveryStore = useDeliveryStore();
 const deliveries = ref([]);
 const visibleBottom = ref(false);
@@ -66,6 +66,18 @@ const updateDeliveryStatus = async (deliveryID) => {
   deliveries.value = deliveries.value.filter(
     (d) => d.deliveryID !== deliveryID
   );
+
+  console.log("DELIVERYY: ", delivery);
+  //Update payment
+
+  const paymentAmount = delivery.cashCollected;
+
+  const payment = await axios.put(`/payment/${delivery.paymentID}`, {
+    paymentAmount,
+  });
+
+  console.log("PAYMEENT: ", payment);
+  //Update transaction
   const { orderID } = delivery;
   await axios.post("/transaction-log", { orderID, deliveryID });
 };
@@ -87,7 +99,7 @@ onMounted(async () => {
     <MobileContainer backgroundColor="bg-[#D6F3FF]">
       <section class="h-full">
         <div>
-          <div class="w-[95%] mx-auto">
+          <div class="w-[95%] mx-auto flex items-center justify-between mb-3">
             <h1>
               <HeaderText
                 featuredText="Delivery"
@@ -96,6 +108,12 @@ onMounted(async () => {
                 featuredTextColor="#004DFF"
               />
             </h1>
+
+            <RouterLink
+              to="/merchant"
+              class="myBoxShadow text-white text-[15px] font-bold py-2 px-4 bg-[#004DFF] rounded-full"
+              >Home</RouterLink
+            >
           </div>
           <div
             class="w-[95%] bg-white py-3 mx-auto rounded-2xl myTextShadow text-[13px]"
