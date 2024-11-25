@@ -94,7 +94,7 @@ onMounted(async () => {
             </OverlayBadge>
 
             <Popover ref="op">
-              <div class="flex flex-col gap-4">
+              <div class="flex flex-col gap-4 !max-h-[250px] !overflow-auto">
                 <div class="myTextShadow">
                   <HeaderText
                     featuredText="Ordered"

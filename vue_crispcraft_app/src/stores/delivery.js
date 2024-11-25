@@ -9,6 +9,7 @@ export const useDeliveryStore = defineStore("delivery", () => {
   function formatDeliveryData(deliveries) {
     const deliveryDetails = deliveries.map((row) => ({
       deliveryID: row.deliveryID,
+      deliveryDate: row.deliveryDate,
       fName: row.fName,
       lName: row.lName,
       fullName: row.fName + " " + row.lName,

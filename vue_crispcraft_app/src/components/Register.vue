@@ -316,7 +316,7 @@ async function submitForm() {
             <p class="text-opacity-50 text-black inline mr-[3px]">
               Already have an account?
             </p>
-            <RouterLink to="/" class="text-[#0000FF] text-opacity-100"
+            <RouterLink to="/login" class="text-[#0000FF] text-opacity-100"
               >Log in</RouterLink
             >
           </div>

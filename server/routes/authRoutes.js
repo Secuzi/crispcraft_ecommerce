@@ -28,7 +28,6 @@ router.post("/login", async (req, res) => {
       default:
         return res.status(400).json({ message: "Invalid role specified." });
     }
-    console.log("USEER:", user);
 
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password" });
@@ -40,7 +39,13 @@ router.post("/login", async (req, res) => {
     }
 
     // Store in session
+
     req.session.user = { user_id: user.customerID, role: user.role };
+    switch (role) {
+      case "merchant":
+        req.session.user.user_id = user.merchantID;
+        break;
+    }
     // Send only necessary data
     res.json({
       message: "Login successful",

@@ -11,14 +11,30 @@ import axios from "axios";
 import { useAuthStore } from "@/stores/auth";
 import { useDeliveryStore } from "@/stores/delivery";
 const selectedRow = ref(null); // Track the selected row
-
+const authStore = useAuthStore();
 const deliveryStore = useDeliveryStore();
 function onRowSelect(event) {
   selectedRow.value = event.data;
   console.log("Row Selected:", event.data);
 }
 
-const setToDeliver = () => {};
+const setToDeliver = async () => {
+  if (!selectedRow.value) {
+    return;
+  }
+  const selectedDelivery = selectedRow.value;
+  selectedDelivery.deliveryStatus = "shipping";
+  selectedDelivery.merchantID = authStore.user_id;
+  console.log("Authstore id", authStore.user_id);
+  await axios.put(`delivery/${selectedDelivery.deliveryID}`, selectedDelivery);
+
+  deliveryStore.pendingDeliveries = deliveryStore.pendingDeliveries.filter(
+    (d) => d.deliveryID !== selectedDelivery.deliveryID
+  );
+
+  console.log("SET TO DELIVER ", selectedDelivery);
+  console.log("DELIVERIES ", deliveryStore.pendingDeliveries);
+};
 
 function onRowUnselect() {
   selectedRow.value = null;
@@ -85,6 +101,7 @@ onMounted(async () => {
             <button
               v-if="selectedRow"
               class="absolute myTextShadow font-bold text-[24px] myBoxShadow px-14 py-3 bottom-0 right-7 bg-mySecondaryColor rounded-3xl text-white"
+              @click="setToDeliver"
             >
               Shipped
             </button>

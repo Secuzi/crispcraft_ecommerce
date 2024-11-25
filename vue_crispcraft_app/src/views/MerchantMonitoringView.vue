@@ -95,7 +95,6 @@ async function submitForm() {
     const getMerchant = await axios.get(
       `/merchant/${response.data.merchantID}`
     );
-    console.log("got merchatn: ", getMerchant.data);
     merchantStore.merchants.push(getMerchant.data.merchant);
 
     toast.add({

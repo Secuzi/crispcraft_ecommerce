@@ -131,12 +131,11 @@ const updateOrderItemOrders = async (req, res) => {
 
 const getMerchantDeliveryData = async (req, res) => {
   try {
-    const { id: orderID } = req.params;
-
     const pool = await poolPromise;
     const query = `
-   SELECT 
+    SELECT 
     d.deliveryID,
+	d.deliveryDate,
     c.fName, c.lName,
     c.phoneNum,
     c.address, 
@@ -161,7 +160,7 @@ INNER JOIN Customer c ON o.customerID = c.customerID
 INNER JOIN OrderItem oi ON o.orderID = oi.orderID
 INNER JOIN Product p ON oi.productID = p.productID
 WHERE d.deliveryStatus = 'pending' -- Replace with your deliveryID parameter
-GROUP BY d.deliveryID, c.fName, c.lName, c.phoneNum, c.[address], o.orderID;
+GROUP BY d.deliveryID, d.deliveryDate, c.fName, c.lName, c.phoneNum, c.[address], o.orderID;
     
     `;
 

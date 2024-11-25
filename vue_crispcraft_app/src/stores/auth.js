@@ -18,6 +18,7 @@ export const useAuthStore = defineStore("auth", () => {
       user_id.value = user.user_id;
       role.value = user.role;
       authenticated.value = true;
+      console.log("USERID: ", user_id.value);
     } catch (error) {
       this.logout();
       throw { message: "Login failed!, either incorrect password or email!" };

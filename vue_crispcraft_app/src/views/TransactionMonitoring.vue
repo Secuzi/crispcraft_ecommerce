@@ -184,7 +184,10 @@ onMounted(async () => {
             </div>
           </section>
 
-          <section class="mt-[10rem] pb-[5rem] flex-grow font-bold text-[18px]">
+          <section
+            v-if="merchant"
+            class="mt-[10rem] pb-[5rem] flex-grow font-bold text-[18px]"
+          >
             <span>Merchant in charge</span>
 
             <!-- Merchant container -->
