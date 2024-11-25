@@ -12,6 +12,7 @@ export const useDeliveryStore = defineStore("delivery", () => {
       deliveryDate: row.deliveryDate,
       fName: row.fName,
       lName: row.lName,
+      reason: row.reason,
       fullName: row.fName + " " + row.lName,
       address: row.address,
       orderID: row.orderID,

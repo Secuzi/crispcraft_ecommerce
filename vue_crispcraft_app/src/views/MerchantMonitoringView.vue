@@ -19,7 +19,7 @@ import {
   minLength,
 } from "@vuelidate/validators";
 import { IconField, InputIcon, InputText, Toast } from "primevue";
-import { onMounted, ref, watch, reactive } from "vue";
+import { onMounted, ref, computed, reactive } from "vue";
 import { useToast } from "primevue";
 const toast = useToast();
 const form = reactive({
@@ -78,6 +78,16 @@ const rules = {
   },
 };
 const merchantStore = useMerchantStore();
+
+const searchTerm = ref("");
+const filteredMerchants = computed(() => {
+  const term = searchTerm.value.toLowerCase();
+  return merchantStore.merchants.filter(
+    (merchant) =>
+      merchant.fName.toLowerCase().includes(term) ||
+      merchant.lName.toLowerCase().includes(term)
+  );
+});
 
 const v$ = useVuelidate(rules, form);
 async function submitForm() {
@@ -164,6 +174,7 @@ onMounted(async () => {
               <IconField>
                 <InputIcon class="pi pi-search" />
                 <InputText
+                  v-model="searchTerm"
                   placeholder="Search Merchant"
                   class="!text-[20px] !focus:border-myPrimaryColor"
                 />
@@ -176,7 +187,7 @@ onMounted(async () => {
               <!-- Main container for the list of logs -->
               <div v-if="merchantStore.merchants.length > 0">
                 <div
-                  v-for="(merchant, index) in merchantStore.merchants"
+                  v-for="(merchant, index) in filteredMerchants"
                   :key="merchant.merchantID"
                   class="myBoxShadow cursor-pointer bg-[#ECECEC] rounded-lg px-5 py-2"
                   :class="[index !== 0 ? 'mt-6' : '']"

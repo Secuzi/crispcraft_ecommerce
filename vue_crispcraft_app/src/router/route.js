@@ -13,6 +13,7 @@ import TransactionMonitoring from "@/views/TransactionMonitoring.vue";
 import MerchantMonitoringView from "@/views/MerchantMonitoringView.vue";
 import MerchantPageView from "@/views/MerchantPageView.vue";
 import DeliveryTrackerView from "@/components/DeliveryTrackerView.vue";
+import MerchantPageReturnedView from "@/views/MerchantPageReturnedView.vue";
 
 const routes = [
   {
@@ -83,6 +84,12 @@ const routes = [
     path: "/merchant/delivery-tracker",
     name: "delivery tracker",
     component: DeliveryTrackerView,
+    meta: { requiresAuth: true, role: "merchant" },
+  },
+  {
+    path: "/merchant/returned",
+    name: "merchant returned",
+    component: MerchantPageReturnedView,
     meta: { requiresAuth: true, role: "merchant" },
   },
   {

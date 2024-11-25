@@ -66,6 +66,8 @@ const updateDeliveryStatus = async (deliveryID) => {
   deliveries.value = deliveries.value.filter(
     (d) => d.deliveryID !== deliveryID
   );
+  const { orderID } = delivery;
+  await axios.post("/transaction-log", { orderID, deliveryID });
 };
 
 onMounted(async () => {

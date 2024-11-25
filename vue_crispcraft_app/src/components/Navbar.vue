@@ -65,6 +65,10 @@ onMounted(async () => {
     );
     order.subtotal = subtotalResponse.data.subtotal;
   }
+
+  const orderItems = await axios.get("/order-item/");
+
+  console.log("Orderlist", orderList.value);
 });
 </script>
 
@@ -116,7 +120,7 @@ onMounted(async () => {
                             textSize="20px"
                           />
                           <span class="text-[16px] font-bold"
-                            >Php {{ order.subtotal + 60 }}</span
+                            >&#8369; {{ order.subtotal + 60 }}</span
                           >
                         </div>
                         <div>

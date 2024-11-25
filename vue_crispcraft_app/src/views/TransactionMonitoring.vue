@@ -8,7 +8,7 @@ import Navbar from "@/components/Navbar.vue";
 import AdminButton from "@/components/AdminButton.vue";
 import HeaderText from "@/components/HeaderText.vue";
 import { IconField, InputIcon, InputText } from "primevue";
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref, watch, computed } from "vue";
 import { useTransactionLogStore } from "@/stores/transactionlog";
 import axios from "axios";
 
@@ -47,6 +47,14 @@ watch(
     payment.value = paymentResponse.data;
   }
 );
+
+const searchTerm = ref("");
+const filteredTransactions = computed(() => {
+  const term = searchTerm.value.toLowerCase();
+  return transactionLogStore.transactions.filter((transaction) =>
+    String(transaction.transactionID).toLowerCase().includes(term)
+  );
+});
 
 onMounted(async () => {
   const transactionsResponse = await axios.get("/query/transaction-data");
@@ -123,6 +131,7 @@ onMounted(async () => {
               <IconField>
                 <InputIcon class="pi pi-search" />
                 <InputText
+                  v-model="searchTerm"
                   placeholder="Search Transaction"
                   class="!text-[20px] !focus:border-myPrimaryColor"
                 />
@@ -137,9 +146,7 @@ onMounted(async () => {
                 <!-- Log Container -->
                 <!-- For loop for the products in the specific order -->
                 <div
-                  v-for="(
-                    transaction, index
-                  ) in transactionLogStore.transactions"
+                  v-for="(transaction, index) in filteredTransactions"
                   :key="transaction.transactionID"
                   class="myBoxShadow cursor-pointer bg-[#ECECEC] rounded-lg px-5 py-2"
                   :class="[
@@ -168,6 +175,7 @@ onMounted(async () => {
                   <div
                     class="text-[15px] italic mt-8 flex justify-between font-medium"
                   >
+                    <span>TransactionID: {{ transaction.transactionID }}</span>
                     <span>OrderID: {{ transaction.orderID }}</span>
                     <span
                       >Order Date:

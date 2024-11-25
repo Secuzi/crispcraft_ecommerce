@@ -6,7 +6,7 @@ import DesktopContainer from "@/components/DesktopContainer.vue";
 import MainContainer from "@/components/MainContainer.vue";
 import Navbar from "@/components/Navbar.vue";
 import HeaderText from "@/components/HeaderText.vue";
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, watch } from "vue";
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth";
 import { useDeliveryStore } from "@/stores/delivery";
@@ -45,24 +45,13 @@ const selectedDelivery = ref();
 onMounted(async () => {
   const deliveryResponse = await axios.get("/query/delivery-data", {
     params: {
-      data: "pending",
+      data: "cancelled",
     },
   });
   deliveryStore.pendingDeliveries = deliveryStore.formatDeliveryData(
     deliveryResponse.data
   );
-  console.log("PENDING DELEVERIES: ", deliveryStore.pendingDeliveries);
-});
-
-const searchTerm = ref("");
-const filteredPendingDeliveries = computed(() => {
-  const term = searchTerm.value.toLowerCase();
-  return deliveryStore.pendingDeliveries.filter(
-    (delivery) =>
-      delivery.fName.toLowerCase().includes(term) ||
-      delivery.lName.toLowerCase().includes(term) ||
-      delivery.orderID
-  );
+  console.log("CANCLLED DELEVERIES: ", deliveryStore.pendingDeliveries);
 });
 </script>
 
@@ -84,7 +73,6 @@ const filteredPendingDeliveries = computed(() => {
             <IconField>
               <InputIcon class="pi pi-search" />
               <InputText
-                v-model="searchTerm"
                 placeholder="Search Order"
                 class="!text-[20px] !focus:border-myPrimaryColor"
               />
@@ -126,8 +114,8 @@ const filteredPendingDeliveries = computed(() => {
             </button>
             <DataTable
               v-model:selection="selectedDelivery"
-              :value="filteredPendingDeliveries"
-              selectionMode="single"
+              :value="deliveryStore.pendingDeliveries"
+              selectionMode="none"
               dataKey="orderID"
               :metaKeySelection="false"
               @rowSelect="onRowSelect"
@@ -152,6 +140,7 @@ const filteredPendingDeliveries = computed(() => {
               </Column>
               <Column field="phoneNum" header="Contact #"></Column>
               <Column field="address" header="Delivery Address"></Column>
+              <Column field="reason" header="Reason"></Column>
               <Column field="totalAmount" header="Total Amount"></Column>
             </DataTable>
           </div>

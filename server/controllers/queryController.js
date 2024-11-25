@@ -138,12 +138,13 @@ const getMerchantDeliveryData = async (req, res) => {
     }
     const pool = await poolPromise;
     const query = `
-    SELECT 
+  SELECT 
     d.deliveryID,
 	d.deliveryDate,
     c.fName, c.lName,
     c.phoneNum,
     c.address, 
+	d.reason,
     o.orderID,
     (
         SELECT 
@@ -165,7 +166,7 @@ INNER JOIN Customer c ON o.customerID = c.customerID
 INNER JOIN OrderItem oi ON o.orderID = oi.orderID
 INNER JOIN Product p ON oi.productID = p.productID
 WHERE d.deliveryStatus = @data -- Replace with your deliveryID parameter
-GROUP BY d.deliveryID, d.deliveryDate, c.fName, c.lName, c.phoneNum, c.[address], o.orderID;
+GROUP BY d.deliveryID, d.deliveryDate, c.fName, c.lName, c.phoneNum, c.[address], o.orderID, d.reason;
     
     `;
 

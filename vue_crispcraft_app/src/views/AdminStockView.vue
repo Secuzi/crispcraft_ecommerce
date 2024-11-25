@@ -182,6 +182,14 @@ const browserWindow = reactive({
   height: window.innerHeight,
 });
 
+const searchTerm = ref("");
+const filteredProducts = computed(() => {
+  const term = searchTerm.value.toLowerCase();
+  return productStore.products.filter((product) =>
+    product.productName.toLowerCase().includes(term)
+  );
+});
+
 const addToInventory = async () => {
   // form.productID = newProduct.value.data.productID;
   // form.stockQty = 0;
@@ -346,7 +354,11 @@ onUnmounted(() => {
             <div class="h-[84px] flex flex-col justify-center">
               <IconField>
                 <InputIcon class="pi pi-search" />
-                <InputText placeholder="Search Product" class="!text-[20px]" />
+                <InputText
+                  placeholder="Search Product"
+                  class="!text-[20px]"
+                  v-model="searchTerm"
+                />
               </IconField>
             </div>
 
@@ -357,7 +369,7 @@ onUnmounted(() => {
               >
                 <CheckoutProductCard
                   class="h-[128px] flex-grow-0"
-                  v-for="(product, index) in productStore.products"
+                  v-for="(product, index) in filteredProducts"
                   :key="product.productID"
                   :id="product.productID"
                   :isActive="product.productID == productStore.selectedProduct"

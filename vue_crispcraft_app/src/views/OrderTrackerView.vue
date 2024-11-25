@@ -82,36 +82,6 @@ const timelineEvents = computed(() => {
   }));
 });
 
-// const orderTracker = ref([
-//   {
-//     status: "",
-//     description:
-//       "The order is being packaged now and will be forwarded to the delivering facility shortly.",
-//     image: PackageIcon,
-//     color: "#9C27B0",
-//     subtext: "Packaging the customer's order",
-//     active: true,
-//   },
-//   {
-//     status: "",
-//     description:
-//       "Your package is now at CEBU CITY. ETA to your location 10/30/24.",
-//     image: DeliveryIcon,
-//     color: "#9C27B0",
-//     subtext: "Delivering the ordered products",
-//     active: true,
-//   },
-//   {
-//     status: "",
-//     description:
-//       "The order is being packaged now and will be forwarded to the delivering facility shortly.",
-//     image: PackageReceivedIcon,
-//     color: "#9C27B0",
-//     subtext: "Delivery successful ",
-//     active: true,
-//   },
-// ]);
-
 watch(
   () => route.params.id,
   (newId, oldId) => {
@@ -121,16 +91,13 @@ watch(
   }
 );
 
-function fetchDelivery() {
+async function fetchDelivery() {
   const deliveryID = route.params.id;
-  axios
-    .get(`/delivery/${deliveryID}`)
-    .then((response) => {
-      delivery.value = response.data.delivery;
-    })
-    .catch(() => {
-      router.push({ name: "NotFound" });
-    });
+  console.log("Delivery ID: ", deliveryID);
+  const deliveryResponse = await axios.get(`/delivery/${deliveryID}`);
+  delivery.value = deliveryResponse.data.delivery;
+
+  console.log("DELIVERY!: ", delivery.value);
 }
 
 const isDelivered = computed(() => {
@@ -248,6 +215,7 @@ onMounted(fetchDelivery);
         </section>
 
         <section
+          v-if="delivery.deliveryStatus !== 'cancelled'"
           class="bg-white px-4 py-4 mr-auto rounded-3xl flex-grow relative h-full flex items-center"
         >
           <div class="w-[884px] mx-auto">
@@ -255,7 +223,7 @@ onMounted(fetchDelivery);
               :value="timelineEvents"
               layout="horizontal"
               align="bottom"
-              class="w-[100%]"
+              class="w-[100%] !ml-[13%]"
             >
               <template #content="{ item, index }">
                 <div class="">
@@ -313,6 +281,14 @@ onMounted(fetchDelivery);
             </div> -->
             <span>Delivery ID: {{ delivery.deliveryID }}</span>
           </div>
+        </section>
+
+        <section v-else>
+          <HeaderText
+            featuredText="DELIVERY CANCELLED"
+            productsText=""
+            textSize="32px"
+          />
         </section>
       </div>
     </DesktopContainer>

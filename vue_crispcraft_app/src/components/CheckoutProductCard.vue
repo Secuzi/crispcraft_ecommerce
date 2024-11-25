@@ -73,7 +73,7 @@ const prop = defineProps({
           <span
             class="font-medium myTextShadow"
             :style="{ fontSize: fontSizeBody }"
-            >Price: Php {{ price }}</span
+            >Price: &#8369; {{ price }}</span
           >
         </div>
       </div>
