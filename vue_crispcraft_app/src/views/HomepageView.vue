@@ -1,6 +1,5 @@
 <script setup>
 import Navbar from "@/components/Navbar.vue";
-import { ref } from "vue";
 import { RouterLink } from "vue-router";
 import { register } from "swiper/element/bundle";
 import BestSellerLogo from "@/assets/images/BAG of CHIPS/bestseller.png";
@@ -10,13 +9,16 @@ import ProductSweetCheese from "@/assets/images/BAG of CHIPS/cheese.png";
 import ProductCheesyHot from "@/assets/images/BAG of CHIPS/cheesyhot.png";
 import ProductChiliHot from "@/assets/images/BAG of CHIPS/chilihot.png";
 import ProductSaltedOnion from "@/assets/images/BAG of CHIPS/onion.png";
+import PulseLoader from "vue-spinner/src/PulseLoader.vue";
 import MainContainer from "@/components/MainContainer.vue";
-
+import { onMounted, ref } from "vue";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import router from "@/router/route";
 import MobileContainer from "@/components/MobileContainer.vue";
 import DesktopContainer from "@/components/DesktopContainer.vue";
+import axios from "axios";
 register();
 
 // Featured products
@@ -27,90 +29,98 @@ const bestSeller = ref({
   colorTheme: "#AE76B8",
 });
 
-const items = ref([
-  {
-    id: 1,
-    image: ProductCheesyHot,
-    colorTheme: "#EF9426",
-  },
-  {
-    id: 2,
-    image: ProductSaltedOnion,
-    colorTheme: "#AE76B8",
-  },
-  {
-    id: 3,
-    image: ProductChiliHot,
-    colorTheme: "#863E24",
-  },
-  {
-    id: 4,
-    image: ProductSweetCheese,
-    colorTheme: "#EBCB5F",
-  },
-]);
+const baseUrl = import.meta.env.VITE_APP_BASE_URL;
+const featuredProducts = ref([]);
+function getRandomFeaturedProducts(products, count = 3) {
+  if (!Array.isArray(products) || products.length === 0) {
+    throw new Error("Products must be a non-empty array");
+  }
+
+  const shuffled = [...products].sort(() => 0.5 - Math.random());
+
+  return shuffled.slice(0, count);
+}
+const isLoading = ref(true);
+const products = ref([]);
+onMounted(async () => {
+  console.log("initial loading: ", isLoading.value);
+  // setTimeout(async () => {
+
+  // }, 5000);
+  const productsResponse = await axios.get("/products");
+  products.value = productsResponse.data.products.filter((x) => x.active == 1);
+  featuredProducts.value = getRandomFeaturedProducts(products.value);
+  isLoading.value = false;
+  console.log("initial loading: ", isLoading.value);
+});
 </script>
 
 <template>
   <MainContainer>
-    <Navbar />
-
-    <DesktopContainer>
-      <!-- Desktop View -->
-      <main
-        class="md:flex md:justify-between hidden bg-mySecondaryColor flex-grow md:items-center h-full"
-      >
-        <!-- Carousel -->
-        <Carousel :items="items" />
-        <!-- Featured Products -->
-        <div class="w-[.8] h-full flex justify-center">
-          <div class="flex flex-col justify-center">
-            <HeaderText textSize="55px" />
-            <div class="flex items-center h-fit">
-              <div
-                class="featured-products-wrapper flex justify-center mb-[-60px] self-end md:mb-0 w-full"
-              >
-                <div class="featured-products max-w-[600px] flex-shrink">
-                  <div
-                    v-for="(item, index) in items"
-                    :key="item.id"
-                    class="product-image w-full"
-                    :style="{ marginLeft: index === 0 ? '0' : '-80px' }"
-                  >
-                    <img :src="item.image" alt="product name" />
+    <div
+      v-if="isLoading"
+      class="text-center text-gray-500 py-6 flex-grow flex justify-center items-center bg-white"
+    >
+      <PulseLoader />
+    </div>
+    <div v-else class="h-full flex-grow flex flex-col">
+      <Navbar />
+      <DesktopContainer>
+        <!-- Desktop View -->
+        <main
+          class="md:flex md:justify-between hidden bg-mySecondaryColor flex-grow md:items-center h-full"
+        >
+          <!-- Carousel -->
+          <Carousel :items="products" />
+          <!-- Featured Products -->
+          <div v-if="!isLoading" ass="w-[.8] h-full flex justify-center">
+            <div class="flex flex-col justify-center">
+              <HeaderText textSize="55px" />
+              <div class="flex items-center h-fit">
+                <div
+                  class="featured-products-wrapper flex justify-center mb-[-60px] self-end md:mb-0 w-full"
+                >
+                  <div class="featured-products max-w-[600px] flex-shrink">
+                    <div
+                      v-for="(item, index) in featuredProducts"
+                      :key="item.productID"
+                      class="product-image w-full"
+                      :style="{ marginLeft: index === 0 ? '0' : '-80px' }"
+                    >
+                      <img
+                        :src="baseUrl + '/' + item.image"
+                        :alt="item.productName"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        <!-- Best Seller -->
-        <div class="h-full min-h-[300px] overflow-hidden relative">
-          <img :src="BestSellerLogo" alt="Best seller logo" />
-          <div
-            class="flex flex-col items-center -rotate-12 right-0 bottom-[-20px] absolute"
-          >
+          <!-- Best Seller -->
+          <div class="h-full min-h-[300px] overflow-hidden relative">
+            <img :src="BestSellerLogo" alt="Best seller logo" />
             <div
-              class="transition hover:scale-125 ease-in-out z-10 cursor-pointer"
+              class="flex flex-col items-center -rotate-12 right-0 bottom-[-20px] absolute"
             >
-              <HeaderText
-                textSize="32px"
-                featuredText="NEW"
-                productsText="PRODUCT LAUNCH"
-              />
-              <img :src="bestSeller.image" alt="name" class="w-[229px]" />
+              <div
+                class="transition hover:scale-125 ease-in-out z-10 cursor-pointer"
+                @click="router.push('/order')"
+              >
+                <img :src="bestSeller.image" alt="name" class="w-[229px]" />
+              </div>
+              <!-- Circle Section -->
+              <div
+                class="w-[283px] best-seller-bg absolute h-[232px] bottom-0"
+                :style="{ backgroundColor: bestSeller.colorTheme }"
+              ></div>
             </div>
-            <!-- Circle Section -->
-            <div
-              class="w-[283px] best-seller-bg absolute h-[232px] bottom-0"
-              :style="{ backgroundColor: bestSeller.colorTheme }"
-            ></div>
           </div>
-        </div>
-      </main>
-    </DesktopContainer>
+        </main>
+      </DesktopContainer>
+    </div>
 
-    <MobileContainer>
+    <!-- <MobileContainer>
       <div
         class="flex-grow flex justify-evenly flex-col md:flex-row md:flex-grow-0"
       >
@@ -150,7 +160,7 @@ const items = ref([
           </div>
         </div>
       </div>
-    </MobileContainer>
+    </MobileContainer> -->
   </MainContainer>
 </template>
 

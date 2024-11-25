@@ -1,8 +1,10 @@
 <script setup>
 //state store for cart??
-import { useCartStore } from "@/stores/cart";
+
+import { useCartStore } from "@/stores/cartItem";
 import CloseIcon from "@/assets/images/icons/EX.svg";
 import { useProductStore } from "@/stores/product";
+import axios from "axios";
 const prop = defineProps({
   image: "",
   header: "",
@@ -18,13 +20,19 @@ const prop = defineProps({
     type: String,
     default: "14px",
   },
+  deleteProduct: {
+    type: Function,
+  },
+
   isActive: {
     type: Boolean,
     default: false,
   },
+  getProduct: {
+    type: Function,
+    default: null,
+  },
 });
-
-const productStore = useProductStore();
 </script>
 
 <template>
@@ -32,13 +40,13 @@ const productStore = useProductStore();
     class="px-5 py-3 transition-all duration-[400ms] ease-in-out flex rounded-xl gap-5 relative cursor-pointer"
     tabindex="0"
     :class="[isActive ? 'bg-white' : 'bg-[#D9D9D9]']"
-    @click="productStore.getProduct(prop.id)"
+    @click="getProduct(prop.id)"
   >
     <img
       :src="CloseIcon"
       alt="Close Icon"
       class="absolute right-[5px] top-[5px] w-5 cursor-pointer"
-      @click="test2(prop.id)"
+      @click="deleteProduct(prop.id)"
     />
 
     <div class="max-w-[60px] flex items-center">
@@ -65,7 +73,7 @@ const productStore = useProductStore();
           <span
             class="font-medium myTextShadow"
             :style="{ fontSize: fontSizeBody }"
-            >Price: Php {{ price }}</span
+            >Price: &#8369; {{ price }}</span
           >
         </div>
       </div>

@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref } from "vue";
+import { reactive, ref, onMounted } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
 import useVuelidate from "@vuelidate/core";
@@ -10,6 +10,7 @@ import { useAuthStore } from "@/stores/auth";
 const form = reactive({
   email: "",
   password: "",
+  role: "",
 });
 const toast = useToast();
 const router = useRouter();
@@ -26,23 +27,38 @@ async function submitForm() {
   if (v$.value.$errors.length > 0) {
     return;
   }
+
   try {
     // const response = await axios.post("http://localhost:3000/auth/login", form);
+    const returnedData = await authStore.login(form);
 
-    await authStore.login(form.email, form.password);
+    console.log("returned data: ", returnedData);
 
-    if (authStore.role === "admin") {
-      router.push("/admin");
-    } else {
-      router.push("/");
+    switch (authStore.role) {
+      case "merchant":
+        router.push("/merchant");
+        break;
+      case "admin":
+        router.push("/admin/stock");
+        break;
+
+      default:
+        router.push("/");
+        break;
     }
+
+    // if (authStore.role === "admin") {
+    //   router.push("/admin/stock");
+    // } else {
+    //   router.push("/");
+    // }
   } catch (e) {
     console.log(e);
 
     toast.add({
       severity: "error",
       summary: "Error",
-      detail: e.response.data.message,
+      detail: e.message,
       life: 3000,
     });
   }
@@ -53,6 +69,10 @@ const isPasswordHidden = ref(true);
 const togglePassword = () => {
   isPasswordHidden.value = !isPasswordHidden.value;
 };
+
+onMounted(() => {
+  form.role = "customer";
+});
 </script>
 
 <template>
@@ -87,7 +107,7 @@ const togglePassword = () => {
           </span>
         </div>
         <!-- Password -->
-        <div class="mb-[27px] relative">
+        <div class="relative mb-4">
           <label
             class="font-bold italic opacity-50 text-sm sm:text-base"
             for="password"
@@ -112,6 +132,17 @@ const togglePassword = () => {
             {{ v$.password.$errors[0].$message }}
           </span>
         </div>
+
+        <select
+          v-model="form.role"
+          required
+          class="mb-[27px] px-3 rounded-md border border-black py-2"
+        >
+          <option value="customer">Customer</option>
+          <option value="merchant">Merchant</option>
+          <option value="admin">Admin</option>
+          <!-- Maybe add admin or not -->
+        </select>
         <!-- Login button -->
         <button
           class="mb-3 bg-[#15B392] w-full h-[43px] font-bold rounded-[3px] bg-opacity-50"

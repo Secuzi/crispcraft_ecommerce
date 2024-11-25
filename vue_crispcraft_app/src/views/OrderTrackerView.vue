@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import Timeline from "primevue/timeline";
 import MobileContainer from "@/components/MobileContainer.vue";
 import DesktopContainer from "@/components/DesktopContainer.vue";
@@ -8,16 +8,26 @@ import DeliveryIcon from "@/assets/images/icons/delivery_icon.svg";
 import PackageReceivedIcon from "@/assets/images/icons/package_received_icon.svg";
 import PackageIcon from "@/assets/images/icons/package_icon.svg";
 import HeaderText from "@/components/HeaderText.vue";
-import Navbar from "@/components/Navbar.vue";
-import MainContainer from "@/components/MainContainer.vue";
+import ExpiredIcon from "@/assets/images/icons/expired_icon.svg";
+import DamagedIcon from "@/assets/images/icons/damaged_icon.svg";
+import NoIssuesIcon from "@/assets/images/icons/noissues_icon.svg";
+import NotDeliveredIcon from "@/assets/images/icons/notdelivered_icon.svg";
+import WrongProductIcon from "@/assets/images/icons/wrongproduct_icon.svg";
 
-const delivery = ref({
-  deliveryID: 9594,
-  deliveryDate: "2023-01-01",
-  cashCollected: null,
-  deliveryStatus: "processing",
-  orderID: 23,
-});
+import Navbar from "@/components/Navbar.vue";
+import { useRoute } from "vue-router";
+import MainContainer from "@/components/MainContainer.vue";
+import axios from "axios";
+import Drawer from "primevue/drawer";
+import router from "@/router/route";
+
+// const delivery = ref({
+//   deliveryID: 9594,
+//   deliveryDate: "2023-01-01",
+//   cashCollected: null,
+//   deliveryStatus: "processing",
+//   orderID: 23,
+// });
 
 /*
 store design:
@@ -27,40 +37,78 @@ store design:
     isDelivered.value = true
   }
 */
+const route = useRoute();
+const delivery = ref({});
 
-const orderTracker = ref([
+const deliveryStates = ref([
   {
-    status: "Processing",
-    description:
-      "The order is being packaged now and will be forwarded to the delivering facility shortly.",
+    status: "pending",
+    label: "Pending",
+    icon: "pi pi-clock",
+    description: "Order placed",
     image: PackageIcon,
-    color: "#9C27B0",
+    active: false,
     subtext: "Packaging the customer's order",
-    active: true,
   },
   {
-    status: "Delivering",
-    description:
-      "Your package is now at CEBU CITY. ETA to your location 10/30/24.",
+    status: "shipping",
+    label: "Shipping",
+    icon: "pi pi-truck",
     image: DeliveryIcon,
-    color: "#9C27B0",
     subtext: "Delivering the ordered products",
-    active: true,
+    description: "On the way",
+    active: false,
   },
   {
-    status: "Received",
-    description:
-      "The order is being packaged now and will be forwarded to the delivering facility shortly.",
+    status: "delivered",
+    label: "Delivered",
+    icon: "pi pi-check",
     image: PackageReceivedIcon,
-    color: "#9C27B0",
     subtext: "Delivery successful ",
-    active: true,
+    description: "Delivered",
+    active: false,
   },
 ]);
+const visibleBottom = ref(false);
+const timelineEvents = computed(() => {
+  const currentStatusIndex = deliveryStates.value.findIndex(
+    (state) => state.status === delivery.value.deliveryStatus
+  );
+
+  // Update active states
+  return deliveryStates.value.map((state, index) => ({
+    ...state,
+    active: index <= currentStatusIndex,
+  }));
+});
+
+watch(
+  () => route.params.id,
+  (newId, oldId) => {
+    if (newId !== oldId) {
+      fetchDelivery();
+    }
+  }
+);
+
+async function fetchDelivery() {
+  const deliveryID = route.params.id;
+  console.log("Delivery ID: ", deliveryID);
+  const deliveryResponse = await axios.get(`/delivery/${deliveryID}`);
+  delivery.value = deliveryResponse.data.delivery;
+
+  console.log("DELIVERY!: ", delivery.value);
+}
 
 const isDelivered = computed(() => {
-  return orderTracker.value[1].active;
+  return deliveryStates.value[1].active;
 });
+
+if (delivery.value.deliveryStatus === "delivered") {
+  isDelivered.value = true;
+}
+
+onMounted(fetchDelivery);
 </script>
 
 <template>
@@ -76,28 +124,27 @@ const isDelivered = computed(() => {
             textSize="55px"
             featuredTextColor="#004DFF"
           />
-          <div class="flex items-center">
+          <div v-if="delivery" class="flex items-center">
             <button
-              @click="console.log('test')"
-              :disabled="isDelivered"
-              class="myTextShadow bg-[#F63639] px-7 py-1 text-white z-10 rounded-lg text-[22px] font-bold"
+              v-if="delivery.deliveryStatus === 'delivered'"
+              class="myTextShadow bg-[#004DFF] px-7 py-1 text-white z-10 rounded-lg text-[22px] font-bold"
               :class="[!isDelivered ? 'opacity-100' : 'opacity-50']"
-              :style="{ backgroundColor: !isDelivered ? '#F63639' : '#004DFF' }"
             >
-              {{ !isDelivered ? "Cancel" : "Delivered" }}
+              Delivered
             </button>
           </div>
         </section>
 
         <section
+          v-if="delivery.deliveryStatus !== 'cancelled'"
           class="bg-white px-4 py-4 mr-auto rounded-3xl flex-grow relative h-full flex items-center"
         >
           <div class="w-[884px] mx-auto">
             <Timeline
-              :value="orderTracker"
+              :value="timelineEvents"
               layout="horizontal"
               align="bottom"
-              class="w-[100%]"
+              class="w-[100%] !ml-[13%]"
             >
               <template #content="{ item, index }">
                 <div class="">
@@ -117,6 +164,7 @@ const isDelivered = computed(() => {
                       item.active
                         ? 'text-opacity-100 text-black'
                         : 'text-opacity-50 text-black',
+                      !item.active ? 'hidden' : 'block',
                     ]"
                     class="text-xs myTextShadow mt-2"
                   >
@@ -143,16 +191,25 @@ const isDelivered = computed(() => {
               </template>
             </Timeline>
           </div>
-          <div class="absolute bottom-7 left-7">
-            <div class="flex gap-2 items-center">
+          <div class="absolute bottom-7 right-7 myTextShadow text-[15px]">
+            <!-- <div class="flex gap-2 items-center">
               <img
                 :src="CustomerSupportIcon"
                 alt="Customer Support"
                 class="w-[32px]"
               />
               <span class="myTextShadow font-bold">Customer Support</span>
-            </div>
+            </div> -->
+            <span>Delivery ID: {{ delivery.deliveryID }}</span>
           </div>
+        </section>
+
+        <section v-else>
+          <HeaderText
+            featuredText="DELIVERY CANCELLED"
+            productsText=""
+            textSize="32px"
+          />
         </section>
       </div>
     </DesktopContainer>
@@ -168,7 +225,6 @@ const isDelivered = computed(() => {
         />
         <div class="flex items-center">
           <button
-            @click="console.log('test')"
             :disabled="isDelivered"
             class="myTextShadow bg-[#F63639] px-7 py-1 text-white z-10 rounded-lg text-[15px] font-bold"
             :class="[!isDelivered ? 'opacity-100' : 'opacity-50']"

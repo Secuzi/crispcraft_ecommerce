@@ -5,41 +5,35 @@ import MobileContainer from "@/components/MobileContainer.vue";
 import Navbar from "@/components/Navbar.vue";
 import AddressCard from "@/components/AddressCard.vue";
 import CheckoutProductCard from "@/components/CheckoutProductCard.vue";
-import { reactive, computed, onMounted, onUnmounted } from "vue";
-import ProductSweetCheese from "@/assets/images/BAG of CHIPS/cheese.png";
-import ProductCheesyHot from "@/assets/images/BAG of CHIPS/cheesyhot.png";
+import { reactive, computed, onMounted, onUnmounted, ref, watch } from "vue";
+import PaymongoIcon from "@/assets/images/icons/paymongo.svg";
 import GcashIcon from "@/assets/images/icons/gcash_icon.svg";
 import CODIcon from "@/assets/images/icons/cashondelivery_icon.svg";
 import { useToast } from "primevue";
 import Toast from "primevue/toast";
-import { useCartStore } from "@/stores/cart";
+import { useCartStore } from "@/stores/cartItem";
 import DesktopContainer from "@/components/DesktopContainer.vue";
-
-const cartStore = useCartStore();
-
+import { useOrderItemStore } from "@/stores/orderItem";
+import { useAuthStore } from "@/stores/auth";
+import { useOrderStore } from "@/stores/order";
+import { usePaymentStore } from "@/stores/payment";
+import router from "@/router/route";
+import { useDeliveryStore } from "@/stores/delivery";
+const paymentStore = usePaymentStore();
+const cartItemStore = useCartStore();
+const orderItemStore = useOrderItemStore();
+const authStore = useAuthStore();
+const orderStore = useOrderStore();
+const deliveryStore = useDeliveryStore();
 const toast = useToast();
-
-// const products = ref([
-//   {
-//     id: 1,
-//     image: ProductCheesyHot,
-//     header: "Malunggay Chips: Cheesy Hot",
-//     qty: 2,
-//     price: 2000,
-//   },
-//   {
-//     id: 2,
-//     image: ProductSweetCheese,
-//     header: "Malunggay Chips: Sweet Cheese",
-//     qty: 69,
-//     price: 99,
-//   },
-// ]);
+import axios from "axios";
 
 const browserWindow = reactive({
   width: window.innerWidth,
   height: window.innerHeight,
 });
+
+const subtotal = ref(0);
 
 const updateDimensions = () => {
   browserWindow.width = window.innerWidth;
@@ -48,17 +42,145 @@ const updateDimensions = () => {
 const isWindowMobile = computed(() => {
   return browserWindow.width <= 320;
 });
-const showSuccessToast = () => {
+const showSuccessToast = async () => {
+  let data = ref();
+
+  // //To be added
+  // if (orderStore.paymentMethod === "paymongo") {
+  //   if (!subtotal.value) {
+  //     return;
+  //   }
+  //   console.log("IN THISSS");
+  //   const options = {
+  //     method: "POST",
+  //     url: "https://api.paymongo.com/v1/links",
+  //     headers: {
+  //       accept: "application/json",
+  //       "content-type": "application/json",
+  //       authorization: "Basic c2tfdGVzdF9vd0Y4SkZFblF1eUU3OWJQdjFQaUhCZG06",
+  //     },
+  //     data: {
+  //       data: {
+  //         attributes: {
+  //           amount: (subtotal.value + deliveryStore.deliveryCharge) * 100,
+  //           description: "Payment for item(s)",
+  //         },
+  //       },
+  //     },
+  //   };
+  //   try {
+  //     const url = await axios.request(options);
+  //     console.log(url.data);
+  //     data.value = url.data;
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+  //   console.log("whaat");
+  // }
+
+  //Status immediately basta payment method is COD
+  const orderObject = { status: "completed", customerID: authStore.user_id };
+  const orderResponse = await axios.post("/order", orderObject);
+  console.log("ORDER RESPONSE: ", orderResponse.data);
+  const { orderID } = orderResponse.data;
+  const customerID = authStore.user_id;
+
+  console.log("CUSTOMEER ID:", customerID);
+  for (const product of cartItemStore.products) {
+    console.log("FOR PRODUCT: ", product);
+    await axios.post(`/order-item`, { orderID, ...product, customerID });
+    console.log("produuct: ", product);
+
+    await axios.put(`/inventory/update-stock`, {
+      productID: product.productID,
+      quantity: product.quantity, // Subtract this quantity
+    });
+  }
+
+  //Do payment process
+  // 2 states: online transac and cod
+  //Focus on cod because of time constraints
+
+  console.log("PAYMENT METHOOD", paymentStore.paymentMethod);
+
+  const paymentObject = {
+    orderID,
+    paymentMethod: paymentStore.paymentMethod,
+  };
+  const paymentResponse = await axios.post("/payment", paymentObject);
+
+  console.log("PAYMENT RESPONSE: ", paymentResponse);
+
+  const deliveryObject = {
+    orderID,
+    deliveryStatus: "pending",
+  };
+  const deliveryResponse = await axios.post("/delivery", deliveryObject);
+
+  console.log("delivery response: ", deliveryResponse.data);
+
+  const { deliveryID } = deliveryResponse.data;
+  //1. user orders, it creates orderID
+  //2. update orderItemID in orderItemStore to newly created orderID
+
+  // const response = await axios.put("/query/updateOrder", {
+  //   orderID: orderResponse.data.orderID,
+  //   customerID: authStore.user_id,
+  // });
+
   toast.add({
     severity: "success",
     summary: "Success",
     detail: "Order Placed",
     life: 3000,
   });
-};
 
-onMounted(() => {
+  setTimeout(() => {
+    // Cases where other people can see other's track-order
+    router.push(`/track-order/${deliveryID}`);
+    // window.open(data.value.data.attributes.checkout_url, "_blank");
+  }, 1500);
+};
+const isPaymongoActive = ref(false);
+
+watch(
+  () => cartItemStore.products,
+  async () => {
+    if (cartItemStore.products.length === 0) {
+      router.push("/order");
+    }
+
+    subtotal.value = await cartItemStore.getSubTotal(authStore.user_id);
+  }
+);
+
+watch(
+  () => paymentStore.paymentMethod,
+  (newValue) => {
+    paymentStore.paymentMethod = newValue;
+  }
+);
+
+const baseUrl = import.meta.env.VITE_APP_BASE_URL;
+
+onMounted(async () => {
   window.addEventListener("resize", updateDimensions);
+  const getCustomerInfoResponse = await axios.get(
+    `/customers/${authStore.user_id}`
+  );
+
+  const getCheckoutResponse = await axios.get(
+    `/query/checkout/${authStore.user_id}`
+  );
+  subtotal.value = await cartItemStore.getSubTotal(authStore.user_id);
+
+  const { customer } = getCustomerInfoResponse.data;
+
+  deliveryStore.address = customer.address;
+  deliveryStore.deliveryCharge = 60;
+  paymentStore.paymentMethod = "cash-on-delivery";
+
+  cartItemStore.products = getCheckoutResponse.data;
 });
 onUnmounted(() => {
   window.removeEventListener("resize", updateDimensions);
@@ -87,12 +209,13 @@ onUnmounted(() => {
           >
             <CheckoutProductCard
               class="mt-3"
-              v-for="product in cartStore.products"
-              :key="product.id"
-              :id="product.id"
-              :image="product.image"
+              v-for="product in cartItemStore.products"
+              :key="product.productID"
+              :id="product.cartItemID"
+              :deleteProduct="cartItemStore.deleteCartItem"
+              :image="baseUrl + '/' + product.image"
               :header="product.productName"
-              :qty="product.qty"
+              :qty="product.quantity"
               :price="product.price"
               fontSizeHeader="18px"
               fontSizeBody="16px"
@@ -100,8 +223,6 @@ onUnmounted(() => {
           </div>
         </div>
       </section>
-
-      <img src="" alt="" />
 
       <section class="flex-grow self-center">
         <div class="myContainer">
@@ -114,16 +235,35 @@ onUnmounted(() => {
             />
           </div>
 
-          <div
-            class="px-5 py-5 bg-white rounded-lg flex items-center gap-5 mt-3"
-          >
-            <h2 class="text-[20px] italic font-bold">Pay with:</h2>
-            <div class="relative w-[66px]">
-              <img :src="GcashIcon" alt="Gcash Icon" class="rounded-lg" />
+          <div class="px-5 py-5 bg-white rounded-lg flex gap-5 mt-3">
+            <h2 class="text-[20px] italic font-bold self-center">Pay with:</h2>
+            <div
+              class="w-[66px] relative hover:bg-green-300 cursor-pointer flex items-center"
+              :class="[!isPaymongoActive ? 'bg-green-400' : '']"
+              @click="
+                () => {
+                  paymentStore.paymentMethod = 'cash-on-delivery';
+                  isPaymongoActive = false;
+                }
+              "
+            >
+              <img
+                :src="CODIcon"
+                alt="Cash On Delivery Icon"
+                class="w-[66px]"
+              />
             </div>
-
-            <div class="w-[66px] relative">
-              <img :src="CODIcon" alt="Cash On Delivery Icon" />
+            <div
+              class="relative w-[66px] hover:bg-green-300 cursor-pointer"
+              :class="[isPaymongoActive ? 'bg-green-400' : '']"
+              @click="
+                () => {
+                  paymentStore.paymentMethod = 'paymongo';
+                  isPaymongoActive = true;
+                }
+              "
+            >
+              <img :src="PaymongoIcon" alt="Paymongo Icon" />
             </div>
           </div>
 
@@ -136,7 +276,7 @@ onUnmounted(() => {
               Order
             </button>
             <span class="font-bold text-[26px]"
-              >Total Price: {{ cartStore.subtotal }}
+              >Total Price: {{ subtotal + deliveryStore.deliveryCharge }}
             </span>
           </div>
         </div>
@@ -164,7 +304,7 @@ onUnmounted(() => {
             </button>
             <span
               class="absolute top-[50%] right-[15%] translate-y-[-50%] z-10 font-bold text-[14px]"
-              >Total Price: {{ cartStore.subtotal }}
+              >Total Price: {{ subtotal }}
             </span>
           </div>
         </div>
@@ -201,7 +341,7 @@ onUnmounted(() => {
         >
           <CheckoutProductCard
             class="mt-3"
-            v-for="product in cartStore.products"
+            v-for="product in cartItemStore.products"
             :key="product.id"
             :id="product.id"
             :image="product.image"

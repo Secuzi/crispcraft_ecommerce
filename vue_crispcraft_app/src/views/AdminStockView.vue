@@ -5,12 +5,19 @@ import MobileContainer from "@/components/MobileContainer.vue";
 import Navbar from "@/components/Navbar.vue";
 import HeaderText from "@/components/HeaderText.vue";
 import CheckoutProductCard from "@/components/CheckoutProductCard.vue";
-import { IconField, InputIcon, InputText } from "primevue";
+import {
+  IconField,
+  InputIcon,
+  InputText,
+  Dialog,
+  DataTable,
+  Column,
+} from "primevue";
 import ChecklistIcon from "@/assets/images/icons/checklists.svg";
 import TransactionIcon from "@/assets/images/icons/transaction.svg";
 import ClerkIcon from "@/assets/images/icons/clerk.svg";
-import Button from "@/components/Button.vue";
 import VueButton from "primevue/button";
+import Button from "@/components/Button.vue";
 import { reactive } from "vue";
 import axios from "axios";
 import DatePicker from "primevue/datepicker";
@@ -20,15 +27,16 @@ import { ref, onMounted, computed, onUnmounted } from "vue";
 import useVuelidate from "@vuelidate/core";
 import { required, helpers } from "@vuelidate/validators";
 import { useProductStore } from "@/stores/product";
-import Dialog from "primevue/dialog";
-import { watchEffect } from "vue";
-import { useInventoryStore } from "@/stores/inventory";
-import { useFlavorStore } from "@/stores/flavor";
+import PulseLoader from "vue-spinner/src/PulseLoader.vue";
+import { watchEffect, watch } from "vue";
+
+import AdminButton from "@/components/AdminButton.vue";
+import { RouterLink } from "vue-router";
 import { useRoute } from "vue-router";
+
+const route = useRoute();
+
 const productStore = useProductStore();
-const route = new useRoute();
-const inventoryStore = useInventoryStore();
-const flavorStore = useFlavorStore();
 const toast = useToast();
 const visible = ref(false);
 const form = reactive({
@@ -37,7 +45,7 @@ const form = reactive({
   price: null,
   expirationDate: null,
 
-  stockQty: 1,
+  stockQty: 0,
   changeDate: "",
 
   flavorName: "",
@@ -47,6 +55,8 @@ const form = reactive({
 const baseUrl = import.meta.env.VITE_APP_BASE_URL;
 
 const imageObject = ref(null);
+
+const dialogVisible = ref(false);
 
 function checkImageFile(event) {
   const { files } = event.target;
@@ -112,12 +122,20 @@ async function submitForm() {
       formData.append("expirationDate", form.expirationDate);
       formData.append("image", imageObject.value);
 
+      if (form.stockQty == 0) {
+        formData.append("active", 0);
+      } else {
+        formData.append("active", 1);
+      }
+
+      console.log("ACTIVE: ", formData.active);
+
       newProduct.value = await axios.put(
         `/products/${productStore.selectedProduct}`,
         formData
       );
       form.productID = newProduct.value.data.productID;
-      console.log(newProduct);
+      console.log("MEW PRODUCTT: ", newProduct.value);
     } catch (e) {
       console.log(e);
       toast.add({
@@ -127,9 +145,8 @@ async function submitForm() {
         life: 3150,
       });
     }
-
+    console.log("SELECTED INVENTORY: ", selectedInventory.value);
     try {
-      //delete this
       newInventory.value = await axios.put(
         `/inventory/${selectedInventory.value}`,
         form
@@ -147,11 +164,14 @@ async function submitForm() {
       detail: "Successfully edited product!",
       life: 3000,
     });
+    const response = await axios.get("/query/stock");
+    productStore.products = response.data;
   } catch (e) {
     console.log(e);
   }
 }
 const products = ref([]);
+const addSelectedProduct = ref();
 
 function removeTimeFromDateString(dateString) {
   return dateString.split("T")[0];
@@ -160,6 +180,36 @@ const browserWindow = reactive({
   width: window.innerWidth,
   height: window.innerHeight,
 });
+
+const searchTerm = ref("");
+const filteredProducts = computed(() => {
+  const term = searchTerm.value.toLowerCase();
+  return productStore.products.filter((product) =>
+    product.productName.toLowerCase().includes(term)
+  );
+});
+
+const addToInventory = async () => {
+  // form.productID = newProduct.value.data.productID;
+  // form.stockQty = 0;
+  if (products.value.length <= 0) {
+    return;
+  }
+
+  addSelectedProduct.value.stockQty = 0;
+
+  const inventoryResponse = await axios.post("/inventory", {
+    ...addSelectedProduct.value,
+  });
+
+  const { inventoryID } = inventoryResponse.data;
+  addSelectedProduct.value.inventoryID = inventoryID;
+
+  console.log(addSelectedProduct.value);
+  productStore.products.push(addSelectedProduct.value);
+
+  dialogVisible.value = false;
+};
 
 const updateDimensions = () => {
   browserWindow.width = window.innerWidth;
@@ -170,9 +220,14 @@ const isWindowMobile = computed(() => {
 });
 const selectedFlavor = ref();
 const selectedInventory = ref();
+const isLoading = ref(true);
 watchEffect(async () => {
-  if (products.value.length > 0 && productStore.selectedProduct) {
-    const selectedProduct = products.value.find(
+  if (isLoading.value) {
+    return;
+  }
+
+  if (productStore.products.length > 0 && productStore.selectedProduct) {
+    const selectedProduct = productStore.products.find(
       (product) => product.productID === productStore.selectedProduct
     );
 
@@ -189,7 +244,6 @@ watchEffect(async () => {
       const { flavor } = flavorResponse.data;
       const inventoryResponse = await axios.get("/inventory");
       const { inventories } = inventoryResponse.data;
-
       const inventory = inventories.find(
         (inventory) => inventory.productID === selectedProduct.productID
       );
@@ -199,18 +253,52 @@ watchEffect(async () => {
       selectedFlavor.value = selectedProduct.flavorID;
 
       selectedInventory.value = selectedProduct.inventoryID;
-
-      console.log("IMAGEEE: ", selectedProduct.image);
     }
   }
 });
 
-const isLoading = ref(true);
+watch(
+  () => addSelectedProduct.value,
+  (newSelect) => {
+    console.log("SELECTED ADD PRODUCT: ", newSelect);
+  }
+);
+
+const dialogClick = async () => {
+  dialogVisible.value = true;
+  //get products
+  const productsResponse = await axios.get("/products");
+  const gotProducts = productsResponse.data.products;
+  console.log("GOT PRODUCTS!", gotProducts);
+  products.value = gotProducts.filter(
+    (product) =>
+      !productStore.products.some(
+        (inventoryProduct) => inventoryProduct.productID === product.productID
+      )
+  );
+  //Get flavors
+
+  const flavorsResponse = await axios.get("/flavors");
+  const flavors = flavorsResponse.data;
+  for (const product of products.value) {
+    for (const flavor of flavors) {
+      if (product.flavorID === flavor.flavorID) {
+        product.flavorName = flavor.flavorName;
+      }
+    }
+  }
+};
+
 onMounted(async () => {
   const response = await axios.get("/query/stock");
-  products.value = response.data;
-  console.log("PRODUCST: ", products.value);
-  productStore.selectedProduct = products.value[0].productID;
+
+  productStore.products = response.data;
+
+  console.log("PRODUUCTS STOOORE: ", productStore.products);
+
+  if (productStore.products.length > 0) {
+    productStore.selectedProduct = productStore.products[0].productID;
+  }
   isLoading.value = false;
   window.addEventListener("resize", updateDimensions);
 });
@@ -218,246 +306,300 @@ onUnmounted(() => {
   window.removeEventListener("resize", updateDimensions);
   //In order to reuse the same store I have to disable this
   productStore.selectedProduct = null;
+  productStore.products = null;
 });
 </script>
 
 <template>
   <MainContainer>
-    <Navbar />
-
-    <DesktopContainer
-      backgroundColor="bg-[#D6F3FF]"
-      alignItems="flex-start"
-      class=""
+    <div
+      v-if="isLoading"
+      class="text-center text-gray-500 py-6 flex-grow flex justify-center items-center bg-white"
     >
-      <section class="flex-grow">
-        <div class="w-[90%] mx-auto flex gap-12 h-[100%] justify-between">
-          <section class="basis-[100px] flex-grow-[1.5]">
-            <HeaderText
-              featuredText="ITEM"
-              productsText="STOCK"
-              textSize="55px"
-            />
-            <div
-              class="bg-white flex py-[5rem] flex-col gap-9 justify-center px-5 rounded-2xl mt-[5rem]"
-            >
-              <button>
-                <div
-                  class="flex items-center justify-center xl:gap-3 2xl:gap-5 bg-[#63A553] rounded-2xl px-4 py-2 myBoxShadow"
-                >
-                  <img :src="ChecklistIcon" class="w-[47px] h-[46px]" />
-                  <span
-                    class="text-white flex-grow font-bold myTextShadow text-[24px] text-left"
-                    >Inventory</span
-                  >
-                </div>
-              </button>
-              <button>
-                <div
-                  class="flex items-center justify-center xl:gap-3 2xl:gap-5 bg-[#63A553] rounded-2xl px-4 py-2 myBoxShadow"
-                >
-                  <img :src="TransactionIcon" class="w-[47px] h-[46px]" />
-                  <span
-                    class="text-white flex-grow font-bold myTextShadow text-[24px] text-left"
-                    >Transactions</span
-                  >
-                </div>
-              </button>
-              <button>
-                <div
-                  class="flex items-center justify-center xl:gap-3 2xl:gap-5 bg-[#63A553] rounded-2xl px-4 py-2 myBoxShadow"
-                >
-                  <img :src="ClerkIcon" class="w-[47px]" />
-                  <span
-                    class="text-white flex-grow font-bold myTextShadow text-[24px] text-left"
-                    >Merchants</span
-                  >
-                </div>
-              </button>
-            </div>
-          </section>
-          <section class="basis-[500px] flex-grow">
-            <div class="h-[84px] flex flex-col justify-center">
-              <IconField>
-                <InputIcon class="pi pi-search" />
-                <InputText placeholder="Search Product" class="!text-[20px]" />
-              </IconField>
-            </div>
+      <PulseLoader />
+    </div>
 
-            <div v-if="!isLoading" class="overflow-auto w-full mt-[5rem]">
-              <div v-if="products.length > 0" class="max-h-[800px]">
-                <CheckoutProductCard
-                  class="h-[128px] flex-grow-0"
-                  v-for="(product, index) in products"
-                  :key="product.productID"
-                  :id="product.productID"
-                  :isActive="product.productID == productStore.selectedProduct"
-                  :class="[index !== 0 ? 'mt-5' : '']"
-                  :image="baseUrl + '/' + product.image"
-                  :header="product.productName"
-                  :description="product.description"
-                  :qty="product.stockQty"
-                  :price="product.price"
-                  fontSizeHeader="18px"
-                  fontSizeBody="16px"
+    <div v-else>
+      <Navbar />
+      <DesktopContainer
+        backgroundColor="bg-[#D6F3FF]"
+        alignItems="flex-start"
+        class=""
+      >
+        <section class="flex-grow">
+          <div class="w-[90%] mx-auto flex gap-12 h-[100%] justify-between">
+            <section class="basis-[100px] flex-grow-[1.5]">
+              <HeaderText
+                featuredText="ITEM"
+                productsText="STOCK"
+                textSize="55px"
+              />
+              <div
+                class="bg-white flex py-[5rem] flex-col gap-9 justify-center px-5 rounded-2xl mt-[5rem]"
+              >
+                <AdminButton
+                  route="/admin/stock"
+                  :imageIcon="ChecklistIcon"
+                  text="Inventory"
+                  :isActive="route.path === '/admin/stock'"
+                />
+                <AdminButton
+                  route="/admin/transactions"
+                  :imageIcon="TransactionIcon"
+                  :isActive="route.path === '/admin/transactions'"
+                  text="Transactions"
+                />
+                <AdminButton
+                  route="/admin/merchants"
+                  :imageIcon="ClerkIcon"
+                  :isActive="route.path === '/admin/merchants'"
+                  text="Merchants"
                 />
               </div>
-              <div v-else>
-                <HeaderText
-                  featuredText="No products"
-                  productsText=""
-                  class="text-center"
-                  textSize="55px"
-                />
-              </div>
-            </div>
-          </section>
-
-          <section class="mt-[10rem] pb-[5rem]">
-            <form
-              v-on:submit.prevent="submitForm"
-              class="bg-white rounded-xl px-10 py-5"
-              enctype="multipart/form-data"
-            >
-              <div class="form-item">
-                <label for="productName" class="myTextShadow"
-                  >Product Name:</label
-                >
-                <input
-                  type="text"
-                  name="productName"
-                  id="productName"
-                  v-model="form.productName"
-                  placeholder="Enter product name"
-                  class="border-black p-3 border-2 rounded-[5px] myFormInput block w-full myFormInput p-inputtext"
-                />
-                <span v-if="v$.productName.$error" class="text-red-500 text-xs">
-                  {{ v$.productName.$errors[0].$message }}
-                </span>
-              </div>
-              <div class="form-item">
-                <label for="flavorName" class="myTextShadow"
-                  >Flavor Name:</label
-                >
-                <input
-                  type="text"
-                  name="flavorName"
-                  v-model="form.flavorName"
-                  id="flavorName"
-                  placeholder="Enter flavor name"
-                  class="border-black p-3 border-2 rounded-[5px] block w-full myFormInput p-inputtext"
-                />
-                <span v-if="v$.flavorName.$error" class="text-red-500 text-xs">
-                  {{ v$.flavorName.$errors[0].$message }}
-                </span>
-              </div>
-
-              <div class="form-item">
-                <label for="description" class="myTextShadow"
-                  >Product Description:</label
-                >
-                <textarea
-                  id="description"
-                  v-model="form.description"
-                  placeholder="Enter product description"
-                  class="border-black w-full p-3 border-2 rounded-[5px] block max-h-[76px] myFormInput p-inputtext"
-                ></textarea>
-                <span v-if="v$.description.$error" class="text-red-500 text-xs">
-                  {{ v$.description.$errors[0].$message }}
-                </span>
-              </div>
-              <div class="form-item">
-                <label for="stock" class="myTextShadow"
-                  >Stocks Available:</label
-                >
-                <div class="flex justify-around gap-2">
-                  <Button
-                    text="-"
-                    type="button"
-                    padding_x="1.5rem"
-                    padding_y="0px"
-                    class="!text-[32px]"
-                    @click="form.stockQty > 0 ? form.stockQty-- : 0"
+            </section>
+            <section class="basis-[500px] flex-grow">
+              <div class="h-[84px] flex flex-col justify-center">
+                <IconField>
+                  <InputIcon class="pi pi-search" />
+                  <InputText
+                    placeholder="Search Product"
+                    class="!text-[20px]"
+                    v-model="searchTerm"
                   />
-                  <Button
-                    text="+"
-                    type="button"
-                    padding_x="1.5rem"
-                    padding_y="0px"
-                    class="!text-[32px] ml-3"
-                    @click="form.stockQty += 1"
+                </IconField>
+              </div>
+              <div v-if="!isLoading" class="overflow-auto w-full mt-[5rem]">
+                <div
+                  v-if="productStore.products.length > 0"
+                  class="max-h-[800px]"
+                >
+                  <CheckoutProductCard
+                    class="h-[128px] flex-grow-0"
+                    v-for="(product, index) in filteredProducts"
+                    :key="product.productID"
+                    :id="product.productID"
+                    :isActive="
+                      product.productID == productStore.selectedProduct
+                    "
+                    :class="[index !== 0 ? 'mt-5' : '']"
+                    :image="baseUrl + '/' + product.image"
+                    :header="product.productName"
+                    :deleteProduct="productStore.deleteProduct"
+                    :getProduct="productStore.getProduct"
+                    :description="product.description"
+                    :qty="product.stockQty"
+                    :price="product.price"
+                    fontSizeHeader="18px"
+                    fontSizeBody="16px"
                   />
+                </div>
+                <div v-else>
+                  <HeaderText
+                    featuredText="No products"
+                    productsText=""
+                    class="text-center"
+                    textSize="55px"
+                  />
+                </div>
+              </div>
+            </section>
+            <section class="mt-[10rem] pb-[5rem]">
+              <form
+                v-on:submit.prevent="submitForm"
+                class="bg-white rounded-xl px-10 py-5 mb-5"
+                enctype="multipart/form-data"
+              >
+                <div class="form-item">
+                  <label for="productName" class="myTextShadow"
+                    >Product Name:</label
+                  >
+                  <input
+                    type="text"
+                    name="productName"
+                    id="productName"
+                    v-model="form.productName"
+                    placeholder="Enter product name"
+                    class="border-black p-3 border-2 rounded-[5px] myFormInput block w-full myFormInput p-inputtext"
+                  />
+                  <span
+                    v-if="v$.productName.$error"
+                    class="text-red-500 text-xs"
+                  >
+                    {{ v$.productName.$errors[0].$message }}
+                  </span>
+                </div>
+                <div class="form-item">
+                  <label for="flavorName" class="myTextShadow"
+                    >Flavor Name:</label
+                  >
+                  <input
+                    type="text"
+                    name="flavorName"
+                    v-model="form.flavorName"
+                    id="flavorName"
+                    placeholder="Enter flavor name"
+                    class="border-black p-3 border-2 rounded-[5px] block w-full myFormInput p-inputtext"
+                  />
+                  <span
+                    v-if="v$.flavorName.$error"
+                    class="text-red-500 text-xs"
+                  >
+                    {{ v$.flavorName.$errors[0].$message }}
+                  </span>
+                </div>
+                <div class="form-item">
+                  <label for="description" class="myTextShadow"
+                    >Product Description:</label
+                  >
+                  <textarea
+                    id="description"
+                    v-model="form.description"
+                    placeholder="Enter product description"
+                    class="border-black w-full p-3 border-2 rounded-[5px] block max-h-[76px] myFormInput p-inputtext"
+                  ></textarea>
+                  <span
+                    v-if="v$.description.$error"
+                    class="text-red-500 text-xs"
+                  >
+                    {{ v$.description.$errors[0].$message }}
+                  </span>
+                </div>
+                <div class="form-item">
+                  <label for="stock" class="myTextShadow"
+                    >Stocks Available:</label
+                  >
+                  <div class="flex justify-around gap-2">
+                    <Button
+                      text="-"
+                      type="button"
+                      padding_x="1.5rem"
+                      padding_y="0px"
+                      class="!text-[32px]"
+                      @click="form.stockQty > 0 ? form.stockQty-- : 0"
+                    />
+                    <Button
+                      text="+"
+                      type="button"
+                      padding_x="1.5rem"
+                      padding_y="0px"
+                      class="!text-[32px] ml-3"
+                      @click="form.stockQty += 1"
+                    />
+                    <input
+                      type="number"
+                      min="0"
+                      name="product stock"
+                      v-model="form.stockQty"
+                      id="stock"
+                      class="border-black border-2 px-2 rounded-[5px] myFormInput p-inputtext"
+                    />
+                  </div>
+                  <span v-if="v$.stockQty.$error" class="text-red-500 text-xs">
+                    {{ v$.stockQty.$errors[0].$message }}
+                  </span>
+                </div>
+                <div class="form-item">
+                  <label for="price" class="myTextShadow">Price:</label>
                   <input
                     type="number"
-                    min="1"
-                    name="product stock"
-                    v-model="form.stockQty"
-                    id="stock"
-                    class="border-black border-2 px-2 rounded-[5px] myFormInput p-inputtext"
+                    min="0"
+                    max="50000"
+                    v-model="form.price"
+                    name="price"
+                    id="price"
+                    class="border-black w-full border-2 p-3 rounded-[5px] block myFormInput p-inputtext"
+                  />
+                  <span v-if="v$.price.$error" class="text-red-500 text-xs">
+                    {{ v$.price.$errors[0].$message }}
+                  </span>
+                </div>
+                <div class="form-item">
+                  <label for="expirationDate" class="myTextShadow"
+                    >Expiration Date:</label
+                  >
+                  <DatePicker
+                    v-model="form.expirationDate"
+                    inputId="expirationDate"
+                    date-format="yy-mm-dd"
+                    class="expiration-date"
+                    :min-date="today"
+                  />
+                  <span
+                    v-if="v$.expirationDate.$error"
+                    class="text-red-500 text-xs block mt-3"
+                  >
+                    {{ v$.expirationDate.$errors[0].$message }}
+                  </span>
+                </div>
+                <div class="form-item">
+                  <input
+                    type="file"
+                    name="image"
+                    accept="image/*"
+                    class="cursor-pointer"
+                    @change="checkImageFile"
+                    id="image"
                   />
                 </div>
-                <span v-if="v$.stockQty.$error" class="text-red-500 text-xs">
-                  {{ v$.stockQty.$errors[0].$message }}
-                </span>
-              </div>
-              <div class="form-item">
-                <label for="price" class="myTextShadow">Price:</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="50000"
-                  v-model="form.price"
-                  name="price"
-                  id="price"
-                  class="border-black w-full border-2 p-3 rounded-[5px] block myFormInput p-inputtext"
-                />
-                <span v-if="v$.price.$error" class="text-red-500 text-xs">
-                  {{ v$.price.$errors[0].$message }}
-                </span>
-              </div>
-              <div class="form-item">
-                <label for="expirationDate" class="myTextShadow"
-                  >Expiration Date:</label
+                <div class="flex justify-end">
+                  <Toast v-if="!isWindowMobile" />
+                  <button
+                    type="submit"
+                    class="bg-[#74CD5F] text-white px-5 rounded-full myBoxShadow font-bold text-[24px] py-[6px] myTextShadow"
+                  >
+                    Edit
+                  </button>
+                </div>
+              </form>
+              <div class="flex justify-between">
+                <RouterLink
+                  to="/admin/create-product"
+                  class="text-[24px] font-bold rounded-full px-4 py-3 bg-[#3672F6] text-white myBoxShadow myTextShadow"
                 >
-                <DatePicker
-                  v-model="form.expirationDate"
-                  inputId="expirationDate"
-                  date-format="yy-mm-dd"
-                  class="expiration-date"
-                  :min-date="today"
-                />
-                <span
-                  v-if="v$.expirationDate.$error"
-                  class="text-red-500 text-xs block mt-3"
-                >
-                  {{ v$.expirationDate.$errors[0].$message }}
-                </span>
-              </div>
-              <div class="form-item">
-                <input
-                  type="file"
-                  name="image"
-                  accept="image/*"
-                  class="cursor-pointer"
-                  @change="checkImageFile"
-                  id="image"
-                />
-              </div>
-
-              <div class="flex justify-end">
-                <Toast v-if="!isWindowMobile" />
+                  Create Product
+                </RouterLink>
                 <button
-                  type="submit"
-                  class="bg-[#74CD5F] text-white px-5 rounded-full myBoxShadow font-bold text-[24px] py-[6px] myTextShadow"
+                  @click="dialogClick"
+                  class="text-[24px] font-bold rounded-full px-4 py-3 bg-[#3672F6] text-white myBoxShadow myTextShadow"
                 >
-                  Edit
+                  Add Product
                 </button>
               </div>
-            </form>
-          </section>
-        </div>
-      </section>
-    </DesktopContainer>
+              <Dialog
+                v-model:visible="dialogVisible"
+                header="Add Product to Inventory"
+                :style="{ width: '75vw' }"
+                modal
+                :contentStyle="{ height: '300px' }"
+              >
+                <DataTable
+                  :value="products"
+                  v-model:selection="addSelectedProduct"
+                  selectionMode="single"
+                  :metaKeySelection="false"
+                  scrollable
+                  scrollHeight="flex"
+                  datakey="productID"
+                  tableStyle="min-width: 50rem"
+                >
+                  <Column field="productID" header="productID"></Column>
+                  <Column field="productName" header="Product Name"></Column>
+                  <Column field="flavorName" header="Flavor Name"></Column>
+                  <Column field="price" header="Price"></Column>
+                </DataTable>
+                <template #footer>
+                  <VueButton
+                    label="Add to Inventory"
+                    icon="pi pi-check"
+                    @click="addToInventory"
+                  />
+                </template>
+              </Dialog>
+            </section>
+          </div>
+        </section>
+      </DesktopContainer>
+    </div>
 
     <MobileContainer backgroundColor="bg-[#D6F3FF]">
       <section class="myContainer">
@@ -738,7 +880,10 @@ onUnmounted(() => {
 .form-item {
   margin-bottom: 1rem;
 }
-
+:deep(.p-datatable-row-selected) {
+  background-color: #74cd5f !important;
+  color: black !important;
+}
 :deep(.p-inputtext:focus) {
   border-color: #74cd5f !important;
 }

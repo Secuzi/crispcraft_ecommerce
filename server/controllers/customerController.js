@@ -1,5 +1,5 @@
 const CustomerService = require("../services/CustomerService");
-const bycrypt = require("bcrypt");
+const bcrypt = require("bcrypt");
 const customerSchema = require("../schemas/CustomerSchema");
 //@path GET /customers
 const getAllCustomers = async (req, res) => {
@@ -34,6 +34,12 @@ const createCustomer = async (req, res) => {
       role = "customer",
     } = req.body;
 
+    // Check if email already exists
+    const existingCustomer = await CustomerService.read(email, "email");
+    if (existingCustomer) {
+      return res.status(400).json({ message: "Email is already in use" });
+    }
+
     const { error, value: validatedCustomer } = customerSchema.validate({
       email,
       password,
@@ -51,8 +57,7 @@ const createCustomer = async (req, res) => {
       return res.status(400).json({ message: errorMessages });
     }
 
-    console.log(validatedCustomer);
-    const hashedPassword = await bycrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     validatedCustomer.password = hashedPassword;
     const newCustomer = await CustomerService.create(validatedCustomer);
 

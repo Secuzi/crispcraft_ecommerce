@@ -5,276 +5,258 @@ import InputNumber from "primevue/inputnumber";
 import Subtotal from "@/components/Subtotal.vue";
 import { ref } from "vue";
 import MainContainer from "@/components/MainContainer.vue";
-import ProductSweetCheese from "@/assets/images/BAG of CHIPS/cheese.png";
-import ProductCheesyHot from "@/assets/images/BAG of CHIPS/cheesyhot.png";
-import ProductChiliHot from "@/assets/images/BAG of CHIPS/chilihot.png";
-import ProductSaltedOnion from "@/assets/images/BAG of CHIPS/onion.png";
 import MobileContainer from "@/components/MobileContainer.vue";
 import MultiCarousel from "@/components/MultiCarousel.vue";
 import { RouterLink } from "vue-router";
-import { useOrderItemStore } from "@/stores/multicarousel";
-import { onUnmounted } from "vue";
+import axios from "axios";
+import { onUnmounted, watch, onMounted, watchEffect } from "vue";
 import Button from "@/components/Button.vue";
 import DesktopContainer from "@/components/DesktopContainer.vue";
+import { useProductStore } from "@/stores/product";
+import { useOrderItemStore } from "@/stores/orderItem";
+import { useCartStore } from "@/stores/cartItem";
+import { useAuthStore } from "@/stores/auth";
+import PulseLoader from "vue-spinner/src/PulseLoader.vue";
 
-const formQuantity = ref(null);
+const cartItemStore = useCartStore();
+const formQuantity = ref(0);
+const authStore = useAuthStore();
+const productStore = useProductStore();
+const orderitemStore = useOrderItemStore();
+const product = ref({});
+const baseUrl = import.meta.env.VITE_APP_BASE_URL;
+const subtotal = ref(0);
+watch(
+  () => formQuantity.value,
+  async (newQuantity) => {
+    const cartProduct = cartItemStore.products.find(
+      (p) => p.productID == productStore.selectedProduct
+    );
 
-const products = ref([
-  {
-    id: 1,
-    image: ProductCheesyHot,
-    productName: "MC Cheesy Hot",
-    colorTheme: "#EF9426",
-    flavor: "Cheesy Hot",
-    price: 100,
-    stock: 99,
-    qty: 2,
-    isFontBlack: true,
-    description:
-      "Experience the delightful crunch of our Cheesy Hot Malunggay Chips—nutritious, flavorful, and perfect for satisfying your snack cravings!",
-  },
-  {
-    id: 2,
-    image: ProductSaltedOnion,
-    colorTheme: "#AE76B8",
-    productName: "MC Salted Onion",
-    flavor: "Salted Onion",
-    isFontBlack: false,
-    price: 200,
-    stock: 39,
-    qty: 2,
-    description:
-      "Enjoy our Malunggay Chips with Salted Onion flavor—crispy, nutritious, and bursting with savory goodness. A delightful snack for every occasion!",
-  },
-  {
-    id: 3,
-    image: ProductChiliHot,
-    colorTheme: "#863E24",
-    productName: "MC Chili Hot",
-    flavor: "Chili Hot",
-    isFontBlack: false,
-    price: 300,
-    stock: 25,
-    qty: 2,
-    description:
-      "Spice up your snack time with our Malunggay Chips in Chili Hot flavor—crispy, zesty, and packed with a fiery kick! Perfectly addictive!",
-  },
-  {
-    id: 4,
-    image: ProductSweetCheese,
-    colorTheme: "#EBCB5F",
-    productName: "MC Sweet Cheese",
-    flavor: "Sweet Cheese",
-    isFontBlack: true,
-    price: 200,
-    stock: 69,
-    qty: 2,
-    description:
-      "Indulge in our Sweet Cheese Malunggay Chips—crispy and perfectly sweetened with cheesy goodness. A unique treat for every snack lover!",
-  },
-  {
-    id: 5,
-    image: ProductSweetCheese,
-    colorTheme: "#EBCB5F",
-    productName: "MC Sweet Cheese",
-    flavor: "Sweet Cheese",
-    isFontBlack: true,
-    price: 345,
-    stock: 69,
-    qty: 2,
-    description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin at risus vel nisi volutpat facilisis. Enjoy the perfect blend of flavor and texture!",
-  },
-  {
-    id: 6,
-    image: ProductSweetCheese,
-    colorTheme: "#EBCB5F",
-    productName: "MC Sweet Cheese",
-    flavor: "Sweet Cheese",
-    isFontBlack: true,
-    price: 345,
-    stock: 69,
-    qty: 2,
-    description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin at risus vel nisi volutpat facilisis. Enjoy the perfect blend of flavor and texture!",
-  },
-  {
-    id: 7,
-    image: ProductSweetCheese,
-    colorTheme: "#EBCB5F",
-    productName: "MC Sweet Cheese",
-    flavor: "Sweet Cheese",
-    isFontBlack: true,
-    price: 345,
-    stock: 69,
-    qty: 2,
-    description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin at risus vel nisi volutpat facilisis. Enjoy the perfect blend of flavor and texture!",
-  },
-]);
+    if (typeof newQuantity === "undefined" || newQuantity === null) {
+      return;
+    }
 
-onUnmounted(() => {
-  orderItemStore.selectedProduct = {};
+    if (newQuantity === 0) {
+      await axios.delete(`/cart-item/${cartProduct.cartItemID}`);
+      cartItemStore.products = cartItemStore.products.filter(
+        (p) => p.cartItemID != cartProduct.cartItemID
+      );
+      return;
+    }
+
+    if (!cartProduct) {
+      //If 0 wala na siya sa cart product
+      product.value.quantity = newQuantity;
+
+      const cartItemResponse = await axios.post("/cart-item", {
+        ...product.value,
+        customerID: authStore.user_id,
+      });
+      const { cartItemID } = cartItemResponse.data;
+      cartItemStore.products.push({
+        ...product.value,
+        cartItemID,
+        customerID: authStore.user_id,
+      });
+      return;
+    }
+    cartProduct.quantity = newQuantity;
+    await axios.put(`/cart-item/${cartProduct.cartItemID}`, cartProduct);
+  }
+);
+
+watch(
+  () => productStore.selectedProduct, // Getter function for the reactive property
+  (newID) => {
+    if (newID) {
+      try {
+        // product.value = await productStore.fetchProductDetails(newID);
+        product.value = productStore.products.find((x) => x.productID == newID);
+        formQuantity.value = null;
+      } catch (error) {
+        console.error("Error fetching product details:", error);
+      }
+    }
+  }
+);
+
+const isLoading = ref(true);
+
+onMounted(async () => {
+  const response = await axios.get("/query/stock");
+  productStore.products = response.data.filter((p) => p.active == 1);
+
+  const cartItemResponse = await axios.get(
+    `/cart-item/customer/${authStore.user_id}`
+  );
+  cartItemStore.products = cartItemResponse.data;
+  console.log("PRODUUCTS: ", cartItemStore.products);
+
+  if (productStore.products.length > 0) {
+    productStore.selectedProduct = productStore.products[0].productID;
+  }
+
+  isLoading.value = false;
 });
 
-const orderItemStore = useOrderItemStore();
-
-orderItemStore.selectedProduct = products.value[0];
+onUnmounted(() => {
+  productStore.selectedProduct = {};
+  // orderitemStore.products = {};
+});
 </script>
 
 <template>
   <MainContainer>
-    <Navbar />
-
-    <DesktopContainer
-      alignItems="md:start"
-      :backgroundColor="orderItemStore.selectedProduct.colorTheme"
+    <div
+      v-if="isLoading"
+      class="text-center text-gray-500 py-6 flex-grow flex justify-center items-center bg-white"
     >
-      <section class="basis-[415px] self-center">
-        <!-- Selected Product -->
-        <div class="flex justify-center">
-          <Transition name="slide-fade">
-            <img
-              v-show="orderItemStore.selectedProduct"
-              :key="orderItemStore.selectedProduct.id"
-              :src="orderItemStore.selectedProduct.image"
-              :alt="orderItemStore.selectedProduct.flavor"
-              class="w-[70%]"
+      <PulseLoader />
+    </div>
+    <div v-else class="h-full flex-grow flex flex-col">
+      <Navbar />
+      <DesktopContainer alignItems="md:start" background-color="!bg-[#D6F3FF]">
+        <section v-if="product" class="basis-[415px] self-center">
+          <!-- Selected Product -->
+          <div class="flex justify-center">
+            <Transition name="slide-fade">
+              <img
+                v-show="product"
+                :key="product.productID"
+                :src="baseUrl + '/' + product.image"
+                :alt="product.flavorName"
+                class="w-[70%]"
+              />
+            </Transition>
+          </div>
+        </section>
+        <section v-if="product" class="basis-[630px]">
+          <h1>
+            <HeaderText
+              featured-text="ORDER"
+              products-text="ITEM"
+              textSize="55px"
             />
-          </Transition>
-        </div>
-      </section>
-
-      <section class="basis-[630px]">
-        <h1>
-          <HeaderText
-            featured-text="ORDER"
-            products-text="ITEM"
-            textSize="55px"
-          />
-        </h1>
-        <h2
-          :class="[
-            'text-[30px]',
-            'text-stroke',
-            'text-white',
-            'font-bebas',
-            'myTextShadow mt-2',
-          ]"
-        >
-          MALUNGGAY CHIPS:
-          <span
-            class="font-rubik tracking-tighter font-bold text-[#EBCB5F] block mt-[-11px] mb-2"
-            style="-webkit-text-stroke: 2px; -webkit-text-stroke-color: black"
-            >{{ orderItemStore.selectedProduct.flavor }}</span
-          >
-        </h2>
-
-        <div class="h-[84px] overflow-y-auto">
-          <p
+          </h1>
+          <h2
             :class="[
-              'italic',
-              'max-w-[360px]',
-              'text-[14px]',
-              'mb-[10px]',
-              orderItemStore.selectedProduct.isFontBlack
-                ? 'text-black'
-                : 'text-white',
+              'text-[30px]',
+              'text-stroke',
+              'text-white',
+              'font-bebas',
+              'myTextShadow mt-2',
             ]"
           >
-            <span class="font-bold">Description:</span>
-            {{ orderItemStore.selectedProduct.description }}
-          </p>
-        </div>
-
-        <div class="flex gap-3 items-center">
-          <!-- Quantity container -->
-          <div class="flex flex-col basis-[100px]">
-            <span class="font-bold italic text-[20px] text-opacity-50"
-              >Quantity:</span
+            {{ product.productName }}
+            <span
+              class="font-rubik tracking-tighter font-bold text-[#EBCB5F] block mt-[-11px] mb-2"
+              style="-webkit-text-stroke: 2px; -webkit-text-stroke-color: black"
+              >{{ product.flavorName }}</span
             >
-
-            <InputNumber
-              v-model="formQuantity"
-              inputId="integeronly"
-              class="h-[24px]"
-              :pt="{
-                inputtext: {
-                  root: '!rounded-[5px]',
-                },
-                root: '!rounded-[5px]',
-              }"
-              style="width: 212px; height: 48px"
-            />
-            <!-- Button Container -->
-            <div class="mt-3">
-              <Button text="-" padding_x="1.5rem" padding_y="0px" />
-              <Button
-                text="+"
-                padding_x="1.5rem"
-                padding_y="0px"
-                class="ml-3"
+          </h2>
+          <div class="h-[84px] overflow-y-auto">
+            <p :class="['italic', 'max-w-[360px]', 'text-[14px]', 'mb-[10px]']">
+              <span class="font-bold">Description:</span>
+              {{ product.description }}
+            </p>
+          </div>
+          <div class="flex gap-3 items-center">
+            <!-- Quantity container -->
+            <div class="flex flex-col basis-[100px]">
+              <span class="font-bold italic text-[20px] text-opacity-50"
+                >Quantity:</span
+              >
+              <InputNumber
+                v-model="formQuantity"
+                inputId="minmax"
+                class="h-[24px]"
+                defaultValue="0"
+                :min="0"
+                :max="product.stockQty"
+                :pt="{
+                  inputtext: {
+                    root: '!rounded-[5px]',
+                  },
+                }"
+                style="width: 212px; height: 48px"
               />
+              <!-- Button Container -->
+              <div class="mt-3">
+                <Button
+                  text="-"
+                  padding_x="1.5rem"
+                  padding_y="0px"
+                  @click="formQuantity > 0 ? (formQuantity -= 1) : formQuantity"
+                />
+                <Button
+                  @click="
+                    formQuantity < product.stockQty
+                      ? (formQuantity += 1)
+                      : formQuantity
+                  "
+                  text="+"
+                  padding_x="1.5rem"
+                  padding_y="0px"
+                  class="ml-3"
+                />
+              </div>
+            </div>
+            <!-- Product info -->
+            <div class="grow fluid">
+              <h3 class="font-extrabold text-opacity-50 text-[16px]">
+                Available Stock: {{ product.stockQty }}
+              </h3>
+              <h3 class="font-extrabold text-[18px]">
+                Price: {{ product.price }}
+              </h3>
             </div>
           </div>
-
-          <!-- Product info -->
-          <div class="grow fluid">
-            <h3 class="font-extrabold text-opacity-50 text-[16px]">
-              Available Stock: {{ orderItemStore.selectedProduct.stock }}
-            </h3>
-            <h3 class="font-extrabold text-[18px]">
-              Price: {{ orderItemStore.selectedProduct.price }}
-            </h3>
+          <h3 class="font-medium mt-3">Choose Other Flavors:</h3>
+          <div class="flex justify-around mt-[22px]">
+            <MultiCarousel
+              :style="'width: 400px'"
+              :items="productStore.products"
+              slidesPerView="3"
+              spaceBetween="20"
+            />
           </div>
-        </div>
-
-        <h3
-          class="font-medium"
-          :class="[
-            orderItemStore.selectedProduct.isFontBlack
-              ? 'text-black'
-              : 'text-white',
-          ]"
-        >
-          Choose Other Flavors:
-        </h3>
-
-        <div class="flex justify-around mt-[22px]">
-          <MultiCarousel
-            :style="'width: 400px'"
-            :items="products"
-            slidesPerView="3"
-            spaceBetween="20"
-          />
-        </div>
-      </section>
-
-      <section class="self-center p-4">
-        <div>
-          <Subtotal
-            :products="products"
-            tableHeaderTextSize="12px"
-            subTotalTextSize="14px"
-            dataTextSize="14px"
-            sumNumberTextSize="14px"
-            class="mt-[15px]"
-            height="100%"
-          />
-          <div class="flex justify-end">
-            <RouterLink to="/checkout">
-              <button
-                class="bg-mySecondaryColor myTextShadow mt-3 myBoxShadow text-white font-bold text-[24px] px-5 py-2 rounded-[25px] text-center"
+        </section>
+        <section class="self-center p-4">
+          <div v-if="!isLoading">
+            <Subtotal
+              :products="cartItemStore.products"
+              tableHeaderTextSize="12px"
+              subTotalTextSize="14px"
+              dataTextSize="14px"
+              sumNumberTextSize="14px"
+              class="mt-[15px]"
+              height="100%"
+              :subtotal="subtotal"
+              :imageClick="cartItemStore.deleteCartItem"
+              :active="!cartItemStore.isAnyProductNotActive"
+            />
+            <div class="flex justify-end">
+              <RouterLink
+                v-if="
+                  !cartItemStore.isAnyProductNotActive &&
+                  cartItemStore.products.length > 0
+                "
+                to="/checkout"
               >
-                Checkout
-              </button>
-            </RouterLink>
+                <button
+                  class="bg-mySecondaryColor myTextShadow mt-3 myBoxShadow text-white font-bold text-[24px] px-5 py-2 rounded-[25px] text-center"
+                >
+                  Checkout
+                </button>
+              </RouterLink>
+            </div>
           </div>
-        </div>
-      </section>
-    </DesktopContainer>
+        </section>
+      </DesktopContainer>
+    </div>
 
-    <!-- MOBILEEE -->
+    <!-- MOBILEEE
     <MobileContainer>
       <section class="myContainer">
         <HeaderText
@@ -283,16 +265,7 @@ orderItemStore.selectedProduct = products.value[0];
           products-text="ITEM"
           featured-text="ORDER"
         />
-        <p
-          class="italic font-medium text-[14px]"
-          :class="[
-            orderItemStore.selectedProduct.isFontBlack
-              ? 'text-black'
-              : 'text-white',
-          ]"
-        >
-          Choose other flavors:
-        </p>
+        <p class="italic font-medium text-[14px]">Choose other flavors:</p>
       </section>
 
       <section class="relative">
@@ -309,7 +282,7 @@ orderItemStore.selectedProduct = products.value[0];
         </div>
       </section>
 
-      <section v-if="orderItemStore.selectedProduct" class="myContainer">
+      <section v-if="productStore.selectedProduct" class="myContainer">
         <h2
           :class="[
             'text-[32px]',
@@ -327,17 +300,7 @@ orderItemStore.selectedProduct = products.value[0];
           >
         </h2>
         <div class="h-[84px] overflow-y-auto">
-          <p
-            :class="[
-              'italic',
-
-              'text-[14px]',
-              'mb-[10px]',
-              orderItemStore.selectedProduct.isFontBlack
-                ? 'text-black'
-                : 'text-white',
-            ]"
-          >
+          <p :class="['italic', 'text-[14px]', 'mb-[10px]']">
             <span class="font-bold">Description:</span>
             {{ orderItemStore.selectedProduct.description }}
           </p>
@@ -361,13 +324,14 @@ orderItemStore.selectedProduct = products.value[0];
 
               <InputNumber
                 v-model="formQuantity"
-                inputId="integeronly"
+                inputId="minmax"
+                min="0"
+                max="99"
                 class="h-[24px]"
                 :pt="{
                   inputtext: {
                     root: '!rounded-[5px]',
                   },
-                  root: '!rounded-[5px]',
                 }"
                 style="width: 150px"
               />
@@ -406,7 +370,7 @@ orderItemStore.selectedProduct = products.value[0];
           </button>
         </RouterLink>
       </section>
-    </MobileContainer>
+    </MobileContainer> -->
   </MainContainer>
 </template>
 

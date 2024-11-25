@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from "vue";
-import { useOrderItemStore } from "@/stores/multicarousel";
+import { useOrderItemStore } from "@/stores/orderItem";
 
 const orderItemStore = useOrderItemStore();
 const props = defineProps({

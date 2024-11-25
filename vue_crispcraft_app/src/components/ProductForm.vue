@@ -75,25 +75,20 @@ async function submitForm() {
         life: 3150,
       });
     }
+    let formData;
+
     try {
-      const formData = new FormData();
+      formData = new FormData();
       formData.append("productName", form.productName);
       formData.append("description", form.description);
       formData.append("flavorID", form.flavorID);
       formData.append("price", form.price);
       formData.append("expirationDate", form.expirationDate);
       formData.append("image", imageObject.value);
-
-      const searchedProductResponse = await axios.get(
-        `/products/name/${form.productName}`
-      );
-
-      if (searchedProductResponse.data) {
-        throw new Error("Product name already exists!");
-      }
-
       newProduct.value = await axios.post("/products", formData);
-      form.productID = newProduct.value.data.productID;
+
+      // newProduct.value = await axios.post("/products", formData);
+      // form.productID = newProduct.value.data.productID;
     } catch (e) {
       console.log(e);
       toast.add({
@@ -104,13 +99,16 @@ async function submitForm() {
       });
     }
 
-    if (!newProduct.value || !newFlavor.value) {
+    if (!newFlavor.value) {
       return;
     }
+
+    console.log(`NEW PRODUUCT: `, newProduct.value);
+    form.productID = newProduct.value.data.productID;
     form.stockQty = 0;
 
-    const inventoryResponse = await axios.post("/inventory", form);
-    console.log(inventoryResponse.data);
+    // const inventoryResponse = await axios.post("/inventory", form);
+    // console.log(inventoryResponse.data);
 
     toast.add({
       severity: "success",
@@ -118,8 +116,9 @@ async function submitForm() {
       detail: "Successfully created product!",
       life: 3000,
     });
-
-    router.push("/admin/stock");
+    setTimeout(() => {
+      router.push("/admin/stock");
+    }, 1000);
   } catch (e) {
     console.log(e);
   }

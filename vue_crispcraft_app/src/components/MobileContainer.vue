@@ -1,5 +1,5 @@
 <script setup>
-import { useOrderItemStore } from "@/stores/multicarousel";
+import { useOrderItemStore } from "@/stores/orderItem";
 
 const orderItemStore = useOrderItemStore();
 

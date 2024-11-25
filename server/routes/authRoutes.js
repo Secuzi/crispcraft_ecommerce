@@ -1,11 +1,13 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const CustomerService = require("../services/CustomerService");
+const MerchantService = require("../services/MerchantService");
+const AdminService = require("../services/AdminService");
 const router = express.Router();
 
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
     // Validate input
     if (!email || !password) {
       return res
@@ -13,18 +15,42 @@ router.post("/login", async (req, res) => {
         .json({ message: "Email and password are required" });
     }
 
-    const user = await CustomerService.getByField("email", email);
+    let user;
+    switch (role) {
+      case "customer":
+        user = await CustomerService.getByField("email", email); // Fetch from "customers" table
+        break;
+      case "merchant":
+        user = await MerchantService.getByField("email", email); // Fetch from "merchants" table
+        break;
+      case "admin":
+        user = await AdminService.getByField("email", email); // Fetch from "admins" table
+        break;
+      default:
+        return res.status(400).json({ message: "Invalid role specified." });
+    }
+
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
     const validPassword = await bcrypt.compare(password, user.password);
+
     if (!validPassword) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
     // Store in session
+
     req.session.user = { user_id: user.customerID, role: user.role };
+    switch (role) {
+      case "merchant":
+        req.session.user.user_id = user.merchantID;
+        break;
+      case "admin":
+        req.session.user.user_id = user.adminID;
+        break;
+    }
     // Send only necessary data
     res.json({
       message: "Login successful",

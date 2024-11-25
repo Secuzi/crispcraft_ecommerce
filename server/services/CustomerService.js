@@ -13,6 +13,9 @@ class CustomerService extends ModelService {
     const result = await pool.request().input("city", city).query(query);
     return result.recordset;
   }
+  async getByFieldCustomer(field, value) {
+    return db("Customer").where(field, value).first(); // Adjust table name
+  }
 }
 
 module.exports = new CustomerService();

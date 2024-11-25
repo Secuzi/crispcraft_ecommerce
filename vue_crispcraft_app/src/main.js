@@ -9,11 +9,27 @@ import { definePreset } from "@primevue/themes";
 import { createPinia } from "pinia";
 import Aura from "@primevue/themes/aura";
 import ToastService from "primevue/toastservice";
+import { useOrderItemStore } from "./stores/orderItem";
 const pinia = createPinia();
+import { useCartStore } from "./stores/cartItem";
 
 const app = createApp(App);
 axios.defaults.baseURL = "http://localhost:3000";
 axios.defaults.withCredentials = true;
+
+router.beforeEach((to, from, next) => {
+  const orderItemStore = useOrderItemStore();
+  const cartItemStore = useCartStore();
+  const isAnyNotProductActive = cartItemStore.isAnyProductNotActive;
+
+  if (to.meta.requiresActiveProduct && isAnyNotProductActive) {
+    console.log("isAnyProductActive: ", isAnyNotProductActive);
+
+    next("/order"); // Redirect back to the current page
+  } else {
+    next(); // Allow navigation
+  }
+});
 
 app.use(router);
 app.use(ToastService);

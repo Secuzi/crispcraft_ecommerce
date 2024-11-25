@@ -26,7 +26,7 @@ const onPrevChange = () => {
     swiper.value.slidePrev();
   }
 };
-
+const baseUrl = import.meta.env.VITE_APP_BASE_URL;
 const onSwiper = (instance) => {
   swiper.value = instance;
 };
@@ -34,16 +34,11 @@ const onSwiper = (instance) => {
 const onSlideChange = (event) => {
   const currentIndex = event.realIndex;
   const currentItem = props.items[currentIndex];
-
-  console.log("Current Slide Index:", currentIndex);
-  console.log("Current Item:", currentItem);
-  currentTheme.value = currentItem.colorTheme;
 };
 </script>
 
 <template>
   <div
-    :style="{ backgroundColor: currentTheme }"
     class="h-full flex items-center px-[24px] py-[41px] transition ease-in-out duration-500 flex-shrink"
   >
     <Swiper
@@ -57,9 +52,9 @@ const onSlideChange = (event) => {
       :grabCursor="false"
       @slideChange="onSlideChange"
     >
-      <SwiperSlide v-for="(item, index) in props.items" :key="item.id">
-        <RouterLink to="/">
-          <img :src="item.image" alt="" />
+      <SwiperSlide v-for="(item, index) in props.items" :key="item.productID">
+        <RouterLink to="/order">
+          <img :src="baseUrl + '/' + item.image" alt="" />
         </RouterLink>
       </SwiperSlide>
       <button class="swiper-button-prev" @click="onPrevChange">

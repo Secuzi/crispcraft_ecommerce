@@ -19,6 +19,7 @@ const {
   updateProduct,
   getProduct,
   getProductByName,
+  deleteProduct,
 } = require("../controllers/productController");
 
 router.get("/", getAllProducts);
@@ -26,5 +27,6 @@ router.get("/:id", getProduct);
 router.get("/name/:productName", getProductByName);
 router.post("/", upload.single("image"), createProduct);
 router.put("/:id", upload.single("image"), updateProduct);
+router.delete("/:id", deleteProduct);
 
 module.exports = router;

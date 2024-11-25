@@ -2,11 +2,14 @@
 import { ref } from "vue";
 import InputText from "primevue/inputtext";
 import LocationIcon from "@/assets/images/icons/location_icon.svg";
+import { useDeliveryStore } from "@/stores/delivery";
 const isDisabled = ref(true);
 
 const toggleDisabled = () => {
   isDisabled.value = !isDisabled.value;
 };
+
+const deliveryStore = useDeliveryStore();
 
 const props = defineProps({
   addressTextSize: {
@@ -41,7 +44,7 @@ const props = defineProps({
         <h3 :style="{ fontSize: addressTextSize }">Address:</h3>
         <InputText
           type="text"
-          v-model="value"
+          v-model="deliveryStore.address"
           :disabled="isDisabled"
           class="checkout-input"
           :style="{ fontSize: addressTextSize }"
@@ -56,7 +59,7 @@ const props = defineProps({
         class="font-semibold myTextShadow"
         :style="{ fontSize: deliveryChargeTextSize }"
       >
-        Delivery Charge: Php 60
+        Delivery Charge: Php {{ deliveryStore.deliveryCharge }}
       </h3>
       <p
         class="font-medium text-[9px] myTextShadow cursor-pointer"
