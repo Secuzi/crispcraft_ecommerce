@@ -90,6 +90,11 @@ const showSuccessToast = async () => {
     console.log("FOR PRODUCT: ", product);
     await axios.post(`/order-item`, { orderID, ...product, customerID });
     console.log("produuct: ", product);
+
+    await axios.put(`/inventory/update-stock`, {
+      productID: product.productID,
+      quantity: product.quantity, // Subtract this quantity
+    });
   }
 
   //Do payment process

@@ -24,6 +24,8 @@ const getInventory = async (req, res) => {
 
 const updateInventory = async (req, res) => {
   const { id } = req.params;
+
+  console.log("WHY AM I HEEEEEEEEEEEEEEEEEEEEEEREEEEE");
   let { stockQty, changeDate } = req.body;
   console.log("STOOCK: ", stockQty);
   if (stockQty === null || typeof stockQty === "undefined") {
@@ -90,6 +92,49 @@ const deleteInventory = async (req, res) => {
     console.log(e);
   }
 };
+const updateInventoryStock = async (req, res) => {
+  const { productID, quantity } = req.body;
+
+  if (!productID || !quantity) {
+    return res
+      .status(400)
+      .json({ message: "Product ID and quantity are required." });
+  }
+
+  try {
+    // Ensure stock is updated only if sufficient quantity exists
+    const inventory = await InventoryService.read(productID, "productID");
+    if (!inventory) {
+      return res
+        .status(404)
+        .json({ message: "Product not found in inventory." });
+    }
+
+    if (inventory.stockQty < quantity) {
+      return res.status(400).json({
+        message: `Insufficient stock. Available: ${inventory.stockQty}`,
+      });
+    }
+
+    const newStockQty = inventory.stockQty - quantity;
+    const changeDate = dayjs().format("YYYY-MM-DD HH:mm:ss");
+
+    await InventoryService.update(
+      inventory.inventoryID,
+      { stockQty: newStockQty, changeDate },
+      "inventoryID"
+    );
+
+    return res.status(200).json({
+      message: "Stock updated successfully.",
+      productID,
+      newStockQty,
+    });
+  } catch (error) {
+    console.error("Error updating inventory stock:", error);
+    return res.status(500).json({ message: "Failed to update stock." });
+  }
+};
 
 module.exports = {
   getAllInventory,
@@ -97,4 +142,5 @@ module.exports = {
   getInventory,
   updateInventory,
   deleteInventory,
+  updateInventoryStock,
 };

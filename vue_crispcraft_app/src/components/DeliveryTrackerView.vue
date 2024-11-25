@@ -6,10 +6,11 @@ import Navbar from "./Navbar.vue";
 import { onMounted, ref } from "vue";
 import axios from "axios";
 import { useDeliveryStore } from "@/stores/delivery";
+import Drawer from "primevue/drawer";
 
 const deliveryStore = useDeliveryStore();
 const deliveries = ref([]);
-
+const visibleBottom = ref(false);
 const updateDeliveryStatus = async (deliveryID) => {
   console.log("IN DELIVERY");
   const delivery = deliveries.value.find((d) => d.deliveryID === deliveryID);
@@ -82,10 +83,45 @@ onMounted(async () => {
                   Delivered
                 </button>
                 <button
+                  @click="visibleBottom = true"
                   class="myBoxShadow text-white text-[15px] font-bold py-1 px-1 bg-[#F63636] rounded-full"
                 >
                   Remove
                 </button>
+                <Drawer
+                  v-model:visible="visibleBottom"
+                  position="bottom"
+                  :showCloseIcon="false"
+                  style="height: 363px; max-width: 320px"
+                  class="!rounded-t-3xl"
+                >
+                  <template #header>
+                    <div>
+                      <h2
+                        class="myTextShadow text-black font-extrabold text-[16px]"
+                      >
+                        Reason for Cancelation?
+                      </h2>
+                    </div>
+                  </template>
+                  <div class="text-black">
+                    <button
+                      class="font-bold w-full text-start text-[13px] bg-[#ECECEC] px-4 py-3 mb-4"
+                    >
+                      Customer did not show up.
+                    </button>
+                    <button
+                      class="font-bold w-full text-start text-[13px] bg-[#ECECEC] px-4 py-3 mb-4"
+                    >
+                      Delivered the wrong product.
+                    </button>
+                    <button
+                      class="font-bold w-full text-start text-[13px] bg-[#ECECEC] px-4 py-3 mb-4"
+                    >
+                      Customer cannot be reached.
+                    </button>
+                  </div>
+                </Drawer>
               </div>
             </div>
           </div>
