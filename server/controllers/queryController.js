@@ -131,6 +131,11 @@ const updateOrderItemOrders = async (req, res) => {
 
 const getMerchantDeliveryData = async (req, res) => {
   try {
+    const { data } = req.query;
+    console.log("data: ", data);
+    if (!data) {
+      res.status(400).json({ message: "NO DATA" });
+    }
     const pool = await poolPromise;
     const query = `
     SELECT 
@@ -159,12 +164,12 @@ INNER JOIN [Order] o ON d.orderID = o.orderID
 INNER JOIN Customer c ON o.customerID = c.customerID
 INNER JOIN OrderItem oi ON o.orderID = oi.orderID
 INNER JOIN Product p ON oi.productID = p.productID
-WHERE d.deliveryStatus = 'pending' -- Replace with your deliveryID parameter
+WHERE d.deliveryStatus = @data -- Replace with your deliveryID parameter
 GROUP BY d.deliveryID, d.deliveryDate, c.fName, c.lName, c.phoneNum, c.[address], o.orderID;
     
     `;
 
-    const result = await pool.request().query(query);
+    const result = await pool.request().input("data", data).query(query);
 
     res.status(200).json(result.recordset);
   } catch (e) {

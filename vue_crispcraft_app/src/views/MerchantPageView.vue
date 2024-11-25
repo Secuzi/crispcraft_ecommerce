@@ -42,7 +42,11 @@ function onRowUnselect() {
 }
 const selectedDelivery = ref();
 onMounted(async () => {
-  const deliveryResponse = await axios.get("/query/delivery-data");
+  const deliveryResponse = await axios.get("/query/delivery-data", {
+    params: {
+      data: "pending",
+    },
+  });
   deliveryStore.pendingDeliveries = deliveryStore.formatDeliveryData(
     deliveryResponse.data
   );

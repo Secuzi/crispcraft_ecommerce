@@ -18,6 +18,7 @@ const cartItemRoutes = require("./routes/CartItemRoutes.js");
 const transactionLogRoutes = require("./routes/transactionLogRoutes.js");
 const deliveryRoutes = require("./routes/deliveryRoutes.js");
 const merchantRoutes = require("./routes/merchantRoutes.js");
+const adminRoutes = require("./routes/AdminRoutes.js");
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(
@@ -50,5 +51,6 @@ app.use("/cart-item", cartItemRoutes);
 app.use("/transaction-log", transactionLogRoutes);
 app.use("/delivery", deliveryRoutes);
 app.use("/merchant", merchantRoutes);
+app.use("/admin", adminRoutes);
 
 app.listen(PORT, () => console.log(`Listening on port: ${PORT}`));

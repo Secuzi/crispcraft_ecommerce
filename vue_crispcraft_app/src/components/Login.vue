@@ -27,6 +27,7 @@ async function submitForm() {
   if (v$.value.$errors.length > 0) {
     return;
   }
+
   try {
     // const response = await axios.post("http://localhost:3000/auth/login", form);
     const returnedData = await authStore.login(form);
@@ -36,6 +37,9 @@ async function submitForm() {
     switch (authStore.role) {
       case "merchant":
         router.push("/merchant");
+        break;
+      case "admin":
+        router.push("/admin/stock");
         break;
 
       default:
@@ -132,6 +136,7 @@ onMounted(() => {
         <select v-model="form.role" required class="mb-[27px]">
           <option value="customer">Customer</option>
           <option value="merchant">Merchant</option>
+          <option value="admin">Admin</option>
           <!-- Maybe add admin or not -->
         </select>
         <!-- Login button -->

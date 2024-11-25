@@ -2,6 +2,7 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const CustomerService = require("../services/CustomerService");
 const MerchantService = require("../services/MerchantService");
+const AdminService = require("../services/AdminService");
 const router = express.Router();
 
 router.post("/login", async (req, res) => {
@@ -34,6 +35,7 @@ router.post("/login", async (req, res) => {
     }
 
     const validPassword = await bcrypt.compare(password, user.password);
+
     if (!validPassword) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
@@ -44,6 +46,9 @@ router.post("/login", async (req, res) => {
     switch (role) {
       case "merchant":
         req.session.user.user_id = user.merchantID;
+        break;
+      case "admin":
+        req.session.user.user_id = user.adminID;
         break;
     }
     // Send only necessary data
