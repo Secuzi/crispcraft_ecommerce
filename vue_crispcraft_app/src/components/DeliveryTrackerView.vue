@@ -11,6 +11,51 @@ import Drawer from "primevue/drawer";
 const deliveryStore = useDeliveryStore();
 const deliveries = ref([]);
 const visibleBottom = ref(false);
+
+const selectedDeliveryID = ref(null);
+
+const showDrawer = (deliveryID) => {
+  selectedDeliveryID.value = deliveryID;
+  visibleBottom.value = true;
+};
+
+const handleCancelationReason = async (reason) => {
+  try {
+    const deliveryID = selectedDeliveryID.value;
+
+    if (!deliveryID) {
+      console.error("No delivery ID selected.");
+      return;
+    }
+
+    const delivery = deliveries.value.find((d) => d.deliveryID === deliveryID);
+    if (!delivery) {
+      console.error("Delivery not found.");
+      return;
+    }
+
+    // Update the delivery with reason and status locally
+    delivery.reason = reason;
+    delivery.deliveryStatus = "cancelled";
+
+    await axios.put(`/delivery/cancel`, {
+      deliveryID: delivery.deliveryID,
+      reason: delivery.reason,
+    });
+
+    console.log("DELIVERY ID: ", deliveryID);
+
+    // Update local state after cancelation
+    deliveries.value = deliveries.value.filter(
+      (d) => d.deliveryID !== deliveryID
+    );
+
+    visibleBottom.value = false; // Close the drawer
+  } catch (error) {
+    console.error("Error storing reason:", error);
+  }
+};
+
 const updateDeliveryStatus = async (deliveryID) => {
   console.log("IN DELIVERY");
   const delivery = deliveries.value.find((d) => d.deliveryID === deliveryID);
@@ -83,7 +128,7 @@ onMounted(async () => {
                   Delivered
                 </button>
                 <button
-                  @click="visibleBottom = true"
+                  @click="showDrawer(delivery.deliveryID)"
                   class="myBoxShadow text-white text-[15px] font-bold py-1 px-1 bg-[#F63636] rounded-full"
                 >
                   Remove
@@ -106,16 +151,25 @@ onMounted(async () => {
                   </template>
                   <div class="text-black">
                     <button
+                      @click="
+                        handleCancelationReason('Customer did not show up.')
+                      "
                       class="font-bold w-full text-start text-[13px] bg-[#ECECEC] px-4 py-3 mb-4"
                     >
                       Customer did not show up.
                     </button>
                     <button
+                      @click="
+                        handleCancelationReason('Delivered the wrong product.')
+                      "
                       class="font-bold w-full text-start text-[13px] bg-[#ECECEC] px-4 py-3 mb-4"
                     >
                       Delivered the wrong product.
                     </button>
                     <button
+                      @click="
+                        handleCancelationReason('Customer cannot be reached.')
+                      "
                       class="font-bold w-full text-start text-[13px] bg-[#ECECEC] px-4 py-3 mb-4"
                     >
                       Customer cannot be reached.
