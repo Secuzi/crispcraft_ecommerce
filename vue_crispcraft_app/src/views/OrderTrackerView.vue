@@ -118,84 +118,6 @@ onMounted(fetchDelivery);
     <DesktopContainer background-color="bg-[#D6F3FF]">
       <div class="w-[90%] mx-auto h-[70%]">
         <section class="flex justify-between items-center">
-          <Drawer
-            v-model:visible="visibleBottom"
-            position="bottom"
-            :showCloseIcon="false"
-            style="height: 638px; max-width: 1283px"
-            class="!rounded-t-3xl"
-          >
-            <template #header>
-              <div class="flex justify-between w-full">
-                <HeaderText
-                  featuredText="Order"
-                  productsText="Feedback"
-                  textSize="55px"
-                  featured-text-color="#004DFF"
-                />
-                <div class="flex items-center">
-                  <button
-                    class="myTextShadow bg-[#004DFF] px-12 py-3 text-white z-10 rounded-2xl text-[22px] font-bold myBoxShadow"
-                  >
-                    Submit
-                  </button>
-                </div>
-              </div>
-            </template>
-            <div>
-              <!-- Description Container -->
-              <div class="flex items-center mb-[73px] w-[90%] mx-auto">
-                <img :src="CustomerSupportIcon" class="w-[55px]" />
-                <div class="font-extrabold text-[24px] text-black myTextShadow">
-                  <p>Is there any wrong with the delivery?</p>
-                  <p>Please let us know.</p>
-                </div>
-              </div>
-
-              <!-- feedback container (main grid)-->
-              <div class="grid grid-cols-5 gap-5 w-[90%] mx-auto">
-                <div class="flex flex-col gap-3 items-center">
-                  <div class="max-h-[111px]">
-                    <img :src="WrongProductIcon" />
-                  </div>
-                  <p>They delivered the <span>wrong product.</span></p>
-                </div>
-                <div class="flex flex-col gap-3 items-center">
-                  <div class="max-h-[111px]">
-                    <img :src="ExpiredIcon" />
-                  </div>
-                  <p>
-                    The product was <span>expired</span> when it was delivered.
-                  </p>
-                </div>
-                <div class="flex flex-col gap-3 items-center">
-                  <div class="max-h-[111px]">
-                    <img :src="DamagedIcon" />
-                  </div>
-                  <p>
-                    The product was <span>damaged</span> when was is delivered.
-                  </p>
-                </div>
-                <div class="flex flex-col gap-3 items-center">
-                  <div class="h-[111px] flex items-center">
-                    <img :src="NotDeliveredIcon" />
-                  </div>
-
-                  <p>The product has not been <span>Delivered.</span></p>
-                </div>
-                <div class="flex flex-col gap-3 items-center">
-                  <div class="h-[111px] flex items-center">
-                    <img :src="NoIssuesIcon" />
-                  </div>
-
-                  <p>
-                    The product is <span>Fine</span> and <span>no issues.</span>
-                  </p>
-                </div>
-              </div>
-            </div>
-          </Drawer>
-
           <HeaderText
             featuredText="ORDER"
             productsText="TRACKER"
@@ -204,7 +126,6 @@ onMounted(fetchDelivery);
           />
           <div v-if="delivery" class="flex items-center">
             <button
-              @click="visibleBottom = true"
               v-if="delivery.deliveryStatus === 'delivered'"
               class="myTextShadow bg-[#004DFF] px-7 py-1 text-white z-10 rounded-lg text-[22px] font-bold"
               :class="[!isDelivered ? 'opacity-100' : 'opacity-50']"
@@ -304,7 +225,6 @@ onMounted(fetchDelivery);
         />
         <div class="flex items-center">
           <button
-            @click="console.log('test')"
             :disabled="isDelivered"
             class="myTextShadow bg-[#F63639] px-7 py-1 text-white z-10 rounded-lg text-[15px] font-bold"
             :class="[!isDelivered ? 'opacity-100' : 'opacity-50']"

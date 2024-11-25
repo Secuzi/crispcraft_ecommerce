@@ -13,7 +13,11 @@ import { useDeliveryStore } from "@/stores/delivery";
 const selectedRow = ref(null); // Track the selected row
 const authStore = useAuthStore();
 const deliveryStore = useDeliveryStore();
-import { RouterLink } from "vue-router";
+import PulseLoader from "vue-spinner/src/PulseLoader.vue";
+import { RouterLink, useRoute } from "vue-router";
+
+const route = useRoute();
+
 function onRowSelect(event) {
   selectedRow.value = event.data;
   console.log("Row Selected:", event.data);
@@ -42,6 +46,7 @@ function onRowUnselect() {
   console.log("Row Unselected");
 }
 const selectedDelivery = ref();
+const isLoading = ref(true);
 onMounted(async () => {
   const deliveryResponse = await axios.get("/query/delivery-data", {
     params: {
@@ -51,6 +56,8 @@ onMounted(async () => {
   deliveryStore.pendingDeliveries = deliveryStore.formatDeliveryData(
     deliveryResponse.data
   );
+
+  isLoading.value = false;
   console.log("PENDING DELEVERIES: ", deliveryStore.pendingDeliveries);
 });
 
@@ -68,96 +75,102 @@ const filteredPendingDeliveries = computed(() => {
 
 <template>
   <MainContainer>
-    <Navbar />
-    <DesktopContainer backgroundColor="bg-[#D6F3FF]" alignItems="flex-start">
-      <!-- Main section to avoid rows -->
-      <section class="flex-grow">
-        <!-- header and search -->
-        <div class="flex items-center">
-          <HeaderText
-            class="ml-11"
-            featuredText="Merchant"
-            productsText="Page"
-            textSize="55px"
-          />
-          <div class="ml-[137px]">
-            <IconField>
-              <InputIcon class="pi pi-search" />
-              <InputText
-                v-model="searchTerm"
-                placeholder="Search Order"
-                class="!text-[20px] !focus:border-myPrimaryColor"
-              />
-            </IconField>
+    <div
+      v-if="isLoading"
+      class="text-center text-gray-500 py-6 flex-grow flex justify-center items-center bg-white"
+    >
+      <PulseLoader />
+    </div>
+    <div v-else class="h-full flex-grow flex flex-col">
+      <Navbar />
+      <DesktopContainer backgroundColor="bg-[#D6F3FF]" alignItems="flex-start">
+        <!-- Main section to avoid rows -->
+        <section class="flex-grow">
+          <!-- header and search -->
+          <div class="flex items-center">
+            <HeaderText
+              class="ml-11"
+              featuredText="Merchant"
+              productsText="Page"
+              textSize="55px"
+            />
+            <div class="ml-[137px]">
+              <IconField>
+                <InputIcon class="pi pi-search" />
+                <InputText
+                  v-model="searchTerm"
+                  placeholder="Search Order"
+                  class="!text-[20px] !focus:border-myPrimaryColor"
+                />
+              </IconField>
+            </div>
           </div>
-        </div>
-        <!-- buttons and table container -->
-        <div class="grid grid-cols-[1fr_3fr] w-[90%] mt-[19px]">
-          <!-- buttons container -->
-          <div
-            class="bg-white max-w-[270px] h-[462px] text-[24px] font-bold text-white"
-          >
-            <RouterLink
-              to="/merchant"
-              class="bg-mySecondaryColor block w-full mt-12 py-3 myTextShadow text-center"
+          <!-- buttons and table container -->
+          <div class="grid grid-cols-[1fr_3fr] w-[90%] mt-[19px]">
+            <!-- buttons container -->
+            <div
+              class="bg-white max-w-[270px] h-[462px] text-[24px] font-bold text-white"
             >
-              Pending
-            </RouterLink>
-
-            <RouterLink
-              to="/merchant/returned"
-              class="bg-mySecondaryColor block w-full mt-12 py-3 myTextShadow text-center"
+              <RouterLink
+                to="/merchant"
+                class="bg-myPrimaryColor block w-full mt-12 py-3 myTextShadow text-center"
+              >
+                Pending
+              </RouterLink>
+              <RouterLink
+                to="/merchant/returned"
+                class="bg-mySecondaryColor block w-full mt-12 py-3 myTextShadow text-center"
+              >
+                Returned
+              </RouterLink>
+            </div>
+            <!-- Table container -->
+            <div
+              v-if="deliveryStore.pendingDeliveries.length > 0"
+              class="relative"
             >
-              Returned
-            </RouterLink>
+              <button
+                v-if="selectedRow"
+                class="absolute myTextShadow font-bold text-[24px] myBoxShadow px-14 py-3 bottom-0 right-7 bg-mySecondaryColor rounded-3xl text-white"
+                @click="setToDeliver"
+              >
+                Shipped
+              </button>
+              <DataTable
+                v-model:selection="selectedDelivery"
+                :value="filteredPendingDeliveries"
+                selectionMode="single"
+                dataKey="orderID"
+                :metaKeySelection="false"
+                @rowSelect="onRowSelect"
+                @rowUnselect="onRowUnselect"
+                tableStyle="min-width: 50rem;"
+              >
+                <Column field="orderID" header="Order ID"></Column>
+                <Column field="fullName" header="Customer Name"></Column>
+                <Column field="orderItems" header="Products Ordered">
+                  <template #body="slotProps">
+                    <ul>
+                      <li
+                        v-for="(item, index) in slotProps.data.orderItems"
+                        :key="index"
+                      >
+                        {{
+                          `${item.productName}: ${item.flavorName} x ${item.quantity}`
+                        }}
+                      </li>
+                    </ul>
+                  </template>
+                </Column>
+                <Column field="phoneNum" header="Contact #"></Column>
+                <Column field="address" header="Delivery Address"></Column>
+                <Column field="totalAmount" header="Total Amount"></Column>
+              </DataTable>
+            </div>
           </div>
-
-          <!-- Table container -->
-          <div
-            v-if="deliveryStore.pendingDeliveries.length > 0"
-            class="relative"
-          >
-            <button
-              v-if="selectedRow"
-              class="absolute myTextShadow font-bold text-[24px] myBoxShadow px-14 py-3 bottom-0 right-7 bg-mySecondaryColor rounded-3xl text-white"
-              @click="setToDeliver"
-            >
-              Shipped
-            </button>
-            <DataTable
-              v-model:selection="selectedDelivery"
-              :value="filteredPendingDeliveries"
-              selectionMode="single"
-              dataKey="orderID"
-              :metaKeySelection="false"
-              @rowSelect="onRowSelect"
-              @rowUnselect="onRowUnselect"
-              tableStyle="min-width: 50rem;"
-            >
-              <Column field="orderID" header="Order ID"></Column>
-              <Column field="fullName" header="Customer Name"></Column>
-              <Column field="orderItems" header="Products Ordered">
-                <template #body="slotProps">
-                  <ul>
-                    <li
-                      v-for="(item, index) in slotProps.data.orderItems"
-                      :key="index"
-                    >
-                      {{
-                        `${item.productName}: ${item.flavorName} x ${item.quantity}`
-                      }}
-                    </li>
-                  </ul>
-                </template>
-              </Column>
-              <Column field="phoneNum" header="Contact #"></Column>
-              <Column field="address" header="Delivery Address"></Column>
-              <Column field="totalAmount" header="Total Amount"></Column>
-            </DataTable>
-          </div>
-        </div>
-      </section>
-    </DesktopContainer>
+        </section>
+      </DesktopContainer>
+    </div>
   </MainContainer>
 </template>
 

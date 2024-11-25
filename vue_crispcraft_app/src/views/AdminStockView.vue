@@ -27,17 +27,16 @@ import { ref, onMounted, computed, onUnmounted } from "vue";
 import useVuelidate from "@vuelidate/core";
 import { required, helpers } from "@vuelidate/validators";
 import { useProductStore } from "@/stores/product";
-
+import PulseLoader from "vue-spinner/src/PulseLoader.vue";
 import { watchEffect, watch } from "vue";
-import { useInventoryStore } from "@/stores/inventory";
-import { useFlavorStore } from "@/stores/flavor";
+
 import AdminButton from "@/components/AdminButton.vue";
-import { RouterLink, useRouter } from "vue-router";
+import { RouterLink } from "vue-router";
+import { useRoute } from "vue-router";
+
+const route = useRoute();
 
 const productStore = useProductStore();
-const router = new useRouter();
-const inventoryStore = useInventoryStore();
-const flavorStore = useFlavorStore();
 const toast = useToast();
 const visible = ref(false);
 const form = reactive({
@@ -313,279 +312,294 @@ onUnmounted(() => {
 
 <template>
   <MainContainer>
-    <Navbar />
-
-    <DesktopContainer
-      backgroundColor="bg-[#D6F3FF]"
-      alignItems="flex-start"
-      class=""
+    <div
+      v-if="isLoading"
+      class="text-center text-gray-500 py-6 flex-grow flex justify-center items-center bg-white"
     >
-      <section class="flex-grow">
-        <div class="w-[90%] mx-auto flex gap-12 h-[100%] justify-between">
-          <section class="basis-[100px] flex-grow-[1.5]">
-            <HeaderText
-              featuredText="ITEM"
-              productsText="STOCK"
-              textSize="55px"
-            />
-            <div
-              class="bg-white flex py-[5rem] flex-col gap-9 justify-center px-5 rounded-2xl mt-[5rem]"
-            >
-              <AdminButton
-                route="/admin/stock"
-                :imageIcon="ChecklistIcon"
-                text="Inventory"
-              />
+      <PulseLoader />
+    </div>
 
-              <AdminButton
-                route="/admin/transactions"
-                :imageIcon="TransactionIcon"
-                text="Transactions"
+    <div v-else>
+      <Navbar />
+      <DesktopContainer
+        backgroundColor="bg-[#D6F3FF]"
+        alignItems="flex-start"
+        class=""
+      >
+        <section class="flex-grow">
+          <div class="w-[90%] mx-auto flex gap-12 h-[100%] justify-between">
+            <section class="basis-[100px] flex-grow-[1.5]">
+              <HeaderText
+                featuredText="ITEM"
+                productsText="STOCK"
+                textSize="55px"
               />
-
-              <AdminButton
-                route="/admin/merchants"
-                :imageIcon="ClerkIcon"
-                text="Merchants"
-              />
-            </div>
-          </section>
-          <section class="basis-[500px] flex-grow">
-            <div class="h-[84px] flex flex-col justify-center">
-              <IconField>
-                <InputIcon class="pi pi-search" />
-                <InputText
-                  placeholder="Search Product"
-                  class="!text-[20px]"
-                  v-model="searchTerm"
-                />
-              </IconField>
-            </div>
-
-            <div v-if="!isLoading" class="overflow-auto w-full mt-[5rem]">
               <div
-                v-if="productStore.products.length > 0"
-                class="max-h-[800px]"
+                class="bg-white flex py-[5rem] flex-col gap-9 justify-center px-5 rounded-2xl mt-[5rem]"
               >
-                <CheckoutProductCard
-                  class="h-[128px] flex-grow-0"
-                  v-for="(product, index) in filteredProducts"
-                  :key="product.productID"
-                  :id="product.productID"
-                  :isActive="product.productID == productStore.selectedProduct"
-                  :class="[index !== 0 ? 'mt-5' : '']"
-                  :image="baseUrl + '/' + product.image"
-                  :header="product.productName"
-                  :deleteProduct="productStore.deleteProduct"
-                  :getProduct="productStore.getProduct"
-                  :description="product.description"
-                  :qty="product.stockQty"
-                  :price="product.price"
-                  fontSizeHeader="18px"
-                  fontSizeBody="16px"
+                <AdminButton
+                  route="/admin/stock"
+                  :imageIcon="ChecklistIcon"
+                  text="Inventory"
+                  :isActive="route.path === '/admin/stock'"
+                />
+                <AdminButton
+                  route="/admin/transactions"
+                  :imageIcon="TransactionIcon"
+                  :isActive="route.path === '/admin/transactions'"
+                  text="Transactions"
+                />
+                <AdminButton
+                  route="/admin/merchants"
+                  :imageIcon="ClerkIcon"
+                  :isActive="route.path === '/admin/merchants'"
+                  text="Merchants"
                 />
               </div>
-              <div v-else>
-                <HeaderText
-                  featuredText="No products"
-                  productsText=""
-                  class="text-center"
-                  textSize="55px"
-                />
-              </div>
-            </div>
-          </section>
-
-          <section class="mt-[10rem] pb-[5rem]">
-            <form
-              v-on:submit.prevent="submitForm"
-              class="bg-white rounded-xl px-10 py-5 mb-5"
-              enctype="multipart/form-data"
-            >
-              <div class="form-item">
-                <label for="productName" class="myTextShadow"
-                  >Product Name:</label
-                >
-                <input
-                  type="text"
-                  name="productName"
-                  id="productName"
-                  v-model="form.productName"
-                  placeholder="Enter product name"
-                  class="border-black p-3 border-2 rounded-[5px] myFormInput block w-full myFormInput p-inputtext"
-                />
-                <span v-if="v$.productName.$error" class="text-red-500 text-xs">
-                  {{ v$.productName.$errors[0].$message }}
-                </span>
-              </div>
-              <div class="form-item">
-                <label for="flavorName" class="myTextShadow"
-                  >Flavor Name:</label
-                >
-                <input
-                  type="text"
-                  name="flavorName"
-                  v-model="form.flavorName"
-                  id="flavorName"
-                  placeholder="Enter flavor name"
-                  class="border-black p-3 border-2 rounded-[5px] block w-full myFormInput p-inputtext"
-                />
-                <span v-if="v$.flavorName.$error" class="text-red-500 text-xs">
-                  {{ v$.flavorName.$errors[0].$message }}
-                </span>
-              </div>
-
-              <div class="form-item">
-                <label for="description" class="myTextShadow"
-                  >Product Description:</label
-                >
-                <textarea
-                  id="description"
-                  v-model="form.description"
-                  placeholder="Enter product description"
-                  class="border-black w-full p-3 border-2 rounded-[5px] block max-h-[76px] myFormInput p-inputtext"
-                ></textarea>
-                <span v-if="v$.description.$error" class="text-red-500 text-xs">
-                  {{ v$.description.$errors[0].$message }}
-                </span>
-              </div>
-              <div class="form-item">
-                <label for="stock" class="myTextShadow"
-                  >Stocks Available:</label
-                >
-                <div class="flex justify-around gap-2">
-                  <Button
-                    text="-"
-                    type="button"
-                    padding_x="1.5rem"
-                    padding_y="0px"
-                    class="!text-[32px]"
-                    @click="form.stockQty > 0 ? form.stockQty-- : 0"
+            </section>
+            <section class="basis-[500px] flex-grow">
+              <div class="h-[84px] flex flex-col justify-center">
+                <IconField>
+                  <InputIcon class="pi pi-search" />
+                  <InputText
+                    placeholder="Search Product"
+                    class="!text-[20px]"
+                    v-model="searchTerm"
                   />
-                  <Button
-                    text="+"
-                    type="button"
-                    padding_x="1.5rem"
-                    padding_y="0px"
-                    class="!text-[32px] ml-3"
-                    @click="form.stockQty += 1"
+                </IconField>
+              </div>
+              <div v-if="!isLoading" class="overflow-auto w-full mt-[5rem]">
+                <div
+                  v-if="productStore.products.length > 0"
+                  class="max-h-[800px]"
+                >
+                  <CheckoutProductCard
+                    class="h-[128px] flex-grow-0"
+                    v-for="(product, index) in filteredProducts"
+                    :key="product.productID"
+                    :id="product.productID"
+                    :isActive="
+                      product.productID == productStore.selectedProduct
+                    "
+                    :class="[index !== 0 ? 'mt-5' : '']"
+                    :image="baseUrl + '/' + product.image"
+                    :header="product.productName"
+                    :deleteProduct="productStore.deleteProduct"
+                    :getProduct="productStore.getProduct"
+                    :description="product.description"
+                    :qty="product.stockQty"
+                    :price="product.price"
+                    fontSizeHeader="18px"
+                    fontSizeBody="16px"
                   />
+                </div>
+                <div v-else>
+                  <HeaderText
+                    featuredText="No products"
+                    productsText=""
+                    class="text-center"
+                    textSize="55px"
+                  />
+                </div>
+              </div>
+            </section>
+            <section class="mt-[10rem] pb-[5rem]">
+              <form
+                v-on:submit.prevent="submitForm"
+                class="bg-white rounded-xl px-10 py-5 mb-5"
+                enctype="multipart/form-data"
+              >
+                <div class="form-item">
+                  <label for="productName" class="myTextShadow"
+                    >Product Name:</label
+                  >
+                  <input
+                    type="text"
+                    name="productName"
+                    id="productName"
+                    v-model="form.productName"
+                    placeholder="Enter product name"
+                    class="border-black p-3 border-2 rounded-[5px] myFormInput block w-full myFormInput p-inputtext"
+                  />
+                  <span
+                    v-if="v$.productName.$error"
+                    class="text-red-500 text-xs"
+                  >
+                    {{ v$.productName.$errors[0].$message }}
+                  </span>
+                </div>
+                <div class="form-item">
+                  <label for="flavorName" class="myTextShadow"
+                    >Flavor Name:</label
+                  >
+                  <input
+                    type="text"
+                    name="flavorName"
+                    v-model="form.flavorName"
+                    id="flavorName"
+                    placeholder="Enter flavor name"
+                    class="border-black p-3 border-2 rounded-[5px] block w-full myFormInput p-inputtext"
+                  />
+                  <span
+                    v-if="v$.flavorName.$error"
+                    class="text-red-500 text-xs"
+                  >
+                    {{ v$.flavorName.$errors[0].$message }}
+                  </span>
+                </div>
+                <div class="form-item">
+                  <label for="description" class="myTextShadow"
+                    >Product Description:</label
+                  >
+                  <textarea
+                    id="description"
+                    v-model="form.description"
+                    placeholder="Enter product description"
+                    class="border-black w-full p-3 border-2 rounded-[5px] block max-h-[76px] myFormInput p-inputtext"
+                  ></textarea>
+                  <span
+                    v-if="v$.description.$error"
+                    class="text-red-500 text-xs"
+                  >
+                    {{ v$.description.$errors[0].$message }}
+                  </span>
+                </div>
+                <div class="form-item">
+                  <label for="stock" class="myTextShadow"
+                    >Stocks Available:</label
+                  >
+                  <div class="flex justify-around gap-2">
+                    <Button
+                      text="-"
+                      type="button"
+                      padding_x="1.5rem"
+                      padding_y="0px"
+                      class="!text-[32px]"
+                      @click="form.stockQty > 0 ? form.stockQty-- : 0"
+                    />
+                    <Button
+                      text="+"
+                      type="button"
+                      padding_x="1.5rem"
+                      padding_y="0px"
+                      class="!text-[32px] ml-3"
+                      @click="form.stockQty += 1"
+                    />
+                    <input
+                      type="number"
+                      min="0"
+                      name="product stock"
+                      v-model="form.stockQty"
+                      id="stock"
+                      class="border-black border-2 px-2 rounded-[5px] myFormInput p-inputtext"
+                    />
+                  </div>
+                  <span v-if="v$.stockQty.$error" class="text-red-500 text-xs">
+                    {{ v$.stockQty.$errors[0].$message }}
+                  </span>
+                </div>
+                <div class="form-item">
+                  <label for="price" class="myTextShadow">Price:</label>
                   <input
                     type="number"
                     min="0"
-                    name="product stock"
-                    v-model="form.stockQty"
-                    id="stock"
-                    class="border-black border-2 px-2 rounded-[5px] myFormInput p-inputtext"
+                    max="50000"
+                    v-model="form.price"
+                    name="price"
+                    id="price"
+                    class="border-black w-full border-2 p-3 rounded-[5px] block myFormInput p-inputtext"
+                  />
+                  <span v-if="v$.price.$error" class="text-red-500 text-xs">
+                    {{ v$.price.$errors[0].$message }}
+                  </span>
+                </div>
+                <div class="form-item">
+                  <label for="expirationDate" class="myTextShadow"
+                    >Expiration Date:</label
+                  >
+                  <DatePicker
+                    v-model="form.expirationDate"
+                    inputId="expirationDate"
+                    date-format="yy-mm-dd"
+                    class="expiration-date"
+                    :min-date="today"
+                  />
+                  <span
+                    v-if="v$.expirationDate.$error"
+                    class="text-red-500 text-xs block mt-3"
+                  >
+                    {{ v$.expirationDate.$errors[0].$message }}
+                  </span>
+                </div>
+                <div class="form-item">
+                  <input
+                    type="file"
+                    name="image"
+                    accept="image/*"
+                    class="cursor-pointer"
+                    @change="checkImageFile"
+                    id="image"
                   />
                 </div>
-                <span v-if="v$.stockQty.$error" class="text-red-500 text-xs">
-                  {{ v$.stockQty.$errors[0].$message }}
-                </span>
-              </div>
-              <div class="form-item">
-                <label for="price" class="myTextShadow">Price:</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="50000"
-                  v-model="form.price"
-                  name="price"
-                  id="price"
-                  class="border-black w-full border-2 p-3 rounded-[5px] block myFormInput p-inputtext"
-                />
-                <span v-if="v$.price.$error" class="text-red-500 text-xs">
-                  {{ v$.price.$errors[0].$message }}
-                </span>
-              </div>
-              <div class="form-item">
-                <label for="expirationDate" class="myTextShadow"
-                  >Expiration Date:</label
+                <div class="flex justify-end">
+                  <Toast v-if="!isWindowMobile" />
+                  <button
+                    type="submit"
+                    class="bg-[#74CD5F] text-white px-5 rounded-full myBoxShadow font-bold text-[24px] py-[6px] myTextShadow"
+                  >
+                    Edit
+                  </button>
+                </div>
+              </form>
+              <div class="flex justify-between">
+                <RouterLink
+                  to="/admin/create-product"
+                  class="text-[24px] font-bold rounded-full px-4 py-3 bg-[#3672F6] text-white myBoxShadow myTextShadow"
                 >
-                <DatePicker
-                  v-model="form.expirationDate"
-                  inputId="expirationDate"
-                  date-format="yy-mm-dd"
-                  class="expiration-date"
-                  :min-date="today"
-                />
-                <span
-                  v-if="v$.expirationDate.$error"
-                  class="text-red-500 text-xs block mt-3"
-                >
-                  {{ v$.expirationDate.$errors[0].$message }}
-                </span>
-              </div>
-              <div class="form-item">
-                <input
-                  type="file"
-                  name="image"
-                  accept="image/*"
-                  class="cursor-pointer"
-                  @change="checkImageFile"
-                  id="image"
-                />
-              </div>
-
-              <div class="flex justify-end">
-                <Toast v-if="!isWindowMobile" />
+                  Create Product
+                </RouterLink>
                 <button
-                  type="submit"
-                  class="bg-[#74CD5F] text-white px-5 rounded-full myBoxShadow font-bold text-[24px] py-[6px] myTextShadow"
+                  @click="dialogClick"
+                  class="text-[24px] font-bold rounded-full px-4 py-3 bg-[#3672F6] text-white myBoxShadow myTextShadow"
                 >
-                  Edit
+                  Add Product
                 </button>
               </div>
-            </form>
-
-            <div class="flex justify-between">
-              <RouterLink
-                to="/admin/create-product"
-                class="text-[24px] font-bold rounded-full px-4 py-3 bg-[#3672F6] text-white myBoxShadow myTextShadow"
+              <Dialog
+                v-model:visible="dialogVisible"
+                header="Add Product to Inventory"
+                :style="{ width: '75vw' }"
+                modal
+                :contentStyle="{ height: '300px' }"
               >
-                Create Product
-              </RouterLink>
-              <button
-                @click="dialogClick"
-                class="text-[24px] font-bold rounded-full px-4 py-3 bg-[#3672F6] text-white myBoxShadow myTextShadow"
-              >
-                Add Product
-              </button>
-            </div>
-            <Dialog
-              v-model:visible="dialogVisible"
-              header="Add Product to Inventory"
-              :style="{ width: '75vw' }"
-              modal
-              :contentStyle="{ height: '300px' }"
-            >
-              <DataTable
-                :value="products"
-                v-model:selection="addSelectedProduct"
-                selectionMode="single"
-                :metaKeySelection="false"
-                scrollable
-                scrollHeight="flex"
-                datakey="productID"
-                tableStyle="min-width: 50rem"
-              >
-                <Column field="productID" header="productID"></Column>
-                <Column field="productName" header="Product Name"></Column>
-                <Column field="flavorName" header="Flavor Name"></Column>
-                <Column field="price" header="Price"></Column>
-              </DataTable>
-              <template #footer>
-                <VueButton
-                  label="Add to Inventory"
-                  icon="pi pi-check"
-                  @click="addToInventory"
-                />
-              </template>
-            </Dialog>
-          </section>
-        </div>
-      </section>
-    </DesktopContainer>
+                <DataTable
+                  :value="products"
+                  v-model:selection="addSelectedProduct"
+                  selectionMode="single"
+                  :metaKeySelection="false"
+                  scrollable
+                  scrollHeight="flex"
+                  datakey="productID"
+                  tableStyle="min-width: 50rem"
+                >
+                  <Column field="productID" header="productID"></Column>
+                  <Column field="productName" header="Product Name"></Column>
+                  <Column field="flavorName" header="Flavor Name"></Column>
+                  <Column field="price" header="Price"></Column>
+                </DataTable>
+                <template #footer>
+                  <VueButton
+                    label="Add to Inventory"
+                    icon="pi pi-check"
+                    @click="addToInventory"
+                  />
+                </template>
+              </Dialog>
+            </section>
+          </div>
+        </section>
+      </DesktopContainer>
+    </div>
 
     <MobileContainer backgroundColor="bg-[#D6F3FF]">
       <section class="myContainer">

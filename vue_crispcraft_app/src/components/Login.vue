@@ -107,7 +107,7 @@ onMounted(() => {
           </span>
         </div>
         <!-- Password -->
-        <div class="relative mb-3">
+        <div class="relative mb-4">
           <label
             class="font-bold italic opacity-50 text-sm sm:text-base"
             for="password"
@@ -133,7 +133,11 @@ onMounted(() => {
           </span>
         </div>
 
-        <select v-model="form.role" required class="mb-[27px]">
+        <select
+          v-model="form.role"
+          required
+          class="mb-[27px] px-3 rounded-md border border-black py-2"
+        >
           <option value="customer">Customer</option>
           <option value="merchant">Merchant</option>
           <option value="admin">Admin</option>

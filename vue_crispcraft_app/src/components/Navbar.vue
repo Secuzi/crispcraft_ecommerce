@@ -84,6 +84,7 @@ onMounted(async () => {
         <ul class="flex items-center sm:justify-around sm:w-full gap-16">
           <li>
             <RouterLink
+              v-if="authStore.role === 'customer'"
               to="/order"
               class="text-white text-[8px] font-bold sm:text-[20px]"
               >Order</RouterLink

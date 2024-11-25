@@ -5,6 +5,7 @@ const props = defineProps({
   route: "",
   imageIcon: "",
   text: "",
+  isActive: Boolean,
 });
 </script>
 
@@ -12,6 +13,7 @@ const props = defineProps({
   <RouterLink :to="props.route">
     <div
       class="flex items-center justify-center xl:gap-3 2xl:gap-5 bg-[#63A553] rounded-2xl px-4 py-2 myBoxShadow"
+      :class="[isActive ? 'bg-myPrimaryColor' : 'bg-mySecondaryColor']"
     >
       <img :src="imageIcon" class="w-[47px] h-[46px]" />
       <span
