@@ -4,7 +4,7 @@ import { RouterLink } from "vue-router";
 import IconField from "primevue/iconfield";
 import InputIcon from "primevue/inputicon";
 import InputText from "primevue/inputtext";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import OrdersIcon from "@/assets/images/icons/orders_icon.svg";
 import { Popover } from "primevue";
@@ -40,7 +40,7 @@ const selectOrder = (deliveryID) => {
       }
     });
 };
-
+const route = useRoute();
 const severity = ref();
 
 const orderList = ref([]);
@@ -66,21 +66,22 @@ onMounted(async () => {
   }
 
   const orderItems = await axios.get("/order-item/");
-
+  console.log('ROUTEE FULL: ', route.fullPath)
+  console.log('ROUTEE: ', route.path)
   console.log("Orderlist", orderList.value);
 });
 </script>
 
 <template>
-  <nav class="bg-myPrimaryColor">
-    <div class="flex justify-around items-center">
-      <div class="flex items-center">
+  <nav class="bg-myPrimaryColor" id="smallNav">
+    <div class="flex justify-around items-center ">
+      <div class="flex items-center sm:min-h-[50px] lg:min-h-[167px] ">
         <RouterLink to="/" class="cursor-pointer">
-          <img :src="logo" class="w-[64px] sm:w-[117px] inline-block" />
+          <img v-show="authStore.role === 'customer'":src="logo" class="w-[64px] sm:w-[117px] inline-block" />
         </RouterLink>
       </div>
       <div class="flex items-center">
-        <ul class="flex items-center sm:justify-around sm:w-full gap-16">
+        <ul class="flex items-center sm:justify-around sm:w-full gap-16 sm:self-center">
           <li>
             <RouterLink
               v-if="authStore.role === 'customer'"
@@ -149,7 +150,7 @@ onMounted(async () => {
           <li>
             <RouterLink
               to="/"
-              class="text-white text-[8px] font-bold sm:text-[20px]"
+              class="text-white text-[8px] font-bold sm:text-[20px] sm:min-h-[50px] sm:self-center"
               @click="authenticationClick"
               >{{ authStore.authenticated ? "Logout" : "Log in" }}</RouterLink
             >
@@ -164,4 +165,12 @@ onMounted(async () => {
 :deep(.p-inputtext:focus) {
   border-color: #2cb100 !important;
 }
+@media (max-width: 639px) {
+  /* Your styles for phone-sized devices go here */
+  #smallNav {
+    height: 50px;
+    }
+}
+
+
 </style>

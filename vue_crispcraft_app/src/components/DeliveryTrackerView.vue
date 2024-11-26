@@ -100,7 +100,7 @@ onMounted(async () => {
   <MainContainer>
     <Navbar />
     <MobileContainer backgroundColor="bg-[#D6F3FF]">
-      <section class="h-full">
+      <section class="h-full mt-3">
         <div>
           <div class="w-[95%] mx-auto flex items-center justify-between mb-3">
             <h1>
@@ -138,7 +138,7 @@ onMounted(async () => {
                 <!-- Second col -->
                 <div class="flex items-center">
                   <span class="font-bold text-[16px]"
-                    >Php {{ delivery.totalAmount + 60 }}</span
+                    >&#8369; {{ delivery.totalAmount + 60 }}</span
                   >
                 </div>
               </div>

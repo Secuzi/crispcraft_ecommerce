@@ -46,6 +46,7 @@ const rules = {
   },
   password: {
     required: helpers.withMessage("Password cannot be empty!", required),
+    minLength: helpers.withMessage("Minimum password must be 8!", minLength(8)),
   },
   phoneNumber: {
     required: helpers.withMessage("Phone number cannot be empty!", required),

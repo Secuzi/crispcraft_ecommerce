@@ -4,7 +4,7 @@ const sqlConfig = {
   user: process.env.DB_USER,
   password: process.env.DB_PWD,
   database: process.env.DB_NAME,
-  server: "DESKTOP-OCNURK7\\SQLEXPRESS",
+  server: "DESKTOP-8HL7PS7\\SQLEXPRESS",
   pool: {
     max: 10,
     min: 0,

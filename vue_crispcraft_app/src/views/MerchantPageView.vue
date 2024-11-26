@@ -112,11 +112,11 @@ onMounted(async () => {
             <!-- Table container -->
             <div
               v-if="deliveryStore.pendingDeliveries.length > 0"
-              class="relative"
+              class="max-h-[400px] overflow-auto"
             >
               <button
                 v-if="selectedRow"
-                class="absolute myTextShadow font-bold text-[24px] myBoxShadow px-14 py-3 bottom-0 right-7 bg-mySecondaryColor rounded-3xl text-white"
+                class="absolute myTextShadow font-bold text-[24px] myBoxShadow px-14 py-3 bottom-14 right-20 bg-mySecondaryColor rounded-3xl text-white"
                 @click="setToDeliver"
               >
                 Shipped

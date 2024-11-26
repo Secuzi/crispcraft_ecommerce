@@ -128,18 +128,10 @@ const showSuccessToast = async () => {
   //   customerID: authStore.user_id,
   // });
 
-  toast.add({
-    severity: "success",
-    summary: "Success",
-    detail: "Order Placed",
-    life: 3000,
-  });
+ 
+  router.push(`/track-order/${deliveryID}`);
 
-  setTimeout(() => {
-    // Cases where other people can see other's track-order
-    router.push(`/track-order/${deliveryID}`);
-    // window.open(data.value.data.attributes.checkout_url, "_blank");
-  }, 1500);
+    
 };
 const isPaymongoActive = ref(false);
 
