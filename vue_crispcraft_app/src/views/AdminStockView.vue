@@ -184,8 +184,11 @@ const browserWindow = reactive({
 const searchTerm = ref("");
 const filteredProducts = computed(() => {
   const term = searchTerm.value.toLowerCase();
-  return productStore.products.filter((product) =>
-    product.productName.toLowerCase().includes(term)
+  return productStore.products.filter(
+    (product) =>
+      product.productName.toLowerCase().includes(term) ||
+      product.flavorName.toLowerCase().includes(term) ||
+      product.fullName.toLowerCase().includes(term)
   );
 });
 
@@ -303,6 +306,16 @@ onMounted(async () => {
   }
   isLoading.value = false;
   window.addEventListener("resize", updateDimensions);
+
+  for (const product of productStore.products) {
+    product.fullName = `${product.productName}: ${product.flavorName}`;
+  }
+
+  // const newProducts = productStore.products.map(
+  //   (product) =>
+  //     (product.fullName = `${product.productName}: ${product.flavorName}`)
+  // );
+  console.log("IN PRODUCRTS: ", productStore.products);
 });
 onUnmounted(() => {
   window.removeEventListener("resize", updateDimensions);
@@ -385,7 +398,7 @@ onUnmounted(() => {
                     "
                     :class="[index !== 0 ? 'mt-5' : '']"
                     :image="baseUrl + '/' + product.image"
-                    :header="product.productName"
+                    :header="product.fullName"
                     :deleteProduct="productStore.deleteProduct"
                     :getProduct="productStore.getProduct"
                     :description="product.description"
