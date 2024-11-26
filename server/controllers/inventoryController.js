@@ -1,5 +1,6 @@
 const inventorySchema = require("../schemas/InventorySchema.js");
 const InventoryService = require("../services/InventoryService");
+const ProductService = require("../services/ProductService.js");
 const dayjs = require("dayjs");
 //@path GET /inventory
 const getAllInventory = async (req, res) => {
@@ -117,6 +118,15 @@ const updateInventoryStock = async (req, res) => {
     }
 
     const newStockQty = inventory.stockQty - quantity;
+    if (newStockQty === 0) {
+      //Get product
+      const getProduct = await ProductService.read(productID, "productID");
+      getProduct.active = 0;
+      console.log("getProduct!!");
+
+      await ProductService.update(productID, { active: 0 }, "productID");
+    }
+
     const changeDate = dayjs().format("YYYY-MM-DD HH:mm:ss");
 
     await InventoryService.update(

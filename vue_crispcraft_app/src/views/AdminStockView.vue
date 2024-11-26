@@ -166,6 +166,9 @@ async function submitForm() {
     });
     const response = await axios.get("/query/stock");
     productStore.products = response.data;
+    for (const product of productStore.products) {
+      product.fullName = `${product.productName}: ${product.flavorName}`;
+    }
   } catch (e) {
     console.log(e);
   }

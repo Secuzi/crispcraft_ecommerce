@@ -8,6 +8,7 @@ import axios from "axios";
 import { useDeliveryStore } from "@/stores/delivery";
 import Drawer from "primevue/drawer";
 import { RouterLink } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
 const deliveryStore = useDeliveryStore();
 const deliveries = ref([]);
 const visibleBottom = ref(false);
@@ -18,7 +19,7 @@ const showDrawer = (deliveryID) => {
   selectedDeliveryID.value = deliveryID;
   visibleBottom.value = true;
 };
-
+const authStore = useAuthStore();
 const handleCancelationReason = async (reason) => {
   try {
     const deliveryID = selectedDeliveryID.value;
@@ -62,6 +63,8 @@ const updateDeliveryStatus = async (deliveryID) => {
   console.log(delivery);
   delivery.deliveryStatus = "delivered";
   delivery.cashCollected = delivery.totalAmount + 60;
+  delivery.merchantID = authStore.user_id;
+  console.log("MERCHANT ID: ", delivery.merchantID);
   await axios.put(`/delivery/${deliveryID}`, delivery);
   deliveries.value = deliveries.value.filter(
     (d) => d.deliveryID !== deliveryID
