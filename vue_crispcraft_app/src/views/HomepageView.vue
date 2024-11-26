@@ -49,6 +49,13 @@ onMounted(async () => {
   // }, 5000);
   const productsResponse = await axios.get("/products");
   products.value = productsResponse.data.products.filter((x) => x.active == 1);
+  console.log("products value!!", products.value);
+  if (products.value.length <= 0) {
+    isLoading.value = false;
+
+    return;
+  }
+
   featuredProducts.value = getRandomFeaturedProducts(products.value);
   isLoading.value = false;
   console.log("initial loading: ", isLoading.value);
@@ -71,9 +78,19 @@ onMounted(async () => {
           class="md:flex md:justify-between hidden bg-mySecondaryColor flex-grow md:items-center h-full"
         >
           <!-- Carousel -->
-          <Carousel :items="products" />
+          <div v-if="products.length <= 0" class="bg-black w-full text-center">
+            <HeaderText
+              featuredText="Website Maintenance!"
+              productsText=""
+              textSize="55px"
+            />
+          </div>
+          <Carousel v-if="products.length > 0" :items="products" />
           <!-- Featured Products -->
-          <div v-if="!isLoading" ass="w-[.8] h-full flex justify-center">
+          <div
+            v-if="products.length > 0"
+            ass="w-[.8] h-full flex justify-center"
+          >
             <div class="flex flex-col justify-center">
               <HeaderText textSize="55px" />
               <div class="flex items-center h-fit">
@@ -98,7 +115,10 @@ onMounted(async () => {
             </div>
           </div>
           <!-- Best Seller -->
-          <div class="h-full min-h-[300px] overflow-hidden relative">
+          <div
+            v-if="products.length > 0"
+            class="h-full min-h-[300px] overflow-hidden relative"
+          >
             <img :src="BestSellerLogo" alt="Best seller logo" />
             <div
               class="flex flex-col items-center -rotate-12 right-0 bottom-[-20px] absolute"

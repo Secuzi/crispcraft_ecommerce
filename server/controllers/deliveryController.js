@@ -16,8 +16,14 @@ const getAllDeliveries = async (req, res) => {
 //@PATH /delivery
 const createDelivery = async (req, res) => {
   try {
-    let { deliveryDate, cashCollected, deliveryStatus, orderID, merchantID } =
-      req.body;
+    let {
+      deliveryDate,
+      cashCollected,
+      deliveryStatus,
+      orderID,
+      merchantID,
+      deliveryAddress,
+    } = req.body;
     deliveryDate = dayjs().format("YYYY-MM-DD HH:mm:ss");
     const { error, value: validatedDelivery } = deliverySchema.validate(
       {
@@ -25,6 +31,7 @@ const createDelivery = async (req, res) => {
         cashCollected,
         deliveryStatus,
         orderID,
+        deliveryAddress,
         merchantID,
       },
       { abortEarly: false }
@@ -38,7 +45,7 @@ const createDelivery = async (req, res) => {
     }
 
     const createdDelivery = await DeliveryService.create(validatedDelivery);
-
+    console.log("CREATED DELIVERYYY!", createdDelivery);
     return res.status(200).json({
       message: "Created Delivery!",
       deliveryID: createdDelivery.id,

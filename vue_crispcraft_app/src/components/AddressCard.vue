@@ -44,7 +44,7 @@ const props = defineProps({
         <h3 :style="{ fontSize: addressTextSize }">Address:</h3>
         <InputText
           type="text"
-          v-model="deliveryStore.address"
+          v-model="deliveryStore.deliveryAddress"
           :disabled="isDisabled"
           class="checkout-input"
           :style="{ fontSize: addressTextSize }"
@@ -61,13 +61,13 @@ const props = defineProps({
       >
         Delivery Charge: &#8369;{{ deliveryStore.deliveryCharge }}
       </h3>
-      <!-- <p
+      <p
         class="font-medium text-[9px] myTextShadow cursor-pointer"
         @click="toggleDisabled"
         :style="{ fontSize: deliveryAddressTextSize }"
       >
         Change Delivery Address
-      </p> -->
+      </p>
     </div>
   </div>
 </template>
