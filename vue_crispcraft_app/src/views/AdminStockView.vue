@@ -209,6 +209,8 @@ const addToInventory = async () => {
   productStore.products.push(addSelectedProduct.value);
 
   dialogVisible.value = false;
+
+  productStore.selectedProduct = productStore.products[0].productID;
 };
 
 const updateDimensions = () => {

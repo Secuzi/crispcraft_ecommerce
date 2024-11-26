@@ -43,7 +43,11 @@ onMounted(async () => {
   transactionLogStore.transactions = transactionLogStore.formatTransactions(
     transactionsResponse.data
   );
-
+  if (transactionsResponse.data.length <= 0) {
+    isLoading.value = false;
+    return;
+  }
+  console.log("TRANSACTION DATA:", transactionsResponse.data);
   activeOrderID.value = transactionLogStore.transactions[0].orderID;
   isLoading.value = false;
   console.log("active id: ", activeOrderID.value);

@@ -11,7 +11,6 @@ import { Popover } from "primevue";
 import HeaderText from "./HeaderText.vue";
 import { ref, onMounted } from "vue";
 import axios from "axios";
-import Badge from "primevue/badge";
 import OverlayBadge from "primevue/overlaybadge";
 const authStore = useAuthStore();
 const router = useRouter();
@@ -92,11 +91,19 @@ onMounted(async () => {
           </li>
 
           <li v-if="authStore.role == 'customer'">
-            <OverlayBadge :severity="severity">
+            <!-- Keep the icon always visible -->
+            <OverlayBadge :severity="severity" v-if="orderList.length > 0">
               <button @click="togglePopover">
                 <img :src="OrdersIcon" class="w-[36px]" />
               </button>
             </OverlayBadge>
+
+            <!-- Render icon without badge -->
+            <template v-else>
+              <button @click="togglePopover">
+                <img :src="OrdersIcon" class="w-[36px]" />
+              </button>
+            </template>
 
             <Popover ref="op">
               <div class="flex flex-col gap-4 !max-h-[250px] !overflow-auto">
