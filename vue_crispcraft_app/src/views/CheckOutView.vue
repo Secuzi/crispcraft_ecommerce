@@ -128,10 +128,7 @@ const showSuccessToast = async () => {
   //   customerID: authStore.user_id,
   // });
 
- 
   router.push(`/track-order/${deliveryID}`);
-
-    
 };
 const isPaymongoActive = ref(false);
 
@@ -199,19 +196,24 @@ onUnmounted(() => {
           <div
             class="bg-white px-4 py-2 pb-0 rounded-2xl rounded-b-none overflow-y-auto"
           >
-            <CheckoutProductCard
-              class="mt-3"
-              v-for="product in cartItemStore.products"
-              :key="product.productID"
-              :id="product.cartItemID"
-              :deleteProduct="cartItemStore.deleteCartItem"
-              :image="baseUrl + '/' + product.image"
-              :header="product.productName"
-              :qty="product.quantity"
-              :price="product.price"
-              fontSizeHeader="18px"
-              fontSizeBody="16px"
-            />
+            <TransitionGroup
+              name="products"
+              v-if="cartItemStore.products.length > 0"
+            >
+              <CheckoutProductCard
+                class="mt-3"
+                v-for="product in cartItemStore.products"
+                :key="product.productID"
+                :id="product.cartItemID"
+                :deleteProduct="cartItemStore.deleteCartItem"
+                :image="baseUrl + '/' + product.image"
+                :header="product.productName"
+                :qty="product.quantity"
+                :price="product.price"
+                fontSizeHeader="18px"
+                fontSizeBody="16px"
+              />
+            </TransitionGroup>
           </div>
         </div>
       </section>
@@ -347,4 +349,18 @@ onUnmounted(() => {
   </MainContainer>
 </template>
 
-<style scoped></style>
+<style scoped>
+.products-enter-active {
+  transition: 0.4 ease all;
+}
+
+.products-enter-from,
+.products-leave-to {
+  opacity: 0;
+  transform: scale(0.6);
+}
+
+.products-leave-active {
+  transition: 0.4 ease all;
+}
+</style>

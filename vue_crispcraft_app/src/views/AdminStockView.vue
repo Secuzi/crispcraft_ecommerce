@@ -212,11 +212,18 @@ const addToInventory = async () => {
   addSelectedProduct.value.inventoryID = inventoryID;
 
   console.log(addSelectedProduct.value);
+
   productStore.products.push(addSelectedProduct.value);
 
+  for (const product of productStore.products) {
+    product.fullName = `${product.productName}: ${product.flavorName}`;
+  }
   dialogVisible.value = false;
 
-  productStore.selectedProduct = productStore.products[0].productID;
+  if (productStore.products.length > 0) {
+    const length = productStore.products.length;
+    productStore.selectedProduct = productStore.products[length - 1].productID;
+  }
 };
 
 const updateDimensions = () => {
@@ -387,7 +394,8 @@ onUnmounted(() => {
                 </IconField>
               </div>
               <div v-if="!isLoading" class="overflow-auto w-full mt-[5rem]">
-                <div
+                <TransitionGroup
+                  name="products"
                   v-if="productStore.products.length > 0"
                   class="max-h-[800px]"
                 >
@@ -410,7 +418,7 @@ onUnmounted(() => {
                     fontSizeHeader="18px"
                     fontSizeBody="16px"
                   />
-                </div>
+                </TransitionGroup>
                 <div v-else>
                   <HeaderText
                     featuredText="No products"
@@ -927,5 +935,19 @@ onUnmounted(() => {
 :deep(.expiration-date .p-inputtext:focus) {
   border-color: white;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25); /* Correct syntax */
+}
+
+.products-enter-active {
+  transition: 0.4 ease all;
+}
+
+.products-enter-from,
+.products-leave-to {
+  opacity: 0;
+  transform: scale(0.6);
+}
+
+.products-leave-active {
+  transition: 0.4 ease all;
 }
 </style>

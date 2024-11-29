@@ -21,7 +21,13 @@ export const useProductStore = defineStore("product", () => {
       (product) => product.inventoryID != inventoryProduct.inventoryID
     );
     products.value = newProducts;
-    selectedProduct.value = products.value[0].productID;
+
+    if (products.value.length > 0) {
+      const length = products.value.length;
+      selectedProduct.value = products.value[length - 1].productID;
+    }
+
+    // selectedProduct.value = products.value[0].productID;
   }
 
   function getProduct(id) {

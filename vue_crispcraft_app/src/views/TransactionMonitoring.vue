@@ -69,7 +69,7 @@ onMounted(async () => {
       <DesktopContainer
         backgroundColor="bg-[#D6F3FF]"
         alignItems="flex-start"
-        class=""
+        class="h-dvh"
       >
         <section class="flex-grow">
           <div class="w-[90%] mx-auto grid grid-cols-[1.1fr_2fr_1.1fr] gap-7">
