@@ -8,9 +8,11 @@ const {
   createCustomer,
   deleteCustomer,
   updateCustomer,
+  getCustomerByField,
 } = require("../controllers/customerController");
 
 router.get("/", getAllCustomers);
+router.get("/field", getCustomerByField);
 
 router.get("/:id", getCustomer);
 
