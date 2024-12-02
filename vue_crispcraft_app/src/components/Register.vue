@@ -39,7 +39,6 @@ const toggleConfirmPassword = () => {
 
 const router = useRouter();
 
-// Todo: create a custom validator to check if email is already used
 const checkIfEmailExists = async (value) => {
   try {
     console.log("Validating email:", value);
@@ -65,7 +64,6 @@ const checkIfEmailExists = async (value) => {
     return true; // Email does not exist
   }
 };
-// const asyncValidator = withAsync(checkIfEmailExists);
 
 const rules = computed(() => {
   return {

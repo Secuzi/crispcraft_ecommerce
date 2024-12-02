@@ -65,23 +65,28 @@ onMounted(async () => {
     order.subtotal = subtotalResponse.data.subtotal;
   }
 
-  const orderItems = await axios.get("/order-item/");
-  console.log('ROUTEE FULL: ', route.fullPath)
-  console.log('ROUTEE: ', route.path)
+  console.log("ROUTEE FULL: ", route.fullPath);
+  console.log("ROUTEE: ", route.path);
   console.log("Orderlist", orderList.value);
 });
 </script>
 
 <template>
   <nav class="bg-myPrimaryColor" id="smallNav">
-    <div class="flex justify-around items-center ">
-      <div class="flex items-center sm:min-h-[50px] lg:min-h-[167px] ">
+    <div class="flex justify-around items-center">
+      <div class="flex items-center sm:min-h-[50px] lg:min-h-[167px]">
         <RouterLink to="/" class="cursor-pointer">
-          <img v-show="authStore.role === 'customer'":src="logo" class="w-[64px] sm:w-[117px] inline-block" />
+          <img
+            v-show="authStore.role === 'customer'"
+            :src="logo"
+            class="w-[64px] sm:w-[117px] inline-block"
+          />
         </RouterLink>
       </div>
       <div class="flex items-center">
-        <ul class="flex items-center sm:justify-around sm:w-full gap-16 sm:self-center">
+        <ul
+          class="flex items-center sm:justify-around sm:w-full gap-16 sm:self-center"
+        >
           <li>
             <RouterLink
               v-if="authStore.role === 'customer'"
@@ -107,33 +112,42 @@ onMounted(async () => {
             </template>
 
             <Popover ref="op">
-              <div class="flex flex-col gap-4 !max-h-[250px] !overflow-auto">
+              <div
+                style="padding: 0px"
+                class="flex flex-col gap-4 !max-h-[250px] !overflow-auto !w-[245px] !p-0"
+              >
                 <div class="myTextShadow">
                   <HeaderText
                     featuredText="Ordered"
                     productsText="Products"
                     textSize="20px"
+                    class="mb-2"
                   />
                   <ul class="list-none p-0 m-0 flex flex-col">
                     <li
-                      v-for="order in orderList"
+                      v-for="(order, index) in orderList"
                       :key="order.orderID"
-                      class="flex items-center gap-2 px-2 py-3 hover:bg-emphasis cursor-pointer rounded-border"
+                      class="flex-1 bg-[#ECECEC] items-center gap-2 px-2 py-3 hover:bg-emphasis cursor-pointer"
+                      :class="index !== 0 ? 'mt-3' : ''"
                       @click="selectOrder(order.deliveryID)"
                     >
                       <div>
-                        <div class="flex justify-between">
+                        <div class="flex justify-between items-center">
                           <HeaderText
                             featuredText="Order"
                             :productsText="String(order.orderID)"
-                            textSize="20px"
+                            textSize="24px"
                           />
-                          <span class="text-[16px] font-bold"
+                          <span
+                            style="text-shadow: none"
+                            class="text-[16px] font-bebas text-black text-opacity-100"
                             >&#8369; {{ order.subtotal + 60 }}</span
                           >
                         </div>
                         <div>
                           <span
+                            style="text-shadow: none"
+                            class="text-[14px] font-bebas text-[#808080] text-opacity-100"
                             >Delivery Date:
                             {{
                               removeTimeFromDateString(order.deliveryDate)
@@ -169,8 +183,10 @@ onMounted(async () => {
   /* Your styles for phone-sized devices go here */
   #smallNav {
     height: 50px;
-    }
+  }
 }
 
-
+::-webkit-scrollbar {
+  width: 4px;
+}
 </style>
