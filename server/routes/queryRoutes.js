@@ -11,6 +11,7 @@ const {
   getOrderSubTotal,
   getOrderList,
   getMerchantDeliveryData,
+  getOrderTrackerData,
 } = require("../controllers/queryController.js");
 
 router.get("/stock", getStockData);
@@ -21,4 +22,5 @@ router.get("/transaction-data", getTransactionLogData);
 router.get("/order-subtotal/:id", getOrderSubTotal);
 router.get("/order-list/:id", getOrderList);
 router.get("/delivery-data/", getMerchantDeliveryData);
+router.get("/delivery-tracker/:id", getOrderTrackerData);
 module.exports = router;

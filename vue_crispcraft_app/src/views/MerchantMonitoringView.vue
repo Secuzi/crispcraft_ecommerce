@@ -116,6 +116,12 @@ async function submitForm() {
       detail: "Successfully added Merchant!",
       life: 3000,
     });
+    form.email = "";
+    form.fName = "";
+    form.lName = "";
+    form.password = "";
+    form.phoneNumber = "";
+    form.telNumber = "";
   } catch (e) {
     console.log(e);
   }
@@ -294,19 +300,21 @@ onMounted(async () => {
                   </div>
                   <div class="form-item relative">
                     <label for="password" class="myTextShadow">Password:</label>
-                    <input
-                      name="password"
-                      v-model="form.password"
-                      id="password"
-                      v-bind:type="isPasswordHidden ? 'password' : 'text'"
-                      placeholder="Enter temporary password"
-                      class="border-black p-3 border-2 rounded-[5px] block w-full myFormInput p-inputtext"
-                    />
-                    <i
-                      class="pi text-black absolute bottom-3 right-3 cursor-pointer text-base"
-                      :class="isPasswordHidden ? 'pi-eye-slash' : 'pi-eye'"
-                      @click="togglePassword"
-                    ></i>
+                    <div class="relative">
+                      <input
+                        name="password"
+                        v-model="form.password"
+                        id="password"
+                        v-bind:type="isPasswordHidden ? 'password' : 'text'"
+                        placeholder="Enter temporary password"
+                        class="border-black p-3 border-2 rounded-[5px] block w-full myFormInput p-inputtext"
+                      />
+                      <i
+                        class="pi text-black absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-base"
+                        :class="isPasswordHidden ? 'pi-eye-slash' : 'pi-eye'"
+                        @click="togglePassword"
+                      ></i>
+                    </div>
                     <span
                       v-if="v$.password.$error"
                       class="text-red-500 text-xs"

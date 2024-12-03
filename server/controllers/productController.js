@@ -88,7 +88,6 @@ const updateProduct = async (req, res) => {
     ? `uploads/${imageFile.filename}`
     : searchedProduct.image;
 
-  console.log("IMAGEEE: ", imagePath);
   const { productName, description, price, flavorID, expirationDate, active } =
     req.body;
   const parsedDate = dayjs(expirationDate, "YYYY-MM-DD");
