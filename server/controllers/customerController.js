@@ -18,6 +18,23 @@ const getCustomer = async (req, res) => {
   return res.status(200).json({ customer });
 };
 
+//@path GET /customers/field
+const getCustomerByField = async (req, res) => {
+  const { email } = req.query;
+  if (!email) {
+    return res.status(400).send("Email is required");
+  }
+
+  console.log("Checking email:", email); // Log email received
+  const customer = await CustomerService.getByField("email", email);
+
+  if (!customer) {
+    console.log("Email does not exist in the database.");
+    return res.status(404).send({ exists: false });
+  }
+  console.log("Email already exists in the database.");
+  return res.status(200).send({ exists: true });
+};
 //@path POST /customers
 
 const createCustomer = async (req, res) => {
@@ -99,4 +116,5 @@ module.exports = {
   createCustomer,
   deleteCustomer,
   updateCustomer,
+  getCustomerByField,
 };

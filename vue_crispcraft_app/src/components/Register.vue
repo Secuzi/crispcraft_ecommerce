@@ -11,8 +11,10 @@ import {
   numeric,
   maxLength,
   minLength,
+  helpers,
 } from "@vuelidate/validators";
 
+const { withAsync } = helpers;
 const form = reactive({
   email: "",
   password: "",
@@ -37,11 +39,42 @@ const toggleConfirmPassword = () => {
 
 const router = useRouter();
 
-// Todo: create a custom validator to check if email is already used
+const checkIfEmailExists = async (value) => {
+  try {
+    console.log("Validating email:", value);
+    value = value.trim(); // Trim the email value to avoid leading/trailing spaces
+
+    // Make the request to check if the email exists
+    const response = await axios.get("/customers/field", {
+      params: { email: value },
+    });
+
+    console.log("Server response:", response.data); // Log the full server response
+
+    // Check if the response contains 'exists'
+    if (response.data && response.data.exists !== undefined) {
+      console.log("Email exists:", response.data.exists); // Log if email exists
+      return !response.data.exists; // return false if the email exists (i.e., should be invalid)
+    } else {
+      console.error("Unexpected response format:", response.data); // Handle unexpected response formats
+      return false; // Return false if the response format is incorrect
+    }
+  } catch (error) {
+    console.error("Error during email validation:", error); // Log the error
+    return true; // Email does not exist
+  }
+};
 
 const rules = computed(() => {
   return {
-    email: { required, email },
+    email: {
+      required: helpers.withMessage("Email is required!", required),
+      email: helpers.withMessage("Enter a valid email!", email),
+      duplicateEmail: helpers.withMessage(
+        "Email already exists!",
+        withAsync(checkIfEmailExists)
+      ),
+    },
     password: { required, minLength: minLength(8) },
     address: { required },
     phoneNum: {
@@ -71,12 +104,12 @@ async function submitForm() {
   }
   try {
     const response = await axios.post("http://localhost:3000/customers", form);
+
     console.log(response.data);
+    router.push("/");
   } catch (e) {
     console.log(e);
   }
-
-  router.push("/");
 }
 </script>
 
@@ -108,10 +141,12 @@ async function submitForm() {
                   v-model="form.email"
                   id="email"
                   placeholder="Email"
+                  @blur="v$.email.$touch()"
                 />
               </div>
+              <!-- <pre>{{ v$.email }}</pre> -->
               <span v-if="v$.email.$error" class="text-red-500 text-xs">
-                {{ v$.email.$errors[0].$message }}
+                {{ v$.email.$errors[0]?.$message }}
               </span>
             </div>
             <!-- Password -->

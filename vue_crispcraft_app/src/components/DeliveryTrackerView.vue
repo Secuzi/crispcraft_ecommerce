@@ -98,7 +98,19 @@ onMounted(async () => {
 
 <template>
   <MainContainer>
-    <Navbar />
+    <nav class="bg-myPrimaryColor py-3">
+      <ul class="flex items-center justify-end w-[90%] mx-auto">
+        <li>
+          <RouterLink
+            to="/"
+            class="text-white text-[8px] font-bold sm:text-[20px] sm:min-h-[50px] sm:self-center"
+            @click="authenticationClick"
+            >{{ authStore.authenticated ? "Logout" : "Log in" }}</RouterLink
+          >
+        </li>
+      </ul>
+    </nav>
+
     <MobileContainer backgroundColor="bg-[#D6F3FF]">
       <section class="h-full mt-3">
         <div>

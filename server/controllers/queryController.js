@@ -132,43 +132,10 @@ const updateOrderItemOrders = async (req, res) => {
 const getMerchantDeliveryData = async (req, res) => {
   try {
     const { data } = req.query;
-    console.log("data: ", data);
     if (!data) {
       res.status(400).json({ message: "NO DATA" });
     }
     const pool = await poolPromise;
-    //     const query = `
-    //   SELECT
-    //     d.deliveryID,
-    // 	d.deliveryDate,
-    //     c.fName, c.lName,
-    //     c.phoneNum,
-    //     c.address,
-    // 	d.reason,
-    //     o.orderID,
-    //     (
-    //         SELECT
-    //             p.productName,
-    //             oi.quantity,
-    //             oi.price,
-    // 			f.flavorName,
-    //             (oi.quantity * oi.price) AS subtotal
-    //         FROM OrderItem oi
-    //         INNER JOIN Product p ON oi.productID = p.productID
-    // 		INNER JOIN Flavor f ON f.flavorID = p.flavorID
-    //         WHERE oi.orderID = o.orderID
-    //         FOR JSON PATH
-    //     ) AS orderItems, -- JSON array of order items
-    //     SUM(oi.quantity * oi.price) AS totalAmount -- Total amount for the order
-    // FROM Delivery d
-    // INNER JOIN [Order] o ON d.orderID = o.orderID
-    // INNER JOIN Customer c ON o.customerID = c.customerID
-    // INNER JOIN OrderItem oi ON o.orderID = oi.orderID
-    // INNER JOIN Product p ON oi.productID = p.productID
-    // WHERE d.deliveryStatus = @data -- Replace with your deliveryID parameter
-    // GROUP BY d.deliveryID, d.deliveryDate, c.fName, c.lName, c.phoneNum, c.[address], o.orderID, d.reason;
-
-    //     `;
 
     const query = `
      SELECT 
@@ -209,6 +176,46 @@ GROUP BY d.deliveryID, d.deliveryDate, c.fName, c.lName, c.phoneNum, d.deliveryA
     const result = await pool.request().input("data", data).query(query);
 
     res.status(200).json(result.recordset);
+  } catch (e) {
+    console.log(e);
+  }
+};
+// To do
+const getOrderTrackerData = async (req, res) => {
+  try {
+    const deliveryID = req.params.id;
+
+    const pool = await poolPromise;
+
+    const query = `
+     SELECT d.deliveryID, d.deliveryDate, d.deliveryStatus, o.quantity,
+   (
+        SELECT 
+            p.productName,
+            oi.quantity,
+            oi.price,
+			f.flavorName,
+			p.[image],
+            (oi.quantity * oi.price) AS subtotal
+        FROM OrderItem oi
+        INNER JOIN Product p ON oi.productID = p.productID
+		INNER JOIN Flavor f ON f.flavorID = p.flavorID
+        WHERE oi.orderID = o.orderID
+        FOR JSON PATH
+    ) AS orderItems
+FROM Delivery AS d
+INNER JOIN OrderItem AS o ON d.orderID = o.orderID
+INNER JOIN Product AS p ON o.productID = p.productID
+WHERE d.deliveryID = @deliveryID
+
+    `;
+
+    const result = await pool
+      .request()
+      .input("deliveryID", deliveryID)
+      .query(query);
+
+    res.status(200).json(result.recordset[0]);
   } catch (e) {
     console.log(e);
   }
@@ -261,4 +268,5 @@ module.exports = {
   getOrderSubTotal,
   getOrderList,
   getMerchantDeliveryData,
+  getOrderTrackerData,
 };
