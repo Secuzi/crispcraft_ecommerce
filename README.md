@@ -22,4 +22,4 @@ A full-stack web application built with **Express.js** (backend) and **Vue.js** 
 ### Setup
 1. Clone the repository:
    ```sh
-   git clone [https://github.com/your-username/repo-name.git](https://github.com/Secuzi/crispcraft_ecommerce.git)
+   git clone https://github.com/Secuzi/crispcraft_ecommerce.git
